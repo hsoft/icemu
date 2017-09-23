@@ -15,7 +15,7 @@ class ShiftRegister(ActivableChip):
 
     def update(self):
         if not self.is_enabled():
-            self.setpins(self.RESULT_PINS, False)
+            self.setpins(low=self.RESULT_PINS, high=[])
             return
 
         newbuffer = self.buffer

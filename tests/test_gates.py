@@ -1,8 +1,11 @@
+from itertools import product
 import random
 
 import pytest
 
-from icemu.gates import CD4001B, SN74HC14
+from icemu.gates import (
+    CD4001B, CD4002B, CD4025B, SN74LS02, SN74LS27, SN54S260, SN74HC14
+)
 
 def assert_output(sr, expected_value):
     value = 0
@@ -21,23 +24,22 @@ def push_value(sr, input_pin, value):
 
 @pytest.mark.parametrize('nor_class', [
     CD4001B,
+    CD4002B,
+    CD4025B,
+    SN74LS02,
+    SN74LS27,
+    SN54S260,
 ])
 def test_nor(nor_class):
     nor = nor_class()
 
-    for in1, in2, out in nor.IO_MAPPING:
-        pin_in1 = nor.getpin(in1)
-        pin_in2 = nor.getpin(in2)
+    for *in_, out in nor.IO_MAPPING:
+        pins_in = list(nor.getpins(in_))
         pin_out = nor.getpin(out)
-        pin_in1.setlow()
-        pin_in2.setlow()
-        assert pin_out.ishigh()
-        pin_in1.sethigh()
-        assert not pin_out.ishigh()
-        pin_in2.sethigh()
-        assert not pin_out.ishigh()
-        pin_in1.setlow()
-        assert not pin_out.ishigh()
+        for input_states in product((False, True), repeat=len(pins_in)):
+            for pin, ishigh in zip(pins_in, input_states):
+                pin.set(ishigh)
+            assert pin_out.ishigh() == (not any(input_states))
 
 def test_sr_latch():
     # let's implement an S-R latch!

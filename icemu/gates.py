@@ -137,26 +137,26 @@ class SN74LS27(NOR3):
     OUTPUT_PINS = [t[3] for t in IO_MAPPING]
 
 class SN54ALS27A(SN74LS27):
-    ()
-    
+    pass
+
 class SN54AS27(SN74LS27):
-    ()
-    
+    pass
+
 class SN5427(SN74LS27):
-    ()
-    
+    pass
+
 class SN7427(SN74LS27):
-    ()
-    
+    pass
+
 class SN54LS27(SN74LS27):
-    ()
-    
+    pass
+
 class SN74ALS27A(SN74LS27):
-    ()
-    
+    pass
+
 class SN74AS27(SN74LS27):
-    ()
-    
+    pass
+
 class SN54S260(NOR5):
     IO_MAPPING = [
         ('A1', 'B1', 'C1', 'D1', 'E1', 'Y1'),
@@ -166,9 +166,10 @@ class SN54S260(NOR5):
     OUTPUT_PINS = [t[5] for t in IO_MAPPING]
 
 class SN74S260(SN54S260):
-    ()
+    pass
+
 class SN74F260(SN54S260):
-    ()
+    pass
 
 class Inverter(Chip):
     def update(self):

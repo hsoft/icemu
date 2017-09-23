@@ -1,9 +1,10 @@
 class Pin:
     def __init__(self, code, high=False, chip=None, output=False):
-        self.code = code
+        self.code = code.replace('~', '')
         self.high = high
         self.chip = chip
         self.output = output
+        self.low_means_enabled = code.startswith('~')
         self.wires = set()
 
     def __str__(self):
@@ -46,6 +47,15 @@ class Pin:
 
     def toggle(self):
         self.set(not self.ishigh())
+
+    def enable(self):
+        self.set(not self.low_means_enabled)
+
+    def disable(self):
+        self.set(self.low_means_enabled)
+
+    def isenabled(self):
+        return self.low_means_enabled != self.ishigh()
 
     def wire_to(self, output_pin):
         assert not self.output

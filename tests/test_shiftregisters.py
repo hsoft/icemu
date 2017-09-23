@@ -53,3 +53,25 @@ def test_IO_buffered(sr_class, input_pin):
     buffer_pin.sethigh()
     assert_output(sr, val)
 
+@pytest.mark.parametrize('sr_class,reset_pin', [
+    (SN74HC595, 'SRCLR'),
+    (CD74AC164, 'MR'),
+])
+def test_reset(sr_class, reset_pin):
+    sr = sr_class()
+
+    ser = sr.getpin(sr.SERIAL_PINS[0])
+    push_value(sr, ser, 0xff)
+
+    if sr.BUFFER_PIN:
+        buffer_pin = sr.getpin(sr.BUFFER_PIN)
+        buffer_pin.setlow()
+        buffer_pin.sethigh()
+
+    assert_output(sr, 0xff)
+
+    reset = sr.getpin(reset_pin)
+    print(reset.ishigh())
+    reset.enable()
+    print(reset.ishigh())
+    assert_output(sr, 0)

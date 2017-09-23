@@ -9,10 +9,10 @@ class Chip:
     def __init__(self):
         for code in self.OUTPUT_PINS:
             pin = Pin(code, chip=self, output=True, high=(code in self.STARTING_HIGH))
-            setattr(self, 'pin_{}'.format(code), pin)
+            setattr(self, 'pin_{}'.format(pin.code), pin)
         for code in self.INPUT_PINS:
             pin = Pin(code, chip=self, high=(code in self.STARTING_HIGH))
-            setattr(self, 'pin_{}'.format(code), pin)
+            setattr(self, 'pin_{}'.format(pin.code), pin)
         self.vcc = Pin('VCC', chip=self, high=True)
         self.update()
 
@@ -57,7 +57,7 @@ class Chip:
         return self.vcc.ishigh()
 
     def getpin(self, code):
-        return getattr(self, 'pin_{}'.format(code))
+        return getattr(self, 'pin_{}'.format(code.replace('~', '')))
 
     def getpins(self, codes):
         return (self.getpin(code) for code in codes)

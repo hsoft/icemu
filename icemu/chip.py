@@ -27,20 +27,22 @@ class Chip:
         else:
             pin_order = self.INPUT_PINS + self.OUTPUT_PINS
         pins = list(self.getpins(pin_order))
+        max_pin_name_len = max(len(p.code) for p in pins)
         if len(pins) % 2:
             pins.append(None)
         left_pins = pins[:len(pins) // 2]
         right_pins = reversed(pins[len(pins) // 2:])
         lines = []
-        lines.append('     _______     ')
+        spacer = (max_pin_name_len + 1) * ' '
+        lines.append(spacer + '_______' + spacer)
         for index, (left, right) in enumerate(zip(left_pins, right_pins)):
             larrow = '<' if left.output else '>'
             lpol = '+' if left.ishigh() else '-'
-            sleft = left.code.rjust(4) + larrow + '|' + lpol
+            sleft = left.code.rjust(max_pin_name_len) + larrow + '|' + lpol
             if right:
                 rarrow = '>' if right.output else '<'
                 rpol = '+' if right.ishigh() else '-'
-                sright = rpol + '|' + rarrow + right.code.ljust(4)
+                sright = rpol + '|' + rarrow + right.code.ljust(max_pin_name_len)
             else:
                 sright = ' |     '
 
@@ -48,8 +50,7 @@ class Chip:
                 spacer = '_'
             else:
                 spacer = ' '
-            middle = 'U' if index == 0 else spacer
-            line = sleft + spacer + middle + spacer + sright
+            line = sleft + 3 * spacer + sright
             lines.append(line)
         return '\n'.join(lines)
 

@@ -47,6 +47,23 @@ testing directly on a prototype often involves significant setup time.
 With emulation, we have a quick setup time, introspection capabilities, all this stuff. We can then
 confirm the soundness of our logic before sending it to our prototype.
 
+## Comparison with Verilog/VHDL
+
+Being new to the world of electronics, I don't know much about full blown simulation solutions.
+However, from what I read about Verilog and VHDL, these tools seem to be about helping to design
+**circuits**.
+
+ICemu's goal is not that! Its goal is to help you debug the software you're going to flash on your
+MCU. Python being easily hooked to C, you can, with a little abstraction layer, directly run your
+code on the simulator and debug it there.
+
+What I've read about simulations on Verilog/VHDL simulators is that you supply it with a series of
+inputs you want to send to your circuits. That's insufficient! What I want to do is run my whole,
+complex software and have **it** supply the inputs and react to the outputs of my simulated circuit.
+
+There's a possibility that my newbie-ness made me create a tool that already exists, however, and
+if that happened, please tell me so I can stop working on useless tools.
+
 ## Why Python
 
 Because it's used for debugging purposes, speed is not essential. Also, Python is easy to glue

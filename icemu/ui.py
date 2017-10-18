@@ -59,25 +59,33 @@ class UIScreen:
         self.last_refresh = time.time()
         win = self.elements_win
         win.erase()
-        _, w = win.getmaxyx()
-        for y, line in enumerate(self._element_lines()):
-            win.addnstr(y, 0, line, w)
+        y = 0
+        x = 0
+        acc_y = 0
+        maxh, maxw = win.getmaxyx()
+        for elem in self.elements:
+            lines = [elem.label] + elem.outputfunc().splitlines()
+            elemw = max(len(line) for line in lines) + 2
+            if elemw + x >= maxw:
+                x = 0
+                y += acc_y
+                acc_y = 0
+            elemh = len(lines)
+            acc_y = max(elemh, acc_y)
+            for i, line in enumerate(lines):
+                win.addnstr(y+i, x, line, elemw)
+            x += elemw
         win.refresh()
 
     def _resize_windows(self):
-        h, w = self._win_elements_size()
-        self.elements_win.resize(h, w)
-        self.action_win.mvwin(h + 2, 0)
-        self.action_win.resize(*self._win_actions_size())
+        maxh, maxw = self.stdscr.getmaxyx()
+        acth, actw = self._win_actions_size()
+        acth += 2
+        self.action_win.mvwin(maxh-acth, 0)
+        self.action_win.resize(acth, actw)
+        self.elements_win.resize(maxh-acth-1, maxw)
         self.last_refresh = 0
         self.refresh()
-
-    def _win_elements_size(self):
-        lines = self._element_lines()
-        h = len(lines)
-        # Let's give ourselves a little buffer of 4 chars...
-        w = max((len(line) for line in lines), default=1) + 4
-        return (h, w)
 
     def _win_actions_size(self):
         h = len(self.actions) + 1

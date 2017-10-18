@@ -16,7 +16,7 @@ it would look like this:
 
     print(dec.asciiart())
          _______
-       A>|- U +|>Y7
+       A>|-   +|>Y7
        B>|-   +|>Y6
        C>|-   +|>Y5
      G2A>|-   +|>Y4
@@ -47,7 +47,12 @@ testing directly on a prototype often involves significant setup time.
 With emulation, we have a quick setup time, introspection capabilities, all this stuff. We can then
 confirm the soundness of our logic before sending it to our prototype.
 
-## Comparison with Verilog/VHDL
+### Killer feature: direct integration with your code
+
+If you have a circuit with a microcontroller in it, you can simulate the circuit by **directly
+plugging the code you're putting on the MCU** in it. See examples.
+
+### Comparison with Verilog/VHDL
 
 Being new to the world of electronics, I don't know much about full blown simulation solutions.
 However, from what I read about Verilog and VHDL, these tools seem to be about helping to design
@@ -90,13 +95,8 @@ functions you've written in your Python program, compile and run!
 
 ## Examples
 
-You can find small examples is the `tests` folders, but the best way to get the grand idea is to
-look at a project that uses it such as my [seg7-multiplex][seg7-multiplex] or my 
-[solar-timer][solar-timer]. Read the Simulation part of the README to get started.
+There are examples in the `examples` folder. Follow instructions in the README file of each example.
 
 ## License
 
 LGPLv3, Copyright 2017 Virgil Dupras
-
-[solar-timer]: https://github.com/hsoft/solar-timer
-[seg7-multiplex]: https://github.com/hsoft/seg7-multiplex

@@ -21,11 +21,14 @@ class Chip:
         outputs = ' '.join(str(self.getpin(code)) for code in self.OUTPUT_PINS)
         return '{} I: {} O: {}'.format(self.__class__.__name__, inputs, outputs)
 
-    def asciiart(self):
+    def _pin_codes_in_order(self):
         if self.PIN_ORDER:
-            pin_order = self.PIN_ORDER
+            return self.PIN_ORDER
         else:
-            pin_order = self.INPUT_PINS + self.OUTPUT_PINS
+            return self.INPUT_PINS + self.OUTPUT_PINS
+
+    def asciiart(self):
+        pin_order = self._pin_codes_in_order()
         pins = list(self.getpins(pin_order))
         max_pin_name_len = max(len(p.code) for p in pins)
         if len(pins) % 2:

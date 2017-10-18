@@ -1,19 +1,17 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "icemu.h"
 
 #define MAX_5BITS 0x1f
 
-void icemu_pinlow(unsigned char pin)
+void icemu_pinset(unsigned char pin, bool high)
 {
-    putchar(ICEMU_SEND_PINLOW | (pin & MAX_5BITS));
-    fflush(stdout);
-}
+    unsigned char msg;
 
-void icemu_pinhigh(unsigned char pin)
-{
-    putchar(ICEMU_SEND_PINHIGH | (pin & MAX_5BITS));
+    msg = high ? ICEMU_RECV_PINHIGH : ICEMU_SEND_PINLOW;
+    putchar(msg | (pin & MAX_5BITS));
     fflush(stdout);
 }
 

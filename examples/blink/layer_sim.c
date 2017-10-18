@@ -4,12 +4,12 @@
 
 void pinhigh()
 {
-    icemu_pinhigh(ICEMU_PINB1);
+    icemu_pinset(ICEMU_PINB1, true);
 }
 
 void pinlow()
 {
-    icemu_pinlow(ICEMU_PINB1);
+    icemu_pinset(ICEMU_PINB1, false);
 }
 
 void pinoutputmode()

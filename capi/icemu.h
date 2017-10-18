@@ -22,8 +22,7 @@
 #define ICEMU_RECV_PINLOW 0x0 << 5
 #define ICEMU_RECV_PINHIGH 0x1 << 5
 
-void icemu_pinlow(unsigned char pin);
-void icemu_pinhigh(unsigned char pin);
+void icemu_pinset(unsigned char pin, bool high);
 bool icemu_pinread(unsigned char pin);
 void icemu_delay_us(unsigned int us);
 void icemu_delay_ms(unsigned int ms);

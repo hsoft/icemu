@@ -1,17 +1,13 @@
-import os
-import time
-
 from icemu.mcu import ATtiny
-from icemu.cwrapper import CodeWrapper
+from icemu.sim import Simulation, TIME_RESOLUTION
 from icemu.ui import UIScreen
 
-class Circuit:
+class Circuit(Simulation):
     def __init__(self):
-        self.uiscreen = UIScreen(refresh_rate_us=(100 * 1000)) # 100ms
+        super().__init__()
         self.mcu = ATtiny()
-        binpath = os.path.join(os.getcwd(), 'blink')
-        self.code = CodeWrapper(executable=binpath, mcu=self.mcu)
-        self.running = True
+        self.run_program('blink', self.mcu)
+        self.uiscreen = UIScreen(refresh_rate_us=(100 * 1000)) # 100ms
         self.uiscreen.add_element(
             "MCU:",
             self.mcu.asciiart
@@ -22,16 +18,13 @@ class Circuit:
         )
         self.uiscreen.refresh()
 
-    def run(self):
-        while self.running:
-            self.code.process_msgout()
-            self.uiscreen.tick(100)
-            time.sleep(0.0001)
-            self.uiscreen.refresh()
-        self.uiscreen.stop()
+    def _process(self):
+        self.uiscreen.tick(TIME_RESOLUTION)
+        self.uiscreen.refresh()
 
     def stop(self):
-        self.running = False
+        super().stop()
+        self.uiscreen.stop()
 
 def main():
     circuit = Circuit()

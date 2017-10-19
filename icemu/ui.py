@@ -19,6 +19,7 @@ class UIScreen:
         self.refresh_counter = 0
         curses.noecho()
         curses.cbreak()
+        curses.curs_set(0)
         self.stdscr.nodelay(True)
         self.elements = []
         self.actions = []
@@ -100,6 +101,7 @@ class UIScreen:
         curses.nocbreak()
         curses.echo()
         curses.endwin()
+        curses.curs_set(1)
 
     def add_element(self, label, outputfunc):
         self.elements.append(UIElement(label, outputfunc))

@@ -1,3 +1,4 @@
+import os
 import subprocess
 import threading
 import time
@@ -12,8 +13,12 @@ RECV_TICK = 0x2
 
 MAX_5BITS = 0x1f
 
+TIME_RESOLUTION = 50 # in usecs
+
 class CodeWrapper:
     def __init__(self, executable, mcu):
+        if not os.path.isabs(executable):
+            executable = os.path.join(os.getcwd(), executable)
         self.proc = subprocess.Popen(executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
         self.mcu = mcu
         self.lock = threading.Lock()
@@ -72,3 +77,32 @@ class CodeWrapper:
 
     def tick(self):
         self.push_msgin(RECV_TICK << 5)
+
+class Simulation:
+    def __init__(self):
+        self.code_wrappers = []
+        self.running = True
+
+    def _process(self):
+        pass # override with code you want to execute in the runloop
+
+    def run_program(self, path, on_mcu):
+        code = CodeWrapper(path, on_mcu)
+        self.code_wrappers.append(code)
+
+    def run(self):
+        one_tick_in_seconds = 1 / (1000 * (1000 / TIME_RESOLUTION))
+        target_time = time.time() + one_tick_in_seconds
+        while self.running:
+            for code in self.code_wrappers:
+                code.process_msgout()
+                code.tick()
+            self._process()
+            while time.time() < target_time:
+                time.sleep(0)
+            target_time += one_tick_in_seconds
+
+    def stop(self):
+        for code in self.code_wrappers:
+            code.stop()
+        self.running = False

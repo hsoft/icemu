@@ -1,14 +1,12 @@
-import os
-import time
-
 from icemu.mcu import ATtiny
-from icemu.cwrapper import CodeWrapper
+from icemu.sim import Simulation, TIME_RESOLUTION
 from icemu.shiftregisters import SN74HC595
 from icemu.seg7 import Segment7, combine_repr
 from icemu.ui import UIScreen
 
-class Circuit:
+class Circuit(Simulation):
     def __init__(self):
+        super().__init__()
         self.uiscreen = UIScreen(refresh_rate_us=(100 * 1000)) # 100ms
         self.mcu = ATtiny()
         self.sr = SN74HC595()
@@ -24,9 +22,7 @@ class Circuit:
             self.sr.OUTPUT_PINS,
         )
 
-        binpath = os.path.join(os.getcwd(), 'seg7')
-        self.code = CodeWrapper(executable=binpath, mcu=self.mcu)
-        self.running = True
+        self.run_program('seg7', self.mcu)
         self.uiscreen.add_element(
             "LED Matrix output:",
             lambda: combine_repr(self.seg)
@@ -45,17 +41,14 @@ class Circuit:
         )
         self.uiscreen.refresh()
 
-    def run(self):
-        while self.running:
-            self.code.process_msgout()
-            self.uiscreen.tick(100)
-            self.seg.tick(100)
-            time.sleep(0.0001)
-            self.uiscreen.refresh()
-        self.uiscreen.stop()
+    def _process(self):
+        self.uiscreen.tick(TIME_RESOLUTION)
+        self.seg.tick(TIME_RESOLUTION)
+        self.uiscreen.refresh()
 
     def stop(self):
-        self.running = False
+        super().stop()
+        self.uiscreen.stop()
 
 def main():
     circuit = Circuit()

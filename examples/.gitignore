@@ -1,5 +1,6 @@
 /blink/blink
 /seg7/seg7
+/timer/timer
 *.hex
 *.bin
 *.o

@@ -1,5 +1,6 @@
 import subprocess
 import threading
+import time
 
 SEND_PINLOW = 0x0
 SEND_PINHIGH = 0x1
@@ -7,27 +8,41 @@ SEND_PINREAD = 0x2
 
 RECV_PINLOW = 0x0
 RECV_PINHIGH = 0x1
+RECV_TICK = 0x2
 
 MAX_5BITS = 0x1f
 
 class CodeWrapper:
     def __init__(self, executable, mcu):
-        self.proc = subprocess.Popen(executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.proc = subprocess.Popen(executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
         self.mcu = mcu
         self.lock = threading.Lock()
         self.msgin = b''
         self.msgout = b''
-        threading.Thread(target=self.communicate_forever, daemon=True).start()
+        self.running = True
+        threading.Thread(target=self.read_forever, daemon=True).start()
+        threading.Thread(target=self.write_forever, daemon=True).start()
 
-    def communicate_forever(self):
-        while True:
-            with self.lock:
-                if self.msgin:
-                    self.proc.stdin.write(self.msgin)
-                    self.msgin = b''
+    def read_forever(self):
+        while self.running:
             msgout = self.proc.stdout.read(1)
             with self.lock:
                 self.msgout += msgout
+
+    def write_forever(self):
+        msgin = b''
+        while self.running:
+            with self.lock:
+                if self.msgin:
+                    msgin = self.msgin
+                    self.msgin = b''
+            if msgin:
+                self.proc.stdin.write(msgin)
+                msgin = b''
+            time.sleep(0)
+
+    def stop(self):
+        self.running = False
 
     def push_msgin(self, msg):
         with self.lock:
@@ -55,3 +70,5 @@ class CodeWrapper:
                 newmsg |= RECV_PINLOW << 5
             self.push_msgin(newmsg)
 
+    def tick(self):
+        self.push_msgin(RECV_TICK << 5)

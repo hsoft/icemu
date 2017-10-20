@@ -2,6 +2,7 @@
 /seg7/seg7
 /timer/timer
 /button/button
+/interrupt/interrupt
 *.hex
 *.bin
 

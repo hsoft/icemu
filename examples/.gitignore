@@ -3,6 +3,7 @@
 /timer/timer
 /button/button
 /interrupt/interrupt
+/multiplex/multiplex
 *.hex
 *.bin
 

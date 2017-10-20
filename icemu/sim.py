@@ -84,9 +84,10 @@ class CodeWrapper:
         self.push_msgin(RECV_TICK << 5)
 
 class Simulation:
-    def __init__(self):
+    def __init__(self, usec_value=1):
         self.code_wrappers = []
         self.running = True
+        self.usec_value = usec_value
         self.ticks = 0
 
     def _process(self):
@@ -101,7 +102,7 @@ class Simulation:
         return self.ticks * TIME_RESOLUTION
 
     def run(self):
-        one_tick_in_seconds = 1 / (1000 * (1000 / TIME_RESOLUTION))
+        one_tick_in_seconds = (1 / (1000 * (1000 / TIME_RESOLUTION))) * self.usec_value
         target_time = time.time() + one_tick_in_seconds
         while self.running:
             for code in self.code_wrappers:

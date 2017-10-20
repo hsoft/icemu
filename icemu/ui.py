@@ -13,10 +13,10 @@ class UIAction:
         self.func = func
 
 class UIScreen:
-    def __init__(self, refresh_rate_us=0):
+    def __init__(self, simulation, refresh_rate=0.1): # 100ms
+        self.simulation = simulation
         self.stdscr = curses.initscr()
-        self.refresh_rate_us = refresh_rate_us
-        self.refresh_counter = 0
+        self.refresh_rate = refresh_rate
         curses.noecho()
         curses.cbreak()
         curses.curs_set(0)
@@ -27,6 +27,10 @@ class UIScreen:
         self.last_ch = -1
         self.elements_win = curses.newwin(1, 42, 0, 0)
         self.action_win = curses.newwin(1, 42, 1, 1)
+        self.add_action(
+            'q', "Quit",
+            self.simulation.stop,
+        )
 
     def _element_lines(self):
         lines = []
@@ -44,20 +48,23 @@ class UIScreen:
         self.last_ch = ch
 
     def _refresh_actions(self):
-        if not self.actions:
-            return
         win = self.action_win
         win.erase()
-        _, w = win.getmaxyx()
-        win.addnstr(0, 0, "Menu:", w)
-        y = 1
-        for action in self.actions:
-            win.addnstr(y, 0, "{} - {}".format(action.key, action.label), w)
-            y+= 1
+        _, maxw = win.getmaxyx()
+        actionlines = ["{} - {}".format(action.key, action.label) for action in self.actions]
+        actionw = max(len(line) for line in actionlines) + 2
+        win.addnstr(0, 0, "Menu:", actionw)
+        for i, line in enumerate(actionlines):
+            win.addnstr(i+1, 0, line, actionw)
+
+        x = actionw + 1
+        w = maxw - x
+        win.addnstr(0, x, "Stats:", w)
+        win.addnstr(1, x, "Time: %1.1f s" % (self.simulation.elapsed_usecs() / (1000 * 1000)), w)
+        win.addnstr(2, x, "Slowdown modifier: %d x" % (self.simulation.usec_value), w)
         win.refresh()
 
     def _refresh_elements(self):
-        self.last_refresh = time.time()
         win = self.elements_win
         win.erase()
         y = 0
@@ -80,10 +87,10 @@ class UIScreen:
 
     def _resize_windows(self):
         maxh, maxw = self.stdscr.getmaxyx()
-        acth, actw = self._win_actions_size()
+        acth, _ = self._win_actions_size()
         acth += 2
         self.action_win.mvwin(maxh-acth, 0)
-        self.action_win.resize(acth, actw)
+        self.action_win.resize(acth, maxw)
         self.elements_win.resize(maxh-acth-1, maxw)
         self.last_refresh = 0
         self.refresh()
@@ -93,9 +100,6 @@ class UIScreen:
         # 5 chars are for key prefixes
         w = max((len(a.label) for a in self.actions), default=1) + 5
         return (h, w)
-
-    def tick(self, us):
-        self.refresh_counter += us
 
     def stop(self):
         curses.nocbreak()
@@ -114,9 +118,10 @@ class UIScreen:
         self._refresh_actions()
 
     def refresh(self):
-        if self.refresh_counter >= self.refresh_rate_us:
-            self.refresh_counter = 0
+        if self.last_refresh + self.refresh_rate < time.time():
+            self.last_refresh = time.time()
             self._refresh_elements()
+            self._refresh_actions()
             self.stdscr.refresh()
 
         self._read_key()

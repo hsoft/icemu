@@ -1,5 +1,5 @@
 from icemu.mcu import ATtiny
-from icemu.sim import Simulation, TIME_RESOLUTION
+from icemu.sim import Simulation
 from icemu.ui import UIScreen
 
 class Circuit(Simulation):
@@ -7,7 +7,7 @@ class Circuit(Simulation):
         super().__init__()
         self.mcu = ATtiny()
         self.code = self.run_program('interrupt', self.mcu)
-        self.uiscreen = UIScreen(refresh_rate_us=(100 * 1000)) # 100ms
+        self.uiscreen = UIScreen(self)
         self.uiscreen.add_element(
             "MCU:",
             self.mcu.asciiart
@@ -16,14 +16,9 @@ class Circuit(Simulation):
             'b', "Toggle button",
             self.toggle_button,
         )
-        self.uiscreen.add_action(
-            'q', "Quit",
-            self.stop,
-        )
         self.uiscreen.refresh()
 
     def _process(self):
-        self.uiscreen.tick(TIME_RESOLUTION)
         self.uiscreen.refresh()
 
     def stop(self):

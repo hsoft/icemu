@@ -7,6 +7,9 @@ class LED:
         self.fade_delay_us = fade_delay_us
         self.fade_counter_us = fade_delay_us + 1
 
+    def __str__(self):
+        return 'X' if self.ishigh() else 'O'
+
     def tick(self, us):
         self.fade_counter_us += us
         self.ishigh()
@@ -47,6 +50,14 @@ class Segment7(Chip):
             'E', 'D', 'C'
         ]
         return ''.join(c if seg and self.leds[seg].ishigh() else ' ' for c, seg in zip(SEGMENTS, SEGPOS))
+
+    def update(self):
+        # Any time an input pin changes, we want to make sure to update each of our LED's fade
+        # counter
+        if not hasattr(self, 'leds'): # initialization, ignore
+            return
+        for led in self.leds.values():
+            led.ishigh()
 
     def tick(self, us):
         for led in self.leds.values():

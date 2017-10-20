@@ -7,7 +7,7 @@ from icemu.ui import UIScreen
 class Circuit(Simulation):
     def __init__(self):
         super().__init__()
-        self.uiscreen = UIScreen(refresh_rate_us=(100 * 1000)) # 100ms
+        self.uiscreen = UIScreen(self)
         self.mcu = ATtiny()
         self.sr = SN74HC595()
         self.seg = Segment7()
@@ -35,14 +35,9 @@ class Circuit(Simulation):
             "Shift register:",
             self.sr.asciiart
         )
-        self.uiscreen.add_action(
-            'q', "Quit",
-            self.stop,
-        )
         self.uiscreen.refresh()
 
     def _process(self):
-        self.uiscreen.tick(TIME_RESOLUTION)
         self.seg.tick(TIME_RESOLUTION)
         self.uiscreen.refresh()
 

@@ -89,6 +89,10 @@ class Simulation:
         self.running = True
         self.usec_value = usec_value
         self.ticks = 0
+        # whether the simulated time is going too fast for the computer's capabilities.
+        # If it's true, the simulation might begin to lose timing accuracy. You should slow it
+        # down with `usec_value` or increase TIME_RESOLUTION (do in on the C side as well!)
+        self.running_late = False
 
     def _process(self):
         pass # override with code you want to execute in the runloop
@@ -109,6 +113,7 @@ class Simulation:
                 code.process_msgout()
                 code.tick()
             self._process()
+            self.running_late = time.time() > (target_time + one_tick_in_seconds)
             while time.time() < target_time:
                 time.sleep(0)
             target_time += one_tick_in_seconds

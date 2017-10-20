@@ -13,7 +13,7 @@ class UIAction:
         self.func = func
 
 class UIScreen:
-    def __init__(self, simulation, refresh_rate=0.1): # 100ms
+    def __init__(self, simulation, refresh_rate=0.3): # 300ms
         self.simulation = simulation
         self.stdscr = curses.initscr()
         self.refresh_rate = refresh_rate
@@ -62,6 +62,9 @@ class UIScreen:
         win.addnstr(0, x, "Stats:", w)
         win.addnstr(1, x, "Time: %1.1f s" % (self.simulation.elapsed_usecs() / (1000 * 1000)), w)
         win.addnstr(2, x, "Slowdown modifier: %d x" % (self.simulation.usec_value), w)
+        if self.simulation.running_late:
+            win.addnstr(3, x, "Running late!", w)
+
         win.refresh()
 
     def _refresh_elements(self):
@@ -96,7 +99,7 @@ class UIScreen:
         self.refresh()
 
     def _win_actions_size(self):
-        h = len(self.actions) + 1
+        h = min(len(self.actions) + 1, 4)
         # 5 chars are for key prefixes
         w = max((len(a.label) for a in self.actions), default=1) + 5
         return (h, w)

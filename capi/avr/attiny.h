@@ -9,3 +9,7 @@
 
 #define ICEMU_TIMER0 0x00
 #define ICEMU_TIMER1 0x01
+
+#define ICEMU_INT0 0x00
+#define ICEMU_INT1 0x01
+#define ICEMU_INT2 0x02

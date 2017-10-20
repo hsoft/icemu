@@ -10,6 +10,7 @@ SEND_PINREAD = 0x2
 RECV_PINLOW = 0x0
 RECV_PINHIGH = 0x1
 RECV_TICK = 0x2
+RECV_INTERRUPT = 0x3
 
 MAX_5BITS = 0x1f
 
@@ -55,9 +56,10 @@ class CodeWrapper:
 
     def process_msgout(self):
         with self.lock:
-            for msg in self.msgout:
-                self.process_sent_msg(msg)
+            msgout = self.msgout
             self.msgout = b''
+        for msg in msgout:
+            self.process_sent_msg(msg)
 
     def process_sent_msg(self, msg):
         msgid = msg >> 5
@@ -75,6 +77,9 @@ class CodeWrapper:
                 newmsg |= RECV_PINLOW << 5
             self.push_msgin(newmsg)
 
+    def interrupt(self, interrupt_id):
+        self.push_msgin((RECV_INTERRUPT << 5) | interrupt_id)
+
     def tick(self):
         self.push_msgin(RECV_TICK << 5)
 
@@ -82,6 +87,7 @@ class Simulation:
     def __init__(self):
         self.code_wrappers = []
         self.running = True
+        self.ticks = 0
 
     def _process(self):
         pass # override with code you want to execute in the runloop
@@ -89,6 +95,10 @@ class Simulation:
     def run_program(self, path, on_mcu):
         code = CodeWrapper(path, on_mcu)
         self.code_wrappers.append(code)
+        return code
+
+    def elapsed_usecs(self):
+        return self.ticks * TIME_RESOLUTION
 
     def run(self):
         one_tick_in_seconds = 1 / (1000 * (1000 / TIME_RESOLUTION))
@@ -101,6 +111,7 @@ class Simulation:
             while time.time() < target_time:
                 time.sleep(0)
             target_time += one_tick_in_seconds
+            self.ticks += 1
 
     def stop(self):
         for code in self.code_wrappers:

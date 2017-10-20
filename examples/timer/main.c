@@ -29,7 +29,7 @@ int main (void)
     pin_high = false;
     pinoutputmode();
 
-    set_timer0_target(1000 * 500); // every 0.5s
+    set_timer0_target(1000UL * 500UL); // every 0.5s
     set_timer0_mode_to_interrupt();
 
 #ifdef SIMULATION

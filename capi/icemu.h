@@ -24,11 +24,13 @@
 #define ICEMU_RECV_PINLOW 0x0 << 5
 #define ICEMU_RECV_PINHIGH 0x1 << 5
 #define ICEMU_RECV_TICK 0x2 << 5 // Time passes by, increment counters
+#define ICEMU_RECV_INTERRUPT 0x3 << 5 // interrupt triggered
 
 void icemu_pinset(unsigned char pin, bool high);
 bool icemu_pinread(unsigned char pin);
 void icemu_delay_us(unsigned int us);
 void icemu_delay_ms(unsigned int ms);
+bool icemu_check_interrupt(unsigned char interrupt_id);
 bool icemu_start_timer(unsigned char timer_id, unsigned long usecs);
 bool icemu_check_timer(unsigned char timer_id);
-void icemu_tick_time();
+void icemu_process_messages();

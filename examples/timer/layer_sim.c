@@ -11,9 +11,9 @@ void pinoutputmode()
 {
 }
 
-bool set_timer0_target(unsigned long ticks)
+bool set_timer0_target(unsigned long usecs)
 {
-    return icemu_start_timer(ICEMU_TIMER0, ticks);
+    return icemu_start_timer(ICEMU_TIMER0, usecs);
 }
 
 void set_timer0_mode_to_interrupt()
@@ -22,6 +22,6 @@ void set_timer0_mode_to_interrupt()
 
 bool sim_process_events()
 {
-    icemu_tick_time();
+    icemu_process_messages();
     return icemu_check_timer(ICEMU_TIMER0);
 }

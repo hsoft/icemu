@@ -20,11 +20,20 @@ class ShiftRegister(ActivableChip):
         else:
             return False
 
+    def _was_disabled(self):
+        self.setpins(low=self.RESULT_PINS, high=[])
+
+    def _was_enabled(self):
+        self._update_outputs()
+
+    def _update_outputs(self):
+        set_binary_value(self.buffer, self.getpins(self.RESULT_PINS))
+
     def update(self):
-        if (not self.is_enabled()) or self.is_resetting():
+        super().update()
+        if self.is_resetting():
             self.setpins(low=self.RESULT_PINS, high=[])
-            if self.is_resetting():
-                self.buffer = 0
+            self.buffer = 0
             return
 
         newbuffer = self.buffer
@@ -36,19 +45,17 @@ class ShiftRegister(ActivableChip):
                 newbuffer |= 0x1
         self.prev_clock_high = clock.ishigh()
 
-        should_refresh_outputs = False
         if self.BUFFER_PIN:
             bufpin = self.getpin(self.BUFFER_PIN)
-            should_refresh_outputs = bufpin.ishigh() and not self.prev_buffer_high
+            if bufpin.ishigh() and not self.prev_buffer_high:
+                self._update_outputs()
             self.prev_buffer_high = bufpin.ishigh()
             # we don't set self.buffer because, per design, buffered SRs suffer a delay
             # when the buffer pin is activated at the same time as the clock pin.
         else:
             # if there's not buffering, there's no delay
             self.buffer = newbuffer
-            should_refresh_outputs = True
-        if should_refresh_outputs:
-            set_binary_value(self.buffer, self.getpins(self.RESULT_PINS))
+            self._update_outputs()
 
         self.buffer = newbuffer
 

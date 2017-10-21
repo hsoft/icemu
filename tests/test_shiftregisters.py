@@ -71,7 +71,27 @@ def test_reset(sr_class, reset_pin):
     assert_output(sr, 0xff)
 
     reset = sr.getpin(reset_pin)
-    print(reset.ishigh())
     reset.enable()
-    print(reset.ishigh())
     assert_output(sr, 0)
+
+@pytest.mark.parametrize('sr_class', [
+    SN74HC595,
+])
+def test_disable_doesnt_reset_buffer(sr_class):
+    # When the "enable" pin is disabled, we don't want to reset the buffer, only make the
+    # output pin temporarily have low outputs.
+    sr = sr_class()
+
+    ser = sr.getpin(sr.SERIAL_PINS[0])
+    eo = sr.getpin(sr.ENABLE_PINS[0])
+    buffer_pin = sr.getpin(sr.BUFFER_PIN)
+    push_value(sr, ser, 0xff)
+    buffer_pin.setlow()
+    buffer_pin.sethigh()
+
+    assert_output(sr, 0xff)
+
+    eo.disable()
+    assert_output(sr, 0)
+    eo.enable()
+    assert_output(sr, 0xff)

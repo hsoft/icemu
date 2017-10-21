@@ -5,6 +5,7 @@ class Decoder(ActivableChip):
     RESULT_PINS = [] # LSB pin goes first
 
     def update(self):
+        super().update()
         selection = 0 if self.is_enabled() else 0xff
         for index, code in enumerate(self.SERIAL_PINS):
             pin = self.getpin(code)

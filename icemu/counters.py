@@ -13,6 +13,7 @@ class BinaryCounter(ActivableChip):
         return (1 << len(self.OUTPUT_PINS)) - 1
 
     def update(self):
+        super().update()
         if not self.is_enabled():
             return
 

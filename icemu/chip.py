@@ -104,13 +104,35 @@ class Chip:
 class ActivableChip(Chip):
     ENABLE_PINS = [] # ~ means that low == enabled
 
+    def __init__(self, *args, **kwargs):
+        self._is_enabled = False
+        super().__init__(*args, **kwargs)
+
+    def _was_enabled(self):
+        pass
+
+    def _was_disabled(self):
+        pass
+
     def is_enabled(self):
+        return self._is_enabled
+
+    def update(self):
+        was_enabled = self._is_enabled
+        enabled = True
         for code in self.ENABLE_PINS:
             pin = self.getpin(code.replace('~', ''))
             enabled = pin.ishigh()
             if code.startswith('~'):
                 enabled = not enabled
             if not enabled:
-                return False
-        return True
+                break
+
+        self._is_enabled = enabled
+        if enabled and not was_enabled:
+            self._was_enabled()
+        elif not enabled and was_enabled:
+            self._was_disabled()
+
+        super().update()
 

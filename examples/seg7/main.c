@@ -28,7 +28,7 @@ static uint8_t current_digit;
 static void toggleclk(Pin pin)
 {
     pinlow(pin);
-    _delay_us(100);
+    _delay_us(1);
     pinhigh(pin);
 }
 

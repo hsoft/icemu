@@ -7,7 +7,8 @@ class Circuit(Simulation):
         super().__init__()
         self.uiscreen = UIScreen(self)
         self.mcu = ATtiny()
-        self.run_program('timer', self.mcu)
+        self.add_mcu(self.mcu)
+        self.mcu.run_program('timer')
         self.uiscreen.add_element(
             "MCU:",
             self.mcu.asciiart

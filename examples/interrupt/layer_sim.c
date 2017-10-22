@@ -12,8 +12,10 @@ bool pinishigh()
 
 void pininputmode()
 {
+    icemu_pinsetmode(ICEMU_PINB0, false);
 }
 
 void pinoutputmode()
 {
+    icemu_pinsetmode(ICEMU_PINB1, true);
 }

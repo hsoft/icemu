@@ -9,13 +9,14 @@ class Circuit(Simulation):
         super().__init__(usec_value=10)
         self.uiscreen = UIScreen(self)
         self.mcu = ATtiny()
+        self.add_mcu(self.mcu)
         self.dec = SN74HC138()
         decoutputs = list(self.dec.getpins(self.dec.OUTPUT_PINS))
         self.leds = [LED(vcc=self.mcu.vcc, gnd=decoutputs[i]) for i in range(8)]
 
         self.dec.wirepins(self.mcu, ['A', 'B', 'C'], ['B0', 'B1', 'B2'])
 
-        self.run_program('multiplex', self.mcu)
+        self.mcu.run_program('multiplex')
         self.uiscreen.add_element(
             "MCU:",
             self.mcu.asciiart

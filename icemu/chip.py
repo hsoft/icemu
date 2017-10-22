@@ -7,12 +7,15 @@ class Chip:
     PIN_ORDER = None
 
     def __init__(self):
+        self.all_pins = []
         for code in self.OUTPUT_PINS:
             pin = Pin(code, chip=self, output=True, high=(code in self.STARTING_HIGH))
             setattr(self, 'pin_{}'.format(pin.code), pin)
+            self.all_pins.append(pin)
         for code in self.INPUT_PINS:
             pin = Pin(code, chip=self, high=(code in self.STARTING_HIGH))
             setattr(self, 'pin_{}'.format(pin.code), pin)
+            self.all_pins.append(pin)
         self.vcc = Pin('VCC', chip=self, high=True)
         self.update()
 
@@ -62,6 +65,12 @@ class Chip:
 
     def getpin(self, code):
         return getattr(self, 'pin_{}'.format(code.replace('~', '')))
+
+    def getinputpins(self):
+        return (p for p in self.all_pins if not p.output)
+
+    def getoutputpins(self):
+        return (p for p in self.all_pins if not p.output)
 
     def getpins(self, codes):
         return (self.getpin(code) for code in codes)

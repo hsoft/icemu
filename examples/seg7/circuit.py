@@ -9,6 +9,7 @@ class Circuit(Simulation):
         super().__init__()
         self.uiscreen = UIScreen(self)
         self.mcu = ATtiny()
+        self.add_mcu(self.mcu)
         self.sr = SN74HC595()
         self.seg = Segment7()
 
@@ -22,7 +23,7 @@ class Circuit(Simulation):
             self.sr.OUTPUT_PINS,
         )
 
-        self.run_program('seg7', self.mcu)
+        self.mcu.run_program('seg7')
         self.uiscreen.add_element(
             "LED Matrix output:",
             lambda: combine_repr(self.seg)

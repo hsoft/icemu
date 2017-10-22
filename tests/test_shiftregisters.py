@@ -93,5 +93,11 @@ def test_disable_doesnt_reset_buffer(sr_class):
 
     eo.disable()
     assert_output(sr, 0)
+
+    # also, test that clocking the buffer pin doesn't change the output while it's disabled!
+    buffer_pin.setlow()
+    buffer_pin.sethigh()
+    assert_output(sr, 0)
+
     eo.enable()
     assert_output(sr, 0xff)

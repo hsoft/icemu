@@ -27,7 +27,8 @@ class ShiftRegister(ActivableChip):
         self._update_outputs()
 
     def _update_outputs(self):
-        set_binary_value(self.buffer, self.getpins(self.RESULT_PINS))
+        if self.is_enabled():
+            set_binary_value(self.buffer, self.getpins(self.RESULT_PINS))
 
     def update(self):
         super().update()

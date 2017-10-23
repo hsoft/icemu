@@ -17,6 +17,7 @@ void pinset(Pin pin, bool high)
 
 void pinoutputmode(Pin pin)
 {
+    icemu_pinsetmode(pinid(pin), true);
 }
 
 bool set_timer0_target(unsigned long usecs)

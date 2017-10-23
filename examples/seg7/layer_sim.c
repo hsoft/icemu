@@ -32,6 +32,7 @@ void pinset(Pin pin, bool high)
 
 void pinoutputmode(Pin pin)
 {
+    icemu_pinsetmode(pinid(pin), true);
 }
 
 void _delay_us(unsigned int us)

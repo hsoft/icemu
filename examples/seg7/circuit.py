@@ -1,15 +1,12 @@
 from icemu.mcu import ATtiny
-from icemu.sim import Simulation, TIME_RESOLUTION
 from icemu.shiftregisters import SN74HC595
 from icemu.seg7 import Segment7, combine_repr
-from icemu.ui import UIScreen
+from icemu.ui import SimulationWithUI
 
-class Circuit(Simulation):
+class Circuit(SimulationWithUI):
     def __init__(self):
         super().__init__()
-        self.uiscreen = UIScreen(self)
-        self.mcu = ATtiny()
-        self.add_mcu(self.mcu)
+        self.mcu = self.add_chip(ATtiny())
         self.sr = SN74HC595()
         self.seg = Segment7()
 
@@ -39,12 +36,9 @@ class Circuit(Simulation):
         self.uiscreen.refresh()
 
     def _process(self):
-        self.seg.tick(TIME_RESOLUTION)
-        self.uiscreen.refresh()
+        self.seg.tick(self.TIME_RESOLUTION)
+        super()._process()
 
-    def stop(self):
-        super().stop()
-        self.uiscreen.stop()
 
 def main():
     circuit = Circuit()

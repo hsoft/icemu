@@ -1,13 +1,10 @@
 from icemu.mcu import ATtiny
-from icemu.sim import Simulation
-from icemu.ui import UIScreen
+from icemu.ui import SimulationWithUI
 
-class Circuit(Simulation):
+class Circuit(SimulationWithUI):
     def __init__(self):
         super().__init__()
-        self.uiscreen = UIScreen(self)
-        self.mcu = ATtiny()
-        self.add_mcu(self.mcu)
+        self.mcu = self.add_chip(ATtiny())
         self.mcu.run_program('timer')
         self.uiscreen.add_element(
             "MCU:",
@@ -15,12 +12,6 @@ class Circuit(Simulation):
         )
         self.uiscreen.refresh()
 
-    def _process(self):
-        self.uiscreen.refresh()
-
-    def stop(self):
-        super().stop()
-        self.uiscreen.stop()
 
 def main():
     circuit = Circuit()

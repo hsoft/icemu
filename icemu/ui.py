@@ -1,6 +1,8 @@
 import curses
 import time
 
+from .sim import Simulation
+
 class UIElement:
     def __init__(self, label, outputfunc):
         self.label = label
@@ -128,4 +130,17 @@ class UIScreen:
             self.stdscr.refresh()
 
         self._read_key()
+
+
+class SimulationWithUI(Simulation):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.uiscreen = UIScreen(self)
+
+    def _process(self):
+        self.uiscreen.refresh()
+
+    def stop(self):
+        super().stop()
+        self.uiscreen.stop()
 

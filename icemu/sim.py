@@ -1,10 +1,11 @@
 import time
 
-TIME_RESOLUTION = 50 # in usecs
 
 class Simulation:
+    TIME_RESOLUTION = 50 # in usecs
+
     def __init__(self, usec_value=1):
-        self.mcus = []
+        self._chips = []
         self.running = True
         self.usec_value = usec_value
         self.ticks = 0
@@ -16,20 +17,22 @@ class Simulation:
     def _process(self):
         pass # override with code you want to execute in the runloop
 
-    def add_mcu(self, mcu):
-        self.mcus.append(mcu)
+    # add a chip that will have its tick() method called at each tick of the sim
+    # if it exists, stop() will also be called when the sim stops.
+    def add_chip(self, chip):
+        self._chips.append(chip)
+        return chip
 
     def elapsed_usecs(self):
-        return self.ticks * TIME_RESOLUTION
+        return self.ticks * self.TIME_RESOLUTION
 
     def run(self):
-        one_tick_in_seconds = (1 / (1000 * (1000 / TIME_RESOLUTION))) * self.usec_value
+        one_tick_in_seconds = (1 / (1000 * (1000 / self.TIME_RESOLUTION))) * self.usec_value
         target_time = time.time() + one_tick_in_seconds
         while self.running:
             try:
-                for mcu in self.mcus:
-                    mcu.process_msgout()
-                    mcu.tick()
+                for chip in self._chips:
+                    chip.tick()
                 self._process()
                 self.running_late = time.time() > (target_time + one_tick_in_seconds)
                 while time.time() < target_time:
@@ -41,6 +44,7 @@ class Simulation:
                 raise
 
     def stop(self):
-        for mcu in self.mcus:
-            mcu.stop()
+        for chip in self._chips:
+            if hasattr(chip, 'stop'):
+                chip.stop()
         self.running = False

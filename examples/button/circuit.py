@@ -1,14 +1,11 @@
 from icemu.mcu import ATtiny
-from icemu.sim import Simulation
-from icemu.ui import UIScreen
+from icemu.ui import SimulationWithUI
 
-class Circuit(Simulation):
+class Circuit(SimulationWithUI):
     def __init__(self):
         super().__init__()
-        self.mcu = ATtiny()
-        self.add_mcu(self.mcu)
+        self.mcu = self.add_chip(ATtiny())
         self.mcu.run_program('button')
-        self.uiscreen = UIScreen(self)
         self.uiscreen.add_element(
             "MCU:",
             self.mcu.asciiart
@@ -18,13 +15,6 @@ class Circuit(Simulation):
             self.toggle_button,
         )
         self.uiscreen.refresh()
-
-    def _process(self):
-        self.uiscreen.refresh()
-
-    def stop(self):
-        super().stop()
-        self.uiscreen.stop()
 
     def toggle_button(self):
         self.mcu.pin_B0.toggle()

@@ -1,15 +1,12 @@
 from icemu.mcu import ATtiny
 from icemu.decoders import SN74HC138
 from icemu.seg7 import LED
-from icemu.sim import Simulation, TIME_RESOLUTION
-from icemu.ui import UIScreen
+from icemu.ui import SimulationWithUI
 
-class Circuit(Simulation):
+class Circuit(SimulationWithUI):
     def __init__(self):
         super().__init__(usec_value=10)
-        self.uiscreen = UIScreen(self)
-        self.mcu = ATtiny()
-        self.add_mcu(self.mcu)
+        self.mcu = self.add_chip(ATtiny())
         self.dec = SN74HC138()
         decoutputs = list(self.dec.getpins(self.dec.OUTPUT_PINS))
         self.leds = [LED(vcc=self.mcu.vcc, gnd=decoutputs[i]) for i in range(8)]
@@ -22,6 +19,10 @@ class Circuit(Simulation):
             self.mcu.asciiart
         )
         self.uiscreen.add_element(
+            "Decoder:",
+            self.dec.asciiart
+        )
+        self.uiscreen.add_element(
             "LEDs:",
             lambda: ''.join(str(l) for l in self.leds)
         )
@@ -29,12 +30,9 @@ class Circuit(Simulation):
 
     def _process(self):
         for led in self.leds:
-            led.tick(TIME_RESOLUTION)
-        self.uiscreen.refresh()
+            led.tick(self.TIME_RESOLUTION)
+        super()._process()
 
-    def stop(self):
-        super().stop()
-        self.uiscreen.stop()
 
 def main():
     circuit = Circuit()

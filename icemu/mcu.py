@@ -110,6 +110,7 @@ class MCU(Chip):
             self.process_msgout()
 
     def tick(self):
+        self.process_msgout()
         self.push_msgin(RECV_TICK << 5)
 
     def update(self):

@@ -104,8 +104,6 @@ class Chip:
         for icode, ocode in zip(inputs, outputs):
            ipin = self.getpin(icode)
            opin = chip.getpin(ocode)
-           assert opin.output
-           assert not ipin.output
            ipin.wires.add(opin)
            opin.wires.add(ipin)
         self.update()

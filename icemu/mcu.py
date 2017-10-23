@@ -1,7 +1,6 @@
 import os
 import subprocess
 import threading
-import time
 
 from .chip import Chip
 
@@ -9,6 +8,7 @@ SEND_PINLOW = 0x0
 SEND_PINHIGH = 0x1
 SEND_PININPUT = 0x2
 SEND_PINOUTPUT = 0x3
+SEND_ENDINTERRUPT = 0x4
 
 RECV_PINLOW = 0x0
 RECV_PINHIGH = 0x1
@@ -20,6 +20,11 @@ MAX_5BITS = 0x1f
 class MCU(Chip):
     def __init__(self):
         self._pin_cache = {}
+        self._waiting_for_interrupt = False
+        self._debug_msgs_to = None
+        # There's too many ticks to debug them. Let's just count them and report the count at every
+        # non-tick msg
+        self._debug_tick_count = 0
         self.lock = threading.Lock()
         self.msgin = b''
         self.msgout = b''
@@ -37,9 +42,21 @@ class MCU(Chip):
         self.push_msgin((msg << 5) | self._intid_from_pin(pin))
         self._pin_cache[pin.code] = pin.ishigh()
 
-    def run_program(self, executable):
+    def _debug_msg(self, send, msg):
+        if not send and msg == (RECV_TICK << 5):
+            self._debug_tick_count += 1
+            return
+        if self._debug_tick_count:
+            print("%d ticks" % self._debug_tick_count, file=self._debug_msgs_to)
+            self._debug_tick_count = 0
+        s = "%s %d %d" % ('S' if send else 'R', (msg & 0xe0) >> 5, msg & MAX_5BITS)
+        print(s, file=self._debug_msgs_to)
+
+    def run_program(self, executable, debug_msgs_to=None):
         if not os.path.isabs(executable):
             executable = os.path.join(os.getcwd(), executable)
+        if debug_msgs_to:
+            self._debug_msgs_to = open(debug_msgs_to, 'wt', encoding='ascii')
         self.proc = subprocess.Popen(executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
         self.running = True
         threading.Thread(target=self.read_forever, daemon=True).start()
@@ -50,30 +67,24 @@ class MCU(Chip):
             with self.lock:
                 self.msgout += msgout
 
-    def write_forever(self):
-        msgin = b''
-        while self.running:
-            with self.lock:
-                if self.msgin:
-                    msgin = self.msgin
-                    self.msgin = b''
-            if msgin:
-                self.proc.stdin.write(msgin)
-                msgin = b''
-            time.sleep(0)
-
     def stop(self):
         self.running = False
+        if self._debug_msgs_to:
+            self._debug_msgs_to.close()
 
     def push_msgin(self, msg):
         if hasattr(self, 'proc'):
             self.proc.stdin.write(bytes([msg]))
+            if self._debug_msgs_to:
+                self._debug_msg(False, msg)
 
     def process_msgout(self):
         with self.lock:
             msgout = self.msgout
             self.msgout = b''
         for msg in msgout:
+            if self._debug_msgs_to:
+                self._debug_msg(True, msg)
             self.process_sent_msg(msg)
 
     def process_sent_msg(self, msg):
@@ -85,14 +96,18 @@ class MCU(Chip):
         elif msgid == SEND_PINHIGH:
             pin.sethigh()
         elif msgid == SEND_PININPUT:
-            if pin.output:
-                pin.output = False
-                self._push_pin_state(pin)
+            pin.output = False
+            self._push_pin_state(pin)
         elif msgid == SEND_PINOUTPUT:
             pin.output = True
+        elif msgid == SEND_ENDINTERRUPT:
+            self._waiting_for_interrupt = False
 
     def interrupt(self, interrupt_id):
+        self._waiting_for_interrupt = True
         self.push_msgin((RECV_INTERRUPT << 5) | interrupt_id)
+        while self._waiting_for_interrupt:
+            self.process_msgout()
 
     def tick(self):
         self.push_msgin(RECV_TICK << 5)

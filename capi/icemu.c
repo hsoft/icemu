@@ -22,7 +22,6 @@
 
 #define MAX_5BITS 0x1f
 #define MAX_TIMERS 10
-#define MAX_INTERRUPTS 10
 #define MAX_PINS MAX_5BITS
 
 #define ICEMU_TIME_RESOLUTION 50 // in usecs
@@ -31,6 +30,7 @@
 #define ICEMU_SEND_PINHIGH 0x1 << 5
 #define ICEMU_SEND_PININPUT 0x2 << 5
 #define ICEMU_SEND_PINOUTPUT 0x3 << 5
+#define ICEMU_SEND_ENDINTERRUPT 0x4 << 5
 
 #define ICEMU_RECV_PINLOW 0x0 << 5
 #define ICEMU_RECV_PINHIGH 0x1 << 5
@@ -42,7 +42,8 @@ static unsigned long current_ticks = 0;
 static unsigned long timers_resolution[MAX_TIMERS] = {0}; // in ticks. 0 = disabled
 static unsigned long timers_counter[MAX_TIMERS] = {0}; // in ticks. 0 = threshold reached, time to set flag
 static bool timers_flag[MAX_TIMERS] = {0}; // timer triggered
-static unsigned char  interrupts_flag[MAX_INTERRUPTS] = {0}; // interrupt triggered
+// There can ever only be one interrupt running at once. -1 means no interrupt
+static char current_interrupt_id = -1;
 static bool pins_high[MAX_PINS] = {0}; // Whether a pin is high
 
 static void tick()
@@ -63,10 +64,9 @@ static void tick()
 
 static void interrupt(unsigned char msg)
 {
+    assert(current_interrupt_id == -1);
     msg &= MAX_5BITS;
-    if (msg < MAX_INTERRUPTS) {
-        interrupts_flag[msg]++;
-    }
+    current_interrupt_id = msg;
 }
 
 static unsigned char readchar()
@@ -154,17 +154,19 @@ void icemu_delay_ms(unsigned int ms)
     icemu_delay_us(ms * 1000);
 }
 
-bool icemu_check_interrupt(unsigned char interrupt_id)
+// Returns the ID of the current interrupt, or -1 if none.
+// if an interrupt is returned, you have to call icemu_end_interrupt()
+// as soon as the interrupt is finished.
+char icemu_check_interrupt()
 {
-    if (interrupt_id >= MAX_INTERRUPTS) {
-        return false;
-    }
-    if (interrupts_flag[interrupt_id] > 0) {
-        interrupts_flag[interrupt_id]--;
-        return true;
-    } else {
-        return false;
-    }
+    return current_interrupt_id;
+}
+
+void icemu_end_interrupt()
+{
+    current_interrupt_id = -1;
+    putchar(ICEMU_SEND_ENDINTERRUPT);
+    fflush(stdout);
 }
 
 bool icemu_start_timer(unsigned char timer_id, unsigned long usecs)

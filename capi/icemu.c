@@ -112,11 +112,22 @@ void icemu_pinset(unsigned char pin, bool high)
 
 void icemu_pinsetmode(unsigned char pin, bool output)
 {
+    unsigned char r;
     unsigned char msg;
 
     msg = output ? ICEMU_SEND_PINOUTPUT : ICEMU_SEND_PININPUT;
     putchar(msg | (pin & MAX_5BITS));
     fflush(stdout);
+
+    while (!output) {
+        r = readchar();
+        assert(process_message(r));
+        msg = r & 0xe0;
+        // waiting for a pin set...
+        if (((msg == ICEMU_RECV_PINLOW) || (msg == ICEMU_RECV_PINHIGH)) && ((r & MAX_5BITS) == (pin & MAX_5BITS))) {
+            break;
+        }
+    }
 }
 
 bool icemu_pinread(unsigned char pin)

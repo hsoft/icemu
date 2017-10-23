@@ -19,12 +19,12 @@ MAX_5BITS = 0x1f
 
 class MCU(Chip):
     def __init__(self):
-        super().__init__()
+        self._pin_cache = {}
         self.lock = threading.Lock()
         self.msgin = b''
         self.msgout = b''
         self.running = False
-        self._pin_cache = {p.code: p.ishigh() for p in self.getinputpins()}
+        super().__init__()
 
     def _pin_from_intid(self, pinid):
         return self.getpin(self._pin_codes_in_order()[pinid])
@@ -32,13 +32,17 @@ class MCU(Chip):
     def _intid_from_pin(self, pin):
         return self._pin_codes_in_order().index(pin.code)
 
+    def _push_pin_state(self, pin):
+        msg = RECV_PINHIGH if pin.ishigh() else RECV_PINLOW
+        self.push_msgin((msg << 5) | self._intid_from_pin(pin))
+        self._pin_cache[pin.code] = pin.ishigh()
+
     def run_program(self, executable):
         if not os.path.isabs(executable):
             executable = os.path.join(os.getcwd(), executable)
         self.proc = subprocess.Popen(executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
         self.running = True
         threading.Thread(target=self.read_forever, daemon=True).start()
-        threading.Thread(target=self.write_forever, daemon=True).start()
 
     def read_forever(self):
         while self.running:
@@ -62,8 +66,8 @@ class MCU(Chip):
         self.running = False
 
     def push_msgin(self, msg):
-        with self.lock:
-            self.msgin += bytes([msg])
+        if hasattr(self, 'proc'):
+            self.proc.stdin.write(bytes([msg]))
 
     def process_msgout(self):
         with self.lock:
@@ -83,7 +87,7 @@ class MCU(Chip):
         elif msgid == SEND_PININPUT:
             if pin.output:
                 pin.output = False
-                self._pin_cache[pin.code] = pin.ishigh()
+                self._push_pin_state(pin)
         elif msgid == SEND_PINOUTPUT:
             pin.output = True
 
@@ -95,11 +99,10 @@ class MCU(Chip):
 
     def update(self):
         for pin in self.getinputpins():
-            if pin.ishigh() != self._pin_cache[pin.code]:
-                msg = RECV_PINHIGH if pin.ishigh() else RECV_PINLOW
-                self.push_msgin((msg << 5) | self._intid_from_pin(pin))
-                self._pin_cache[pin.code] = pin.ishigh()
+            if pin.code not in self._pin_cache or pin.ishigh() != self._pin_cache[pin.code]:
+                self._push_pin_state(pin)
+
 
 class ATtiny(MCU):
-    OUTPUT_PINS = ['B0', 'B1', 'B2', 'B3', 'B4', 'B5']
+    INPUT_PINS = ['B0', 'B1', 'B2', 'B3', 'B4', 'B5']
 

@@ -8,12 +8,17 @@ class Pin:
         self.wires = set()
 
     def __str__(self):
-        return '{}/{}'.format(self.code, 'H' if self.ishigh() else 'L')
+        isoutput = 'O' if self.output else 'I'
+        ishigh = 'H' if self.ishigh() else 'L'
+        return '{}/{}/{}'.format(self.code, isoutput, ishigh)
 
     def ishigh(self):
         if not self.output and self.wires:
-            wired_outputs = (p for p in self.wires if p.output)
-            return any(p.ishigh() for p in wired_outputs)
+            wired_outputs = [p for p in self.wires if p.output]
+            if wired_outputs:
+                return any(p.ishigh() for p in wired_outputs)
+            else:
+                return self.high
         else:
             return self.high
 
@@ -58,8 +63,6 @@ class Pin:
         return self.low_means_enabled != self.ishigh()
 
     def wire_to(self, output_pin):
-        assert not self.output
-        assert output_pin.output
         self.wires.add(output_pin)
         output_pin.wires.add(self)
         if self.chip:

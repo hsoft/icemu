@@ -26,15 +26,19 @@ class Simulation:
         one_tick_in_seconds = (1 / (1000 * (1000 / TIME_RESOLUTION))) * self.usec_value
         target_time = time.time() + one_tick_in_seconds
         while self.running:
-            for mcu in self.mcus:
-                mcu.process_msgout()
-                mcu.tick()
-            self._process()
-            self.running_late = time.time() > (target_time + one_tick_in_seconds)
-            while time.time() < target_time:
-                time.sleep(0)
-            target_time += one_tick_in_seconds
-            self.ticks += 1
+            try:
+                for mcu in self.mcus:
+                    mcu.process_msgout()
+                    mcu.tick()
+                self._process()
+                self.running_late = time.time() > (target_time + one_tick_in_seconds)
+                while time.time() < target_time:
+                    time.sleep(0)
+                target_time += one_tick_in_seconds
+                self.ticks += 1
+            except: # yes, even SysExit
+                self.stop()
+                raise
 
     def stop(self):
         for mcu in self.mcus:

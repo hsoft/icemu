@@ -140,9 +140,6 @@ void icemu_delay_us(unsigned int us)
     unsigned long target;
 
     target = us / ICEMU_TIME_RESOLUTION;
-    if (target == 0) {
-        target = 1;
-    }
     target += current_ticks;
     while (current_ticks < target) {
         icemu_process_messages();

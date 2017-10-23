@@ -53,11 +53,17 @@ class MCU(Chip):
         print(s, file=self._debug_msgs_to)
 
     def run_program(self, executable, debug_msgs_to=None):
-        if not os.path.isabs(executable):
-            executable = os.path.join(os.getcwd(), executable)
         if debug_msgs_to:
             self._debug_msgs_to = open(debug_msgs_to, 'wt', encoding='ascii')
-        self.proc = subprocess.Popen(executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
+        if hasattr(executable, 'stdin') and hasattr(executable, 'stdout'):
+            # we're passing a fake (or real) process that's already running. Just use those already-
+            # opened stdin/stdout.
+            self.proc = executable
+        else:
+            if not os.path.isabs(executable):
+                executable = os.path.join(os.getcwd(), executable)
+            self.proc = subprocess.Popen(
+                executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
         self.running = True
         threading.Thread(target=self.read_forever, daemon=True).start()
 

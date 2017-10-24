@@ -29,13 +29,13 @@ logic automatically.
 
 ## See it in action
 
-Here's a little video of `icemu` used in my [seg7-multiplex][seg7-multiplex] project:
+Here's a little video of the simulated `seg7` example (see `examples` folder):
 
-[![asciinema](https://asciinema.org/a/WsYhXc1VcgfmkKZ8SAT18xYjv.png)](https://asciinema.org/a/WsYhXc1VcgfmkKZ8SAT18xYjv)
+[![asciinema](https://asciinema.org/a/LCF3EGRiJFK1LzXwn2R6XUgGb.png)](https://asciinema.org/a/LCF3EGRiJFK1LzXwn2R6XUgGb)
 
-This board drives an array of 7-segments displays through a ATtiny45 MCU and a couple of ICs to
-drive down pin count. The software that runs on the MCU is real, but with a couple of ifdefs, can
-run on a completely simulated environment with the help of `icemu`.
+and here is the video of the **exact same code** running in real life!
+
+[![vimeo](https://i.vimeocdn.com/video/662736875_677x.jpg)](https://vimeo.com/239693641)
 
 ## What is it for
 

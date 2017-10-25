@@ -1,4 +1,5 @@
 from .pin import Pin
+from .util import fmtfreq
 
 class Chip:
     OUTPUT_PINS = []
@@ -31,6 +32,12 @@ class Chip:
             return self.INPUT_PINS + self.OUTPUT_PINS
 
     def asciiart(self):
+        def pinsymbol(pin):
+            if pin.is_oscillating():
+                return '~'
+            else:
+                return '+' if pin.ishigh() else '-'
+
         pin_order = self._pin_codes_in_order()
         pins = list(self.getpins(pin_order))
         max_pin_name_len = max(len(p.code) for p in pins)
@@ -43,11 +50,11 @@ class Chip:
         lines.append(spacer + '_______' + spacer)
         for index, (left, right) in enumerate(zip(left_pins, right_pins)):
             larrow = '<' if left.output else '>'
-            lpol = '+' if left.ishigh() else '-'
+            lpol = pinsymbol(left)
             sleft = left.code.rjust(max_pin_name_len) + larrow + '|' + lpol
             if right:
                 rarrow = '>' if right.output else '<'
-                rpol = '+' if right.ishigh() else '-'
+                rpol = pinsymbol(right)
                 sright = rpol + '|' + rarrow + right.code.ljust(max_pin_name_len)
             else:
                 sright = ' |     '
@@ -58,6 +65,14 @@ class Chip:
                 spacer = ' '
             line = sleft + 3 * spacer + sright
             lines.append(line)
+
+        for pin in pins:
+            if not pin:
+                continue
+            freq = pin.oscillating_freq()
+            if freq:
+                line = "~{} = {}".format(pin.code, fmtfreq(freq))
+                lines.append(line)
         return '\n'.join(lines)
 
     def ispowered(self):
@@ -70,15 +85,17 @@ class Chip:
         return (p for p in self.all_pins if not p.output)
 
     def getoutputpins(self):
-        return (p for p in self.all_pins if not p.output)
+        return (p for p in self.all_pins if p.output)
 
     def getpins(self, codes):
         return (self.getpin(code) for code in codes)
 
     # Set multiple pins on the same chip and only update chips one all pins are updated.
-    def setpins(self, low, high):
+    def setpins(self, low=None, high=None):
         updateself = False
         updatelist = set()
+        low = low or []
+        high = high or []
         for codes, val in [(low, False), (high, True)]:
             for pin in self.getpins(codes):
                 if pin.high != val:

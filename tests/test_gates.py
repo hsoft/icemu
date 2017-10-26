@@ -90,7 +90,7 @@ def test_inverters(inv_class):
 def test_nor_oscillating():
     nor = CD4001B()
 
-    FREQ = 42
+    FREQ = 4242
     inpt = Pin(code='FOO', oscillating_freq=FREQ)
 
     nor.pin_A.wire_to(inpt)
@@ -104,7 +104,7 @@ def test_nor_oscillating():
 def test_inverters_oscillating():
     inv = SN74HC14()
 
-    FREQ = 42
+    FREQ = 4242
     inpt = Pin(code='FOO', oscillating_freq=FREQ)
 
     inv.getpin(inv.INPUT_PINS[0]).wire_to(inpt)

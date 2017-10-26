@@ -32,7 +32,7 @@ class Simulation:
         while self.running:
             try:
                 for chip in self._chips:
-                    chip.tick()
+                    chip.tick(self.TIME_RESOLUTION)
                 self._process()
                 self.running_late = time.time() > (target_time + one_tick_in_seconds)
                 while time.time() < target_time:

@@ -7,22 +7,30 @@ class Circuit(SimulationWithUI):
     def __init__(self):
         super().__init__()
         self.oscillator = Pin('XTAL', oscillating_freq=(10**6))
-        self.cnt = SN74F161AN()
-        self.dec = SN74HC138()
+        self.cnt = self.add_chip(SN74F161AN())
+        self.dec = self.add_chip(SN74HC138())
+        self.cnt2 = self.add_chip(SN74F161AN())
 
         clk = self.cnt.getpin(self.cnt.CLOCK_PIN)
         clk.wire_to(self.oscillator)
 
-        self.dec.pin_A.wire_to(self.oscillator)
+        self.dec.pin_A.wire_to(self.cnt.pin_QD)
         self.dec.pin_C.sethigh()
 
+        clk = self.cnt2.getpin(self.cnt2.CLOCK_PIN)
+        clk.wire_to(self.dec.pin_Y5)
+
         self.uiscreen.add_element(
-            "Counter:",
+            "Counter 1:",
             self.cnt.asciiart
         )
         self.uiscreen.add_element(
             "Decoder:",
             self.dec.asciiart
+        )
+        self.uiscreen.add_element(
+            "Counter 2:",
+            self.cnt2.asciiart
         )
         self.uiscreen.add_action(
             '+', "Faster", self.faster)

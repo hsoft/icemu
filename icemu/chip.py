@@ -111,8 +111,9 @@ class Chip:
         for chip in updatelist:
             chip.update()
 
-    def tick(self, us):
-        pass
+    def tick(self, usecs):
+        for pin in self.all_pins:
+            pin.tick(usecs)
 
     def update(self):
         pass

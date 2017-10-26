@@ -1,6 +1,13 @@
-from .util import fmtfreq
+from .util import fmtfreq, USECS_PER_SECOND
 
 class Pin:
+    # Frequency (in Hz) at which the "oscillation" logic takes over. A pin oscillating under this
+    # threshold will end up having its value toggled at regular intervals through the tick() method.
+    # This threshold represents what is realistically possible to simulate and keep the pace.
+    # Normal logic will always be more accurate than oscillation logic, so if your machine can
+    # handle more, increase this value for a more accurate simulation.
+    OSCILLATION_THRESHOLD = 1000
+
     def __init__(self, code, high=False, chip=None, output=False, oscillating_freq=0):
         self.code = code.replace('~', '')
         self.high = high
@@ -8,6 +15,7 @@ class Pin:
         # an oscillating pin is always output.
         self.output = bool(oscillating_freq) or output
         self._oscillating_freq = oscillating_freq # in Hz
+        self._next_oscillation_in = USECS_PER_SECOND // oscillating_freq if oscillating_freq else 0
         self.low_means_enabled = code.startswith('~')
         self.wires = set()
 
@@ -48,7 +56,14 @@ class Pin:
             return max_freq
 
     def is_oscillating(self):
-        return bool(self.oscillating_freq())
+        return self.oscillating_freq() >= self.OSCILLATION_THRESHOLD
+
+    def tick(self, usecs):
+        if 0 < self.oscillating_freq() < self.OSCILLATION_THRESHOLD:
+            self._next_oscillation_in -= usecs
+            if self._next_oscillation_in <= 0:
+                self._next_oscillation_in += USECS_PER_SECOND // self.oscillating_freq()
+                self.toggle()
 
     def propagate_to(self):
         if self.output:
@@ -77,6 +92,7 @@ class Pin:
 
     def set_oscillating_freq(self, freq):
         self._oscillating_freq = freq
+        self._next_oscillation_in = USECS_PER_SECOND // freq if freq else 0
         wired_chips = self.propagate_to()
         for chip in wired_chips:
             chip.update()

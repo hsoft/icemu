@@ -115,7 +115,7 @@ class MCU(Chip):
         while self._waiting_for_interrupt:
             self.process_msgout()
 
-    def tick(self):
+    def tick(self, usecs):
         self.process_msgout()
         self.push_msgin(RECV_TICK << 5)
 

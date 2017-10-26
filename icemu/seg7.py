@@ -10,8 +10,8 @@ class LED:
     def __str__(self):
         return 'X' if self.ishigh() else 'O'
 
-    def tick(self, us):
-        self.fade_counter_us += us
+    def tick(self, usecs):
+        self.fade_counter_us += usecs
         self.ishigh()
 
     def ishigh(self):
@@ -59,7 +59,7 @@ class Segment7(Chip):
         for led in self.leds.values():
             led.ishigh()
 
-    def tick(self, us):
+    def tick(self, usecs):
         for led in self.leds.values():
-            led.tick(us)
+            led.tick(usecs)
 

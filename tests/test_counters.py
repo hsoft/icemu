@@ -26,7 +26,7 @@ def test_oscillating_input(cnt_class):
     # various rates. Pin 1 is going to be freq/2, Pin2, freq/4 and so on.
     cnt = cnt_class()
 
-    FREQ = 4242
+    FREQ = 10**6
     inpt = Pin(code='FOO', oscillating_freq=FREQ)
     clk = cnt.getpin(cnt.CLOCK_PIN)
     clk.wire_to(inpt)

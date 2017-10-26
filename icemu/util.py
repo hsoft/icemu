@@ -1,5 +1,8 @@
 from itertools import combinations
 
+USECS_PER_SECOND = 10**6
+MSECS_PER_SECOND = 10**3
+
 # first pin is the least significant bit
 def set_binary_value(value, pins):
     for i, pin in enumerate(pins):

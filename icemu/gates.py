@@ -10,9 +10,17 @@ class Gate(Chip):
 
     def update(self):
         for *in_, out in self.IO_MAPPING:
-            pins_in = self.getpins(in_)
+            pins_in = list(self.getpins(in_))
             pin_out = self.getpin(out)
-            pin_out.set(self._test(pins_in))
+            normal_pins = [p for p in pins_in if not p.is_oscillating()]
+            oscillating_pins = [p for p in pins_in if p.is_oscillating()]
+            # when there's no normal pin, the result is necessarily oscillating.
+            if not normal_pins or self._test(normal_pins):
+                pin_out.sethigh()
+                if oscillating_pins:
+                    pin_out.set_oscillating_freq(max(p.oscillating_freq() for p in oscillating_pins))
+            else:
+                pin_out.setlow()
 
 
 class NOR(Gate):
@@ -119,6 +127,7 @@ class Inverter(Chip):
             pin_in = self.getpin(in_)
             pin_out = self.getpin(out)
             pin_out.set(not pin_in.ishigh())
+            pin_out.set_oscillating_freq(pin_in.oscillating_freq())
 
 
 class SN74HC14(Inverter):

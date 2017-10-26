@@ -20,6 +20,8 @@ class Pin:
             ishigh = 'H' if self.ishigh() else 'L'
         return '{}/{}/{}'.format(self.code, isoutput, ishigh)
 
+    __repr__ = __str__
+
     def ishigh(self):
         if self.is_oscillating():
             return True

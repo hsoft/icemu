@@ -25,6 +25,8 @@ class Chip:
         outputs = ' '.join(str(self.getpin(code)) for code in self.OUTPUT_PINS)
         return '{} I: {} O: {}'.format(self.__class__.__name__, inputs, outputs)
 
+    __repr__ = __str__
+
     def _pin_codes_in_order(self):
         if self.PIN_ORDER:
             return self.PIN_ORDER

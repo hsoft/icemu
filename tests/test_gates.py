@@ -6,6 +6,20 @@ import pytest
 from icemu.gates import (
     CD4001B, CD4002B, CD4025B, SN74LS02, SN74LS27, SN54S260, SN74HC14
 )
+from icemu.pin import Pin
+
+ALL_NORS = [
+    CD4001B,
+    CD4002B,
+    CD4025B,
+    SN74LS02,
+    SN74LS27,
+    SN54S260,
+]
+
+ALL_INVERTERS = [
+    SN74HC14,
+]
 
 def assert_output(sr, expected_value):
     value = 0
@@ -22,14 +36,7 @@ def push_value(sr, input_pin, value):
         clock_pin.setlow()
         clock_pin.sethigh()
 
-@pytest.mark.parametrize('nor_class', [
-    CD4001B,
-    CD4002B,
-    CD4025B,
-    SN74LS02,
-    SN74LS27,
-    SN54S260,
-])
+@pytest.mark.parametrize('nor_class', ALL_NORS)
 def test_nor(nor_class):
     nor = nor_class()
 
@@ -64,9 +71,7 @@ def test_sr_latch():
     assert not nor.pin_J.ishigh()
     assert nor.pin_K.ishigh()
 
-@pytest.mark.parametrize('inv_class', [
-    SN74HC14
-])
+@pytest.mark.parametrize('inv_class', ALL_INVERTERS)
 def test_inverters(inv_class):
     inv = inv_class()
 
@@ -82,3 +87,26 @@ def test_inverters(inv_class):
         pin = inv.getpin(out)
         assert pin.ishigh() == (not bool(val & (1 << i)))
 
+def test_nor_oscillating():
+    nor = CD4001B()
+
+    FREQ = 42
+    inpt = Pin(code='FOO', oscillating_freq=FREQ)
+
+    nor.pin_A.wire_to(inpt)
+    # Because the position of pin_B makes a positive outcome for pin_J possible, it's oscillating.
+    assert nor.pin_J.oscillating_freq() == FREQ
+    nor.pin_B.sethigh()
+    # Because the position of pin_B makes a positive outcome for pin_J impossible, it's not oscillating.
+    assert nor.pin_J.oscillating_freq() == 0
+    assert not nor.pin_J.ishigh()
+
+def test_inverters_oscillating():
+    inv = SN74HC14()
+
+    FREQ = 42
+    inpt = Pin(code='FOO', oscillating_freq=FREQ)
+
+    inv.getpin(inv.INPUT_PINS[0]).wire_to(inpt)
+    assert inv.getpin(inv.OUTPUT_PINS[0]).oscillating_freq() == FREQ
+    assert inv.getpin(inv.OUTPUT_PINS[1]).oscillating_freq() == 0

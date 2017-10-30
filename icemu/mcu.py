@@ -20,6 +20,9 @@ MAX_5BITS = 0x1f
 class MCU(Chip):
     def __init__(self):
         self._waiting_for_interrupt = False
+        # a list of codes of enabled interrupts. A naked code means "interrupt on rising edge"
+        # and a code with a "~" prefix means "interrupt on falling edge".
+        self._interrupt_enabled_on_pins = set()
         self._debug_msgs_to = None
         # There's too many ticks to debug them. Let's just count them and report the count at every
         # non-tick msg
@@ -53,6 +56,10 @@ class MCU(Chip):
     def _pin_change(self, pin):
         if not pin.output and not pin.is_oscillating():
             self._push_pin_state(pin)
+            if pin.ishigh() and pin.code in self._interrupt_enabled_on_pins:
+                self.interrupt(self.INTERRUPT_PINS.index(pin.code))
+            elif not pin.ishigh() and '~' + pin.code in self._interrupt_enabled_on_pins:
+                self.interrupt(self.INTERRUPT_PINS.index(pin.code))
 
     def run_program(self, executable, debug_msgs_to=None):
         if debug_msgs_to:
@@ -111,6 +118,14 @@ class MCU(Chip):
         elif msgid == SEND_ENDINTERRUPT:
             self._waiting_for_interrupt = False
 
+    def enable_interrupt_on_pin(self, pin, rising=False, falling=False):
+        assert pin.code in self.INTERRUPT_PINS
+        assert rising or falling
+        if rising:
+            self._interrupt_enabled_on_pins.add(pin.code)
+        if falling:
+            self._interrupt_enabled_on_pins.add('~' + pin.code)
+
     def interrupt(self, interrupt_id):
         self._waiting_for_interrupt = True
         self.push_msgin((RECV_INTERRUPT << 5) | interrupt_id)
@@ -124,4 +139,5 @@ class MCU(Chip):
 
 class ATtiny(MCU):
     INPUT_PINS = ['B0', 'B1', 'B2', 'B3', 'B4', 'B5']
+    INTERRUPT_PINS = INPUT_PINS # all pins have an associated interrupt
 

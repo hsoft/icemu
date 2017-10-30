@@ -8,6 +8,7 @@ class Chip:
     PIN_ORDER = None
 
     def __init__(self):
+        self._pin_cache = {}
         self.all_pins = []
         for code in self.OUTPUT_PINS:
             pin = Pin(code, chip=self, output=True, high=(code in self.STARTING_HIGH))
@@ -32,6 +33,14 @@ class Chip:
             return self.PIN_ORDER
         else:
             return self.INPUT_PINS + self.OUTPUT_PINS
+
+    @staticmethod
+    def _pin_is_in_code_list(pin, codes):
+        return pin.code in codes or '~' + pin.code in codes
+
+    # called during update() when a pin changes its low/high/oscillate state
+    def _pin_change(self, pin, rise, fall, oscillate_at):
+        pass
 
     def asciiart(self):
         def pinsymbol(pin):
@@ -116,7 +125,16 @@ class Chip:
             pin.tick(usecs)
 
     def update(self):
-        pass
+        for pin in self.getinputpins():
+            code = pin.code
+            prev_val = self._pin_cache.get(code)
+            if pin.is_oscillating():
+                curr_val = pin.oscillating_freq()
+            else:
+                curr_val = pin.ishigh()
+            if prev_val != curr_val:
+                self._pin_change(pin)
+                self._pin_cache[code] = curr_val
 
     # Same as with setpins, but for wire_to()
     # Has to be called from the chip having the *input* pins
@@ -132,8 +150,12 @@ class ActivableChip(Chip):
     ENABLE_PINS = [] # ~ means that low == enabled
 
     def __init__(self, *args, **kwargs):
-        self._is_enabled = False
+        self._is_enabled = True
         super().__init__(*args, **kwargs)
+
+    def _pin_change(self, pin):
+        if self._pin_is_in_code_list(pin, self.ENABLE_PINS):
+            self._update_enabled()
 
     def _was_enabled(self):
         pass
@@ -141,10 +163,7 @@ class ActivableChip(Chip):
     def _was_disabled(self):
         pass
 
-    def is_enabled(self):
-        return self._is_enabled
-
-    def update(self):
+    def _update_enabled(self):
         was_enabled = self._is_enabled
         enabled = True
         for code in self.ENABLE_PINS:
@@ -161,5 +180,6 @@ class ActivableChip(Chip):
         elif not enabled and was_enabled:
             self._was_disabled()
 
-        super().update()
+    def is_enabled(self):
+        return self._is_enabled
 

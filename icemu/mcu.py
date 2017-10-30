@@ -19,7 +19,6 @@ MAX_5BITS = 0x1f
 
 class MCU(Chip):
     def __init__(self):
-        self._pin_cache = {}
         self._waiting_for_interrupt = False
         self._debug_msgs_to = None
         # There's too many ticks to debug them. Let's just count them and report the count at every
@@ -40,7 +39,6 @@ class MCU(Chip):
     def _push_pin_state(self, pin):
         msg = RECV_PINHIGH if pin.ishigh() else RECV_PINLOW
         self.push_msgin((msg << 5) | self._intid_from_pin(pin))
-        self._pin_cache[pin.code] = pin.ishigh()
 
     def _debug_msg(self, send, msg):
         if not send and msg == (RECV_TICK << 5):
@@ -51,6 +49,10 @@ class MCU(Chip):
             self._debug_tick_count = 0
         s = "%s %d %d" % ('S' if send else 'R', (msg & 0xe0) >> 5, msg & MAX_5BITS)
         print(s, file=self._debug_msgs_to)
+
+    def _pin_change(self, pin):
+        if not pin.output and not pin.is_oscillating():
+            self._push_pin_state(pin)
 
     def run_program(self, executable, debug_msgs_to=None):
         if debug_msgs_to:
@@ -118,11 +120,6 @@ class MCU(Chip):
     def tick(self, usecs):
         self.process_msgout()
         self.push_msgin(RECV_TICK << 5)
-
-    def update(self):
-        for pin in self.getinputpins():
-            if pin.code not in self._pin_cache or pin.ishigh() != self._pin_cache[pin.code]:
-                self._push_pin_state(pin)
 
 
 class ATtiny(MCU):

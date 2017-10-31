@@ -2,13 +2,14 @@ import time
 
 
 class Simulation:
-    TIME_RESOLUTION = 50 # in usecs
+    # this is the minimal time we want to wait between run loops.
+    LOOP_PERIOD = 50 # in usec
 
     def __init__(self, usec_value=1):
         self._chips = []
         self.running = True
         self.usec_value = usec_value
-        self.ticks = 0
+        self._elapsed_usecs = 0
         # whether the simulated time is going too fast for the computer's capabilities.
         # If it's true, the simulation might begin to lose timing accuracy. You should slow it
         # down with `usec_value` or increase TIME_RESOLUTION (do in on the C side as well!)
@@ -24,21 +25,23 @@ class Simulation:
         return chip
 
     def elapsed_usecs(self):
-        return self.ticks * self.TIME_RESOLUTION
+        return self._elapsed_usecs
 
     def run(self):
-        one_tick_in_seconds = (1 / (1000 * (1000 / self.TIME_RESOLUTION))) * self.usec_value
-        target_time = time.time() + one_tick_in_seconds
+        usec_value_in_seconds = (1 / (10 ** 6)) * self.usec_value
         while self.running:
             try:
-                for chip in self._chips:
-                    chip.tick(self.TIME_RESOLUTION)
-                self._process()
-                self.running_late = time.time() > (target_time + one_tick_in_seconds)
+                timestamp = time.time()
+                target_time = timestamp + (usec_value_in_seconds * self.LOOP_PERIOD)
                 while time.time() < target_time:
                     time.sleep(0)
-                target_time += one_tick_in_seconds
-                self.ticks += 1
+                new_timestamp = time.time()
+                elapsed_usecs = round((new_timestamp - timestamp) / usec_value_in_seconds)
+                self._elapsed_usecs += elapsed_usecs
+                self.running_late = elapsed_usecs > (self.LOOP_PERIOD * 2)
+                for chip in self._chips:
+                    chip.tick(elapsed_usecs)
+                self._process()
             except: # yes, even SysExit
                 self.stop()
                 raise

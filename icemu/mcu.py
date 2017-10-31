@@ -14,10 +14,13 @@ RECV_PINLOW = 0x0
 RECV_PINHIGH = 0x1
 RECV_TICK = 0x2
 RECV_INTERRUPT = 0x3
+RECV_REPEAT = 0x4
 
 MAX_5BITS = 0x1f
 
 class MCU(Chip):
+    TIME_RESOLUTION = 50 # in usecs
+
     def __init__(self):
         self._waiting_for_interrupt = False
         # a list of codes of enabled interrupts. A naked code means "interrupt on rising edge"
@@ -27,6 +30,8 @@ class MCU(Chip):
         # There's too many ticks to debug them. Let's just count them and report the count at every
         # non-tick msg
         self._debug_tick_count = 0
+        # number of usecs elapsed since we've sent the last tick
+        self._elapsed_usecs = 0
         self.lock = threading.Lock()
         self.msgin = b''
         self.msgout = b''
@@ -44,13 +49,15 @@ class MCU(Chip):
         self.push_msgin((msg << 5) | self._intid_from_pin(pin))
 
     def _debug_msg(self, send, msg):
-        if not send and msg == (RECV_TICK << 5):
-            self._debug_tick_count += 1
+        msgtype = (msg & 0xe0) >> 5
+        msgarg = msg & MAX_5BITS
+        if not send and msgtype == RECV_TICK:
+            self._debug_tick_count += msgarg + 1
             return
         if self._debug_tick_count:
             print("%d ticks" % self._debug_tick_count, file=self._debug_msgs_to)
             self._debug_tick_count = 0
-        s = "%s %d %d" % ('S' if send else 'R', (msg & 0xe0) >> 5, msg & MAX_5BITS)
+        s = "%s %d %d" % ('S' if send else 'R', msgtype, msgarg)
         print(s, file=self._debug_msgs_to)
 
     def _pin_change(self, pin):
@@ -126,15 +133,23 @@ class MCU(Chip):
         if falling:
             self._interrupt_enabled_on_pins.add('~' + pin.code)
 
-    def interrupt(self, interrupt_id):
+    def interrupt(self, interrupt_id, count=1):
+        assert count <= MAX_5BITS + 1
         self._waiting_for_interrupt = True
+        if count > 1:
+            self.push_msgin((RECV_REPEAT << 5) | (count - 1))
         self.push_msgin((RECV_INTERRUPT << 5) | interrupt_id)
         while self._waiting_for_interrupt:
             self.process_msgout()
 
     def tick(self, usecs):
-        self.process_msgout()
-        self.push_msgin(RECV_TICK << 5)
+        self._elapsed_usecs += usecs
+        while self._elapsed_usecs >= self.TIME_RESOLUTION:
+            # we can only send a maximum of 32 ticks at once
+            tick_count = min(32, self._elapsed_usecs // self.TIME_RESOLUTION)
+            self._elapsed_usecs -= tick_count * self.TIME_RESOLUTION
+            self.process_msgout()
+            self.push_msgin((RECV_TICK << 5) | (tick_count - 1))
 
 
 class ATtiny(MCU):

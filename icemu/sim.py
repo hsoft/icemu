@@ -29,16 +29,16 @@ class Simulation:
 
     def run(self):
         usec_value_in_seconds = (1 / (10 ** 6)) * self.usec_value
+        timestamp = time.time()
         while self.running:
             try:
-                timestamp = time.time()
-                target_time = timestamp + (usec_value_in_seconds * self.LOOP_PERIOD)
-                while time.time() < target_time:
-                    time.sleep(0)
+                if not self.running_late:
+                    time.sleep(usec_value_in_seconds * self.LOOP_PERIOD)
                 new_timestamp = time.time()
                 elapsed_usecs = round((new_timestamp - timestamp) / usec_value_in_seconds)
+                timestamp = new_timestamp
                 self._elapsed_usecs += elapsed_usecs
-                self.running_late = elapsed_usecs > (self.LOOP_PERIOD * 2)
+                self.running_late = elapsed_usecs > (self.LOOP_PERIOD * 1.2)
                 for chip in self._chips:
                     chip.tick(elapsed_usecs)
                 self._process()

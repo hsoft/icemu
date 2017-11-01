@@ -9,7 +9,7 @@ class Circuit(SimulationWithUI):
         self.mcu = self.add_chip(ATtiny())
         self.dec = SN74HC138()
         decoutputs = list(self.dec.getpins(self.dec.OUTPUT_PINS))
-        self.leds = [LED(vcc=self.mcu.vcc, gnd=decoutputs[i]) for i in range(8)]
+        self.leds = [self.add_chip(LED(vcc=self.mcu.vcc, gnd=decoutputs[i])) for i in range(8)]
 
         self.dec.wirepins(self.mcu, ['A', 'B', 'C'], ['B0', 'B1', 'B2'])
 
@@ -27,11 +27,6 @@ class Circuit(SimulationWithUI):
             lambda: ''.join(str(l) for l in self.leds)
         )
         self.uiscreen.refresh()
-
-    def _process(self):
-        for led in self.leds:
-            led.tick(self.TIME_RESOLUTION)
-        super()._process()
 
 
 def main():

@@ -5,10 +5,10 @@ from icemu.ui import SimulationWithUI
 
 class Circuit(SimulationWithUI):
     def __init__(self):
-        super().__init__()
+        super().__init__(usec_value=2)
         self.mcu = self.add_chip(ATtiny())
-        self.sr = SN74HC595()
-        self.seg = Segment7()
+        self.sr = self.add_chip(SN74HC595())
+        self.seg = self.add_chip(Segment7())
 
         self.sr.pin_SRCLK.wire_to(self.mcu.pin_B0)
         self.sr.pin_SER.wire_to(self.mcu.pin_B1)
@@ -34,10 +34,6 @@ class Circuit(SimulationWithUI):
             self.sr.asciiart
         )
         self.uiscreen.refresh()
-
-    def _process(self):
-        self.seg.tick(self.TIME_RESOLUTION)
-        super()._process()
 
 
 def main():

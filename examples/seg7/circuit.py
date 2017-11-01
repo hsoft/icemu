@@ -5,7 +5,7 @@ from icemu.ui import SimulationWithUI
 
 class Circuit(SimulationWithUI):
     def __init__(self):
-        super().__init__(usec_value=2)
+        super().__init__()
         self.mcu = self.add_chip(ATtiny())
         self.sr = self.add_chip(SN74HC595())
         self.seg = self.add_chip(Segment7())

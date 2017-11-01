@@ -31,12 +31,14 @@ def combine_repr(*segs):
     line3 = ' '.join(s[8:] for s in outputs)
     return '\n'.join([line1, line2, line3])
 
+# Remember: segments are visible when pin is *low*
 class Segment7(Chip):
     INPUT_PINS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'DP']
+    FADE_DELAY_US = 10**4
 
     def __init__(self, *args, **kwargs):
+        self.fading_pins = {}
         super().__init__(*args, **kwargs)
-        self.leds = {pin.code: LED(self.vcc, pin) for pin in self.getpins(self.INPUT_PINS)}
 
     def __str__(self):
         SEGMENTS = """
@@ -49,17 +51,22 @@ class Segment7(Chip):
             'F', 'G', 'B', '',
             'E', 'D', 'C'
         ]
-        return ''.join(c if seg and self.leds[seg].ishigh() else ' ' for c, seg in zip(SEGMENTS, SEGPOS))
+        highpins = {p.code for p in self.getinputpins() if not p.ishigh() or p.code in self.fading_pins}
+        return ''.join(c if seg and seg in highpins else ' ' for c, seg in zip(SEGMENTS, SEGPOS))
 
-    def update(self):
-        # Any time an input pin changes, we want to make sure to update each of our LED's fade
-        # counter
-        if not hasattr(self, 'leds'): # initialization, ignore
-            return
-        for led in self.leds.values():
-            led.ishigh()
+    def _pin_change(self, pin):
+        if pin.ishigh():
+            # pin was just lowered, activate delay
+            self.fading_pins[pin.code] = self.FADE_DELAY_US
+        else:
+            if pin.code in self.fading_pins:
+                del self.fading_pins[pin.code]
 
     def tick(self, usecs):
-        for led in self.leds.values():
-            led.tick(usecs)
+        for code, delay in list(self.fading_pins.items()):
+            delay -= usecs
+            if delay <= 0:
+                del self.fading_pins[code]
+            else:
+                self.fading_pins[code] = delay
 

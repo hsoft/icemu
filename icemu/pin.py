@@ -1,4 +1,5 @@
 from .util import fmtfreq, USECS_PER_SECOND
+from ._pin import Pin as PinC
 
 # About oscillation
 #
@@ -16,13 +17,17 @@ from .util import fmtfreq, USECS_PER_SECOND
 #
 # The visual symbol we use for a rapidly oscillating pin is "~" and always evaluates to "high".
 
+C_OVERRIDES = ['isoutput', 'setoutput', 'setinput']
+
 class Pin:
     def __init__(self, code, high=False, chip=None, output=False, oscillating_freq=0):
         self.code = code.replace('~', '')
-        self.high = high
+        output = bool(oscillating_freq) or output
+        self._c = PinC(output=output, high=high)
+        for override in C_OVERRIDES:
+            setattr(self, override, getattr(self._c, override))
         self.chip = chip
         # an oscillating pin is always output.
-        self.output = bool(oscillating_freq) or output
         self._oscillating_freq = oscillating_freq # in Hz
         # None means "rapid oscillation"
         self._next_oscillation_in = None
@@ -30,7 +35,7 @@ class Pin:
         self.wires = set()
 
     def __str__(self):
-        isoutput = 'O' if self.output else 'I'
+        isoutput = 'O' if self.isoutput() else 'I'
         oscillating_freq = self.oscillating_freq()
         if oscillating_freq:
             ishigh = '~{}'.format(fmtfreq(oscillating_freq))
@@ -41,24 +46,24 @@ class Pin:
     __repr__ = __str__
 
     def _get_wired_oscillator(self):
-        assert not self.output
-        wired_outputs = [p for p in self.wires if p.output]
+        assert not self.isoutput()
+        wired_outputs = [p for p in self.wires if p.isoutput()]
         return max(wired_outputs, key=lambda p: p.oscillating_freq(), default=None)
 
     def ishigh(self):
         if self.is_oscillating_rapidly():
             return True
-        if not self.output and self.wires:
-            wired_outputs = [p for p in self.wires if p.output]
+        if not self.isoutput() and self.wires:
+            wired_outputs = [p for p in self.wires if p.isoutput()]
             if wired_outputs:
                 return any(p.ishigh() for p in wired_outputs)
             else:
-                return self.high
+                return self._c.ishigh()
         else:
-            return self.high
+            return self._c.ishigh()
 
     def oscillating_freq(self):
-        if self.output:
+        if self.isoutput():
             return self._oscillating_freq
         else:
             wired = self._get_wired_oscillator()
@@ -75,14 +80,14 @@ class Pin:
 
     def next_oscillation_in(self):
         # usecs, only words when is_oscillating_slowly()
-        if self.output:
+        if self.isoutput():
             return self._next_oscillation_in
         else:
             wired = self._get_wired_oscillator()
             return wired.next_oscillation_in() if wired else None
 
     def tick(self, usecs):
-        if self.output and self.oscillating_freq():
+        if self.isoutput() and self.oscillating_freq():
             freq = self.oscillating_freq()
             every_usecs = USECS_PER_SECOND / freq
             rapid = every_usecs * 2 <= usecs
@@ -95,26 +100,25 @@ class Pin:
                     self._next_oscillation_in += every_usecs
 
     def propagate_to(self):
-        if self.output:
+        if self.isoutput():
             return {
                 p.chip for p in self.wires
-                if not p.output and p.chip is not self and p.chip is not None
+                if not p.isoutput() and p.chip is not self and p.chip is not None
             }
         else:
             return set()
 
     def set(self, val):
-        if self.output and self.is_oscillating_rapidly():
+        if self.isoutput() and self.is_oscillating_rapidly():
             self._oscillating_freq = 0
 
-        if val == self.high:
+        if not self._c.set(val):
             return
 
-        self.high = val
-        if not self.output and self.chip:
+        if not self.isoutput() and self.chip:
             self.chip.update()
 
-        if self.output:
+        if self.isoutput():
             wired_chips = self.propagate_to()
             for chip in wired_chips:
                 chip.update()

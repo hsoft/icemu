@@ -12,6 +12,16 @@ def test_oscillating_fmt(freq, expected):
     assert pin.oscillating_freq() == freq
     assert str(pin) == "FOO/O/~{}".format(expected)
 
+def test_low_high():
+    pin = Pin(code='FOO', high=True)
+    assert pin.ishigh()
+    pin.setlow()
+    assert not pin.ishigh()
+    pin.sethigh()
+    assert pin.ishigh()
+    pin.toggle()
+    assert not pin.ishigh()
+
 def test_sethigh_and_freq():
     # setting a pin high or low stops oscillation
     FREQ = 4242

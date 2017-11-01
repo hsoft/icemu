@@ -64,7 +64,7 @@ class MCU(Chip):
         print(s, file=self._debug_msgs_to)
 
     def _pin_change(self, pin):
-        if not pin.output and not pin.is_oscillating_rapidly():
+        if not pin.isoutput() and not pin.is_oscillating_rapidly():
             self._push_pin_state(pin)
             interrupt = self._interrupt_enabled.get(pin.code)
             if interrupt is not None:
@@ -122,10 +122,10 @@ class MCU(Chip):
         elif msgid == SEND_PINHIGH:
             pin.sethigh()
         elif msgid == SEND_PININPUT:
-            pin.output = False
+            pin.setoutput()
             self._push_pin_state(pin)
         elif msgid == SEND_PINOUTPUT:
-            pin.output = True
+            pin.setinput()
         elif msgid == SEND_ENDINTERRUPT:
             self._waiting_for_interrupt = False
 

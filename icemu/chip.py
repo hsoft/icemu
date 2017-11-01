@@ -60,11 +60,11 @@ class Chip:
         spacer = (max_pin_name_len + 1) * ' '
         lines.append(spacer + '_______' + spacer)
         for index, (left, right) in enumerate(zip(left_pins, right_pins)):
-            larrow = '<' if left.output else '>'
+            larrow = '<' if left.isoutput() else '>'
             lpol = pinsymbol(left)
             sleft = left.code.rjust(max_pin_name_len) + larrow + '|' + lpol
             if right:
-                rarrow = '>' if right.output else '<'
+                rarrow = '>' if right.isoutput() else '<'
                 rpol = pinsymbol(right)
                 sright = rpol + '|' + rarrow + right.code.ljust(max_pin_name_len)
             else:
@@ -93,10 +93,10 @@ class Chip:
         return getattr(self, 'pin_{}'.format(code.replace('~', '')))
 
     def getinputpins(self):
-        return (p for p in self.all_pins if not p.output)
+        return (p for p in self.all_pins if not p.isoutput())
 
     def getoutputpins(self):
-        return (p for p in self.all_pins if p.output)
+        return (p for p in self.all_pins if p.isoutput())
 
     def getpins(self, codes):
         return (self.getpin(code) for code in codes)
@@ -109,9 +109,9 @@ class Chip:
         high = high or []
         for codes, val in [(low, False), (high, True)]:
             for pin in self.getpins(codes):
-                if pin.high != val:
-                    pin.high = val
-                    if pin.output:
+                if pin._c.ishigh() != val:
+                    pin._c.set(val)
+                    if pin.isoutput():
                        updatelist |= pin.propagate_to()
                     else:
                         updateself = True

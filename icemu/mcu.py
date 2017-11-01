@@ -122,10 +122,10 @@ class MCU(Chip):
         elif msgid == SEND_PINHIGH:
             pin.sethigh()
         elif msgid == SEND_PININPUT:
-            pin.setoutput()
+            pin.setinput()
             self._push_pin_state(pin)
         elif msgid == SEND_PINOUTPUT:
-            pin.setinput()
+            pin.setoutput()
         elif msgid == SEND_ENDINTERRUPT:
             self._waiting_for_interrupt = False
 

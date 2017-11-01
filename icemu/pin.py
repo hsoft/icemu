@@ -23,7 +23,7 @@ class Pin:
     def __init__(self, code, high=False, chip=None, output=False, oscillating_freq=0):
         self.code = code.replace('~', '')
         output = bool(oscillating_freq) or output
-        self._c = PinC(output=output, high=high)
+        self._c = PinC(output=output, high=high, chip=chip)
         for override in C_OVERRIDES:
             setattr(self, override, getattr(self._c, override))
         self.chip = chip
@@ -112,16 +112,7 @@ class Pin:
         if self.isoutput() and self.is_oscillating_rapidly():
             self._oscillating_freq = 0
 
-        if not self._c.set(val):
-            return
-
-        if not self.isoutput() and self.chip:
-            self.chip.update()
-
-        if self.isoutput():
-            wired_chips = self.propagate_to()
-            for chip in wired_chips:
-                chip.update()
+        self._c.set(val)
 
     def set_oscillating_freq(self, freq):
         self._oscillating_freq = freq
@@ -150,7 +141,9 @@ class Pin:
 
     def wire_to(self, output_pin):
         self.wires.add(output_pin)
+        self._c.wire_to(output_pin._c)
         output_pin.wires.add(self)
+        output_pin._c.wire_to(self._c)
         if self.chip:
             self.chip.update()
 

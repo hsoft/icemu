@@ -110,7 +110,7 @@ class Chip:
         for codes, val in [(low, False), (high, True)]:
             for pin in self.getpins(codes):
                 if pin._c.ishigh() != val:
-                    pin._c.set(val)
+                    pin._c.setraw(val)
                     if pin.isoutput():
                        updatelist |= pin.propagate_to()
                     else:
@@ -143,7 +143,9 @@ class Chip:
            ipin = self.getpin(icode)
            opin = chip.getpin(ocode)
            ipin.wires.add(opin)
+           ipin._c.wire_to(opin._c)
            opin.wires.add(ipin)
+           opin._c.wire_to(ipin._c)
         self.update()
 
 class ActivableChip(Chip):

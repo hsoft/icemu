@@ -1,8 +1,10 @@
 import os
 import subprocess
 import threading
+from collections import namedtuple
 
 from .chip import Chip
+from .util import USECS_PER_SECOND
 
 SEND_PINLOW = 0x0
 SEND_PINHIGH = 0x1
@@ -18,14 +20,15 @@ RECV_REPEAT = 0x4
 
 MAX_5BITS = 0x1f
 
+Interrupt = namedtuple('Interrupt', 'code interrupt_id rising falling')
+
 class MCU(Chip):
     TIME_RESOLUTION = 50 # in usecs
 
     def __init__(self):
         self._waiting_for_interrupt = False
-        # a list of codes of enabled interrupts. A naked code means "interrupt on rising edge"
-        # and a code with a "~" prefix means "interrupt on falling edge".
-        self._interrupt_enabled_on_pins = set()
+        # {code: Interrupt}
+        self._interrupt_enabled = {}
         self._debug_msgs_to = None
         # There's too many ticks to debug them. Let's just count them and report the count at every
         # non-tick msg
@@ -61,12 +64,13 @@ class MCU(Chip):
         print(s, file=self._debug_msgs_to)
 
     def _pin_change(self, pin):
-        if not pin.output and not pin.is_oscillating():
+        if not pin.output and not pin.is_oscillating_rapidly():
             self._push_pin_state(pin)
-            if pin.ishigh() and pin.code in self._interrupt_enabled_on_pins:
-                self.interrupt(self.INTERRUPT_PINS.index(pin.code))
-            elif not pin.ishigh() and '~' + pin.code in self._interrupt_enabled_on_pins:
-                self.interrupt(self.INTERRUPT_PINS.index(pin.code))
+            interrupt = self._interrupt_enabled.get(pin.code)
+            if interrupt is not None:
+                high = pin.ishigh()
+                if (high and interrupt.rising) or (not high and interrupt.falling):
+                    self.interrupt(interrupt.interrupt_id)
 
     def run_program(self, executable, debug_msgs_to=None):
         if debug_msgs_to:
@@ -128,21 +132,32 @@ class MCU(Chip):
     def enable_interrupt_on_pin(self, pin, rising=False, falling=False):
         assert pin.code in self.INTERRUPT_PINS
         assert rising or falling
-        if rising:
-            self._interrupt_enabled_on_pins.add(pin.code)
-        if falling:
-            self._interrupt_enabled_on_pins.add('~' + pin.code)
+        interrupt_id = self.INTERRUPT_PINS.index(pin.code)
+        interrupt = Interrupt(pin.code, interrupt_id, rising, falling)
+        self._interrupt_enabled[pin.code] = interrupt
 
     def interrupt(self, interrupt_id, count=1):
-        assert count <= MAX_5BITS + 1
-        self._waiting_for_interrupt = True
-        if count > 1:
-            self.push_msgin((RECV_REPEAT << 5) | (count - 1))
-        self.push_msgin((RECV_INTERRUPT << 5) | interrupt_id)
-        while self._waiting_for_interrupt:
-            self.process_msgout()
+        while count >= 1:
+            self._waiting_for_interrupt = True
+            subcount = min(MAX_5BITS + 1, count)
+            count -= subcount
+            if subcount > 1:
+                self.push_msgin((RECV_REPEAT << 5) | (subcount - 1))
+            self.push_msgin((RECV_INTERRUPT << 5) | interrupt_id)
+            while self._waiting_for_interrupt:
+                self.process_msgout()
 
     def tick(self, usecs):
+        for interrupt in self._interrupt_enabled.values():
+            pin = self.getpin(interrupt.code)
+            if pin.is_oscillating_rapidly():
+                count = (pin.oscillating_freq() / USECS_PER_SECOND) * usecs
+                if not (interrupt.rising and interrupt.falling):
+                    count /= 2
+                count = round(count)
+                if count >= 1:
+                    self.interrupt(self.INTERRUPT_PINS.index(pin.code), count=int(count))
+
         self._elapsed_usecs += usecs
         while self._elapsed_usecs >= self.TIME_RESOLUTION:
             # we can only send a maximum of 32 ticks at once

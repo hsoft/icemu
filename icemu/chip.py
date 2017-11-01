@@ -44,7 +44,7 @@ class Chip:
 
     def asciiart(self):
         def pinsymbol(pin):
-            if pin.is_oscillating():
+            if pin.is_oscillating_rapidly():
                 return '~'
             else:
                 return '+' if pin.ishigh() else '-'
@@ -128,7 +128,7 @@ class Chip:
         for pin in self.getinputpins():
             code = pin.code
             prev_val = self._pin_cache.get(code)
-            if pin.is_oscillating():
+            if pin.is_oscillating_rapidly():
                 curr_val = pin.oscillating_freq()
             else:
                 curr_val = pin.ishigh()

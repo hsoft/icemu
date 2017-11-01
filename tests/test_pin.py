@@ -23,19 +23,19 @@ def test_sethigh_and_freq():
     assert pin.oscillating_freq() == 0
 
 def test_oscillating_threshold():
-    pin = Pin(code='FOO', oscillating_freq=Pin.OSCILLATION_THRESHOLD)
-    assert pin.is_oscillating()
-    pin.set_oscillating_freq(Pin.OSCILLATION_THRESHOLD-1)
-    assert not pin.is_oscillating()
-
-def test_oscillating_flip_under_threshold():
-    tick = (Pin.OSCILLATION_THRESHOLD // 2) + 1
-    pin = Pin(code='FOO', oscillating_freq=Pin.OSCILLATION_THRESHOLD-1)
-    pin.sethigh()
-    pin.tick(tick)
-    assert pin.ishigh()
-    pin.tick(tick)
+    # whether we oscillate slowly or rapidly depends on the ticks we send the pin.
+    pin = Pin(code='FOO', oscillating_freq=1000)
+    # 1 kHz means a tick every 1000 usec
+    assert pin.is_oscillating_rapidly() # we always start oscillating rapidly
+    pin.tick(50) # we become slow because it takes a lot of ticks to toggle.
+    assert not pin.is_oscillating_rapidly()
+    assert pin.is_oscillating_slowly()
+    assert pin.next_oscillation_in() == 950
+    pin.setlow()
+    pin.tick(50) # no toggle
+    assert pin.is_oscillating_slowly()
     assert not pin.ishigh()
-    pin.tick(tick)
-    pin.tick(tick)
+    pin.tick(1000) # still slow, toggles
+    assert pin.is_oscillating_slowly()
     assert pin.ishigh()
+

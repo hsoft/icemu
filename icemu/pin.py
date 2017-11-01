@@ -1,13 +1,22 @@
 from .util import fmtfreq, USECS_PER_SECOND
 
-class Pin:
-    # Frequency (in Hz) at which the "oscillation" logic takes over. A pin oscillating under this
-    # threshold will end up having its value toggled at regular intervals through the tick() method.
-    # This threshold represents what is realistically possible to simulate and keep the pace.
-    # Normal logic will always be more accurate than oscillation logic, so if your machine can
-    # handle more, increase this value for a more accurate simulation.
-    OSCILLATION_THRESHOLD = 1000
+# About oscillation
+#
+# Setting an oscillation_freq triggers a system where there's two types of oscillation: slow and
+# rapid. Slow oscillation is an oscillation that happens faster than twice the time resolution (
+# the `usec` value we send to `tick()`. As long as we're slowly oscillating, the pin will stay in
+# "normal logic" mode, that is, the same logic of a non-oscillating pin. It would be the equivalent
+# of manually writing a timed loop that called `toggle()` on the pin.
+#
+# Past that threshold, however, the "oscillating" logic takes over. To be able to simulate more
+# `update()` calls to our ICs, we stop calling `update()` at all and tell the ICs to "propagate
+# oscillation". For example, a 4 bit counter with a rapidly oscillating input would end up with
+# would end up with outputs of oscillating freqs or rate/2, rate/4, rate/8 and rate/16, and this,
+# without further need to call `update()`, thus saving a lot of processing.
+#
+# The visual symbol we use for a rapidly oscillating pin is "~" and always evaluates to "high".
 
+class Pin:
     def __init__(self, code, high=False, chip=None, output=False, oscillating_freq=0):
         self.code = code.replace('~', '')
         self.high = high
@@ -15,7 +24,8 @@ class Pin:
         # an oscillating pin is always output.
         self.output = bool(oscillating_freq) or output
         self._oscillating_freq = oscillating_freq # in Hz
-        self._next_oscillation_in = USECS_PER_SECOND // oscillating_freq if oscillating_freq else 0
+        # None means "rapid oscillation"
+        self._next_oscillation_in = None
         self.low_means_enabled = code.startswith('~')
         self.wires = set()
 
@@ -30,8 +40,13 @@ class Pin:
 
     __repr__ = __str__
 
+    def _get_wired_oscillator(self):
+        assert not self.output
+        wired_outputs = [p for p in self.wires if p.output]
+        return max(wired_outputs, key=lambda p: p.oscillating_freq(), default=None)
+
     def ishigh(self):
-        if self.is_oscillating():
+        if self.is_oscillating_rapidly():
             return True
         if not self.output and self.wires:
             wired_outputs = [p for p in self.wires if p.output]
@@ -42,28 +57,42 @@ class Pin:
         else:
             return self.high
 
-    # An oscillator is a pin that oscillates between low and high at a high frequency, too high
-    # for the simulator to compute logic changes. The visual symbol we use for it is "~". When
-    # plugging such a pin in a chip, the logic changes completely and, instead of having low or
-    # high outputs, we have oscillating outputs with the same or a different frequency. An
-    # oscillating pin, logically, always evaluates to "high".
     def oscillating_freq(self):
         if self.output:
             return self._oscillating_freq
         else:
-            wired_outputs = [p for p in self.wires if p.output]
-            max_freq = max((p.oscillating_freq() for p in wired_outputs), default=0)
-            return max_freq
+            wired = self._get_wired_oscillator()
+            return wired.oscillating_freq() if wired else 0
+
+    def is_oscillating_rapidly(self):
+        return self.oscillating_freq() and self.next_oscillation_in() is None
+
+    def is_oscillating_slowly(self):
+        return self.oscillating_freq() and self.next_oscillation_in() is not None
 
     def is_oscillating(self):
-        return self.oscillating_freq() >= self.OSCILLATION_THRESHOLD
+        return self.oscillating_freq() > 0
+
+    def next_oscillation_in(self):
+        # usecs, only words when is_oscillating_slowly()
+        if self.output:
+            return self._next_oscillation_in
+        else:
+            wired = self._get_wired_oscillator()
+            return wired.next_oscillation_in() if wired else None
 
     def tick(self, usecs):
-        if 0 < self.oscillating_freq() < self.OSCILLATION_THRESHOLD:
-            self._next_oscillation_in -= usecs
-            if self._next_oscillation_in <= 0:
-                self._next_oscillation_in += USECS_PER_SECOND // self.oscillating_freq()
-                self.toggle()
+        if self.output and self.oscillating_freq():
+            freq = self.oscillating_freq()
+            every_usecs = USECS_PER_SECOND / freq
+            rapid = every_usecs * 2 <= usecs
+            if rapid:
+                self._next_oscillation_in = None
+            else:
+                self._next_oscillation_in = (self._next_oscillation_in or 0) - usecs
+                while self._next_oscillation_in < 0:
+                    self.toggle()
+                    self._next_oscillation_in += every_usecs
 
     def propagate_to(self):
         if self.output:
@@ -75,7 +104,7 @@ class Pin:
             return set()
 
     def set(self, val):
-        if self.is_oscillating():
+        if self.output and self.is_oscillating_rapidly():
             self._oscillating_freq = 0
 
         if val == self.high:
@@ -92,7 +121,7 @@ class Pin:
 
     def set_oscillating_freq(self, freq):
         self._oscillating_freq = freq
-        self._next_oscillation_in = USECS_PER_SECOND // freq if freq else 0
+        self._next_oscillation_in = None
         wired_chips = self.propagate_to()
         for chip in wired_chips:
             chip.update()

@@ -62,10 +62,11 @@ class UIScreen:
         x = actionw + 1
         w = maxw - x
         win.addnstr(0, x, "Stats:", w)
-        win.addnstr(1, x, "Time: %1.1f s" % (self.simulation.elapsed_usecs() / (1000 * 1000)), w)
-        win.addnstr(2, x, "Slowdown modifier: %d x" % (self.simulation.usec_value), w)
+        win.addnstr(1, x, "Time: %1.1fs" % (self.simulation.elapsed_usecs() / (1000 * 1000)), w)
+        win.addnstr(2, x, "Slowdown modifier: %dx" % (self.simulation.usec_value), w)
         if self.simulation.running_late:
-            win.addnstr(3, x, "Running late!", w)
+            msg = "Running late (%1.1fs)!" % (self.simulation.late_by)
+            win.addnstr(3, x, msg, w)
 
         win.refresh()
 

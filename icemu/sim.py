@@ -9,7 +9,7 @@ class Simulation:
         self._chips = []
         self.running = True
         self.usec_value = usec_value
-        self._elapsed_usecs = 0
+        self._ticks = 0
         # whether the simulated time is going too fast for the computer's capabilities.
         # If it's true, the simulation might begin to lose timing accuracy. You should slow it
         # down with `usec_value` or increase TIME_RESOLUTION (do in on the C side as well!)
@@ -25,23 +25,25 @@ class Simulation:
         return chip
 
     def elapsed_usecs(self):
-        return self._elapsed_usecs
+        return self._ticks * self.LOOP_PERIOD
 
     def run(self):
         usec_value_in_seconds = (1 / (10 ** 6)) * self.usec_value
+        tick_value_in_seconds = usec_value_in_seconds * self.LOOP_PERIOD
         timestamp = time.time()
+        epoch = timestamp
         while self.running:
             try:
-                if not self.running_late:
-                    time.sleep(usec_value_in_seconds * self.LOOP_PERIOD)
-                new_timestamp = time.time()
-                elapsed_usecs = round((new_timestamp - timestamp) / usec_value_in_seconds)
-                timestamp = new_timestamp
-                self._elapsed_usecs += elapsed_usecs
-                self.running_late = elapsed_usecs > (self.LOOP_PERIOD * 1.2)
                 for chip in self._chips:
-                    chip.tick(elapsed_usecs)
+                    chip.tick(self.LOOP_PERIOD)
                 self._process()
+                new_timestamp = time.time()
+                self._ticks += 1
+                target = epoch + self._ticks * tick_value_in_seconds
+                self.late_by = new_timestamp - target
+                self.running_late = self.late_by > 0
+                if not self.running_late:
+                    time.sleep(-self.late_by)
             except: # yes, even SysExit
                 self.stop()
                 raise

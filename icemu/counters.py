@@ -14,7 +14,7 @@ class BinaryCounter(ActivableChip):
             return
 
         if pin.code == self.CLOCK_PIN:
-            if pin.is_oscillating():
+            if pin.is_oscillating_rapidly():
                 self._update_oscillating(pin)
             elif pin.ishigh():
                 self._update_normal(pin)

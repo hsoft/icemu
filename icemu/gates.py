@@ -12,8 +12,8 @@ class Gate(Chip):
         for *in_, out in self.IO_MAPPING:
             pins_in = list(self.getpins(in_))
             pin_out = self.getpin(out)
-            normal_pins = [p for p in pins_in if not p.is_oscillating()]
-            oscillating_pins = [p for p in pins_in if p.is_oscillating()]
+            normal_pins = [p for p in pins_in if not p.is_oscillating_rapidly()]
+            oscillating_pins = [p for p in pins_in if p.is_oscillating_rapidly()]
             # when there's no normal pin, the result is necessarily oscillating.
             if not normal_pins or self._test(normal_pins):
                 pin_out.sethigh()

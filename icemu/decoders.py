@@ -17,7 +17,7 @@ class Decoder(ActivableChip):
         # outputs in the oscillating range is going to get an equal part of the output time.
         # we use the maximum frequency value among input pins.
         base_selection = get_binary_value(spins) # selection when all oscillating pins are high
-        oscillating_indexes = {i for i, p in enumerate(spins) if p.is_oscillating()}
+        oscillating_indexes = {i for i, p in enumerate(spins) if p.is_oscillating_rapidly()}
         selection_range = {base_selection,}
         for lowpins in combinations_inner(oscillating_indexes):
             sel = base_selection
@@ -39,7 +39,7 @@ class Decoder(ActivableChip):
             return
 
         spins = list(self.getpins(self.SERIAL_PINS))
-        if any(p.is_oscillating() for p in spins):
+        if any(p.is_oscillating_rapidly() for p in spins):
             self._update_oscillating(spins)
         else:
             self._update_normal(spins)

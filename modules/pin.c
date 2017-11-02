@@ -33,7 +33,8 @@ pin_wired_oscillator(Pin *pin)
             return NULL;
         }
     } else {
-        for (int i=0; i<MAX_WIRE_COUNT; i++) {
+        int i;
+        for (i=0; i<MAX_WIRE_COUNT; i++) {
             if (pin->wires[i] == NULL) {
                 break;
             }
@@ -52,7 +53,8 @@ pin_update_chips(Pin *pin)
         PyObject_CallMethod(pin->chip, "update", NULL);
     }
     if (pin->output) {
-        for (int i=0; i<MAX_WIRE_COUNT; i++) {
+        int i;
+        for (i=0; i<MAX_WIRE_COUNT; i++) {
             if (pin->wires[i] == NULL) {
                 break;
             }
@@ -84,7 +86,8 @@ pin_ishigh(Pin *pin)
         return pin->high;
     } else {
         bool hasoutput = false;
-        for (int i=0; i<MAX_WIRE_COUNT; i++) {
+        int i;
+        for (i=0; i<MAX_WIRE_COUNT; i++) {
             if (pin->wires[i] == NULL) {
                 break;
             }
@@ -173,7 +176,8 @@ pin_tick(Pin *pin, unsigned int usecs)
 static void
 pin_wire_to(Pin *pin, Pin *other)
 {
-    for (int i=0; i<MAX_WIRE_COUNT; i++) {
+    int i;
+    for (i=0; i<MAX_WIRE_COUNT; i++) {
         if (pin->wires[i] == other) {
             break;
         }
@@ -192,9 +196,10 @@ Pin_init(Pin *self, PyObject *args, PyObject *kwds)
     static char *kwlist[] = {
         "output", "high", "low_means_enabled", "oscillating_freq", "chip", NULL
     };
+    int i;
 
 
-    for (int i=0; i<MAX_WIRE_COUNT; i++) {
+    for (i=0; i<MAX_WIRE_COUNT; i++) {
         self->wires[i] = NULL;
     }
     self->next_oscillation_in = 0;

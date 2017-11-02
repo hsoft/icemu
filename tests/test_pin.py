@@ -24,11 +24,14 @@ def test_low_high():
 
 def test_sethigh_and_freq():
     # setting a pin high or low stops oscillation
-    FREQ = 4242
+    FREQ = 10**5
     pin = Pin(code='FOO', oscillating_freq=FREQ)
+    pin.tick(50) # enable rapid oscillation
+    assert pin.is_oscillating_rapidly()
     pin.setlow()
     assert pin.oscillating_freq() == 0
     pin.set_oscillating_freq(FREQ)
+    pin.tick(50)
     pin.sethigh()
     assert pin.oscillating_freq() == 0
 

@@ -12,7 +12,7 @@ def test_pin_rising_falling():
             super().__init__(*args, **kwargs)
 
         def _pin_change(self, pin):
-            if pin.is_oscillating_rapidly():
+            if pin.is_oscillating():
                 self.pin_oscillates.append(pin.code)
             elif pin.ishigh():
                 self.pin_rose.append(pin.code)

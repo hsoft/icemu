@@ -33,7 +33,8 @@ def combine_repr(*segs):
 
 # Remember: segments are visible when pin is *low*
 class Segment7(Chip):
-    INPUT_PINS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'DP']
+    INPUT_PINS = ['VCC', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'DP']
+    STARTING_HIGH = ['VCC']
     FADE_DELAY_US = 10**4
 
     def __init__(self, *args, **kwargs):
@@ -51,10 +52,20 @@ class Segment7(Chip):
             'F', 'G', 'B', '',
             'E', 'D', 'C'
         ]
-        highpins = {p.code for p in self.getinputpins() if not p.ishigh() or p.code in self.fading_pins}
+        highpins = set(self.fading_pins.keys())
+        if self.pin_VCC.ishigh():
+            highpins |= {p.code for p in self.getinputpins() if not p.ishigh()}
         return ''.join(c if seg and seg in highpins else ' ' for c, seg in zip(SEGMENTS, SEGPOS))
 
     def _pin_change(self, pin):
+        if pin == self.pin_VCC and not pin.ishigh():
+            # active fade delay for all lit segments
+            for pin in self.getinputpins():
+                if not pin.ishigh():
+                    self.fading_pins[pin.code] = self.FADE_DELAY_US
+            return
+        if not self.pin_VCC.ishigh():
+            return
         if pin.ishigh():
             # pin was just lowered, activate delay
             self.fading_pins[pin.code] = self.FADE_DELAY_US

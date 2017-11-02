@@ -18,7 +18,6 @@ class Chip:
             pin = Pin(code, chip=self, high=(code in self.STARTING_HIGH))
             setattr(self, 'pin_{}'.format(pin.code), pin)
             self.all_pins.append(pin)
-        self.vcc = Pin('VCC', chip=self, high=True)
         self.update()
 
     def __str__(self):
@@ -85,9 +84,6 @@ class Chip:
                 line = "~{} = {}".format(pin.code, fmtfreq(freq))
                 lines.append(line)
         return '\n'.join(lines)
-
-    def ispowered(self):
-        return self.vcc.ishigh()
 
     def getpin(self, code):
         return getattr(self, 'pin_{}'.format(code.replace('~', '')))

@@ -152,8 +152,8 @@ class MCU(Chip):
             pin = self.getpin(interrupt.code)
             if pin.is_oscillating_rapidly():
                 count = (pin.oscillating_freq() / USECS_PER_SECOND) * usecs
-                if not (interrupt.rising and interrupt.falling):
-                    count /= 2
+                if interrupt.rising and interrupt.falling:
+                    count *= 2
                 count = round(count)
                 if count >= 1:
                     self.interrupt(self.INTERRUPT_PINS.index(pin.code), count=int(count))

@@ -129,8 +129,8 @@ class Chip:
             else:
                 curr_val = pin.ishigh()
             if prev_val != curr_val:
-                self._pin_change(pin)
                 self._pin_cache[code] = curr_val
+                self._pin_change(pin)
 
     # Same as with setpins, but for wire_to()
     # Has to be called from the chip having the *input* pins

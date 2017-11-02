@@ -11,7 +11,7 @@ typedef struct Pin {
     bool high;
     bool low_means_enabled;
     unsigned int oscillating_freq;
-    int next_oscillation_in;
+    int next_toggle_in;
     bool oscillating_rapidly;
     PyObject *chip;
     struct Pin *wires[MAX_WIRE_COUNT];
@@ -132,9 +132,7 @@ pin_oscillating_freq(Pin *pin)
 static void
 pin_set(Pin *pin, bool high)
 {
-    if (pin->oscillating_rapidly) {
-        pin->oscillating_freq = 0;
-    }
+    pin->oscillating_freq = 0;
 
     if (high == pin->high) {
         return;
@@ -147,10 +145,12 @@ pin_set(Pin *pin, bool high)
 static void
 pin_set_oscillating_freq(Pin *pin, unsigned int freq)
 {
-    pin->oscillating_freq = freq;
-    pin->next_oscillation_in = 0;
-    pin->oscillating_rapidly = true;
-    pin_update_chips(pin);
+    if (freq != pin->oscillating_freq) {
+        pin->oscillating_freq = freq;
+        pin->next_toggle_in = 0;
+        pin->oscillating_rapidly = true;
+        pin_update_chips(pin);
+    }
 }
 
 static void
@@ -159,16 +159,19 @@ pin_tick(Pin *pin, unsigned int usecs)
     if (!(pin->output && pin->oscillating_freq)) {
         return;
     }
-    unsigned int freq = pin->oscillating_freq;
+    // we double the frequency because we toggle *twice* per hertz per second. Once for low, once
+    // for high.
+    unsigned int freq = pin->oscillating_freq * 2;
     unsigned int every_usecs = (1000 * 1000) / freq;
     pin->oscillating_rapidly = every_usecs * 2 <= usecs;
     if (pin->oscillating_rapidly) {
-        pin->next_oscillation_in = 0;
+        pin->next_toggle_in = 0;
     } else {
-        pin->next_oscillation_in -= usecs;
-        while (pin->next_oscillation_in < 0) {
-            pin_set(pin, !pin->high);
-            pin->next_oscillation_in += every_usecs;
+        pin->next_toggle_in -= usecs;
+        while (pin->next_toggle_in <= 0) {
+            pin->high = !pin->high;
+            pin_update_chips(pin);
+            pin->next_toggle_in += every_usecs;
         }
     }
 }
@@ -202,7 +205,7 @@ Pin_init(Pin *self, PyObject *args, PyObject *kwds)
     for (i=0; i<MAX_WIRE_COUNT; i++) {
         self->wires[i] = NULL;
     }
-    self->next_oscillation_in = 0;
+    self->next_toggle_in = 0;
     self->oscillating_rapidly = true;
     if (!PyArg_ParseTupleAndKeywords(
             args, kwds, "pppIO", kwlist,
@@ -270,28 +273,6 @@ static PyObject *
 Pin_is_oscillating_slowly(PyObject *self)
 {
     RETBOOL(pin_is_oscillating_slowly((Pin *)self));
-}
-
-static PyObject *
-Pin_next_oscillation_in(PyObject *self)
-{
-    Pin *pin;
-
-    pin = (Pin *)self;
-    if (pin->output) {
-        if (pin->oscillating_freq) {
-            if (pin->oscillating_rapidly) {
-                Py_RETURN_NONE;
-            } else {
-                return PyLong_FromLong(pin->next_oscillation_in);
-            }
-        } else {
-            Py_RETURN_NONE;
-        }
-    } else {
-        Pin *oscillator = pin_wired_oscillator(pin);
-        return Pin_next_oscillation_in((PyObject *)oscillator);
-    }
 }
 
 static PyObject *
@@ -391,7 +372,6 @@ static PyMethodDef Pin_methods[] = {
     {"is_oscillating", (PyCFunction)Pin_is_oscillating, METH_NOARGS, ""},
     {"is_oscillating_rapidly", (PyCFunction)Pin_is_oscillating_rapidly, METH_NOARGS, ""},
     {"is_oscillating_slowly", (PyCFunction)Pin_is_oscillating_slowly, METH_NOARGS, ""},
-    {"next_oscillation_in", (PyCFunction)Pin_next_oscillation_in, METH_NOARGS, ""},
     {"oscillating_freq", (PyCFunction)Pin_oscillating_freq, METH_NOARGS, ""},
     {"set", (PyCFunction)Pin_set, METH_O, ""},
     {"sethigh", (PyCFunction)Pin_sethigh, METH_NOARGS, ""},

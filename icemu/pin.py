@@ -3,6 +3,10 @@ from ._pin import Pin as PinC
 
 # About oscillation
 #
+# Oscillation frequence is the number of times per second that an oscillation between low and high
+# will occur. By definition, that number is in hertz. A pin with a oscillating_freq of 1 will toggle
+# *twice* a second (once for low, once for high).
+#
 # Setting an oscillation_freq triggers a system where there's two types of oscillation: slow and
 # rapid. Slow oscillation is an oscillation that happens faster than twice the time resolution (
 # the `usec` value we send to `tick()`. As long as we're slowly oscillating, the pin will stay in
@@ -19,8 +23,8 @@ from ._pin import Pin as PinC
 
 C_OVERRIDES = [
     'disable', 'enable', 'isenabled', 'ishigh', 'isoutput', 'is_oscillating',
-    'is_oscillating_rapidly', 'is_oscillating_slowly', 'next_oscillation_in', 'oscillating_freq',
-    'set', 'sethigh', 'setlow', 'setoutput', 'setinput', 'set_oscillating_freq', 'tick', 'toggle'
+    'is_oscillating_rapidly', 'is_oscillating_slowly', 'oscillating_freq', 'set', 'sethigh',
+    'setlow', 'setoutput', 'setinput', 'set_oscillating_freq', 'tick', 'toggle'
 ]
 
 class Pin:

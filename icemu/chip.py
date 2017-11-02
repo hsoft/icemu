@@ -38,7 +38,7 @@ class Chip:
         return pin.code in codes or '~' + pin.code in codes
 
     # called during update() when a pin changes its low/high/oscillate state
-    def _pin_change(self, pin, rise, fall, oscillate_at):
+    def _pin_change(self, pin):
         pass
 
     def asciiart(self):

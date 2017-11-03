@@ -47,10 +47,18 @@ testing directly on a prototype often involves significant setup time.
 With emulation, we have a quick setup time, introspection capabilities, all this stuff. We can then
 confirm the soundness of our logic before sending it to our prototype.
 
-### Killer feature: direct integration with your code
+### Killer feature #1: direct integration with your code
 
 If you have a circuit with a microcontroller in it, you can simulate the circuit by **directly
 plugging the code you're putting on the MCU** in it. See examples.
+
+### Killer feature #2: integration with FTDI devices
+
+If you have a FTDI device, you can use it to wire *actual* stuff in your simulation. You can wire
+the input pin the same way you would with any other simulated chip, but when you do, pin changes
+will actually be sent to the FTDI device, banging actual bits. It's very useful to test partially
+built prototypes: your simulation is known to work, and gradually, you solder small parts of your
+circuit, test them through FTDI, and then you know that what you've soldered works!
 
 ### Comparison with Verilog/VHDL
 

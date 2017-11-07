@@ -1,5 +1,9 @@
 #include "layer.h"
 
+void setup_interrupt()
+{
+}
+
 void pinset(bool high)
 {
     icemu_pinset(ICEMU_PINB1, high);

@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 
+void setup_interrupt();
 void pinset(bool high);
 bool pinishigh();
 void pininputmode();

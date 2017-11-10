@@ -2,6 +2,7 @@
 
 void setup_interrupt()
 {
+    icemu_enable_interrupt(ICEMU_PINB0, true, true);
 }
 
 void pinset(bool high)

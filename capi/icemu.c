@@ -30,24 +30,22 @@
 #define ICEMU_SEND_PINHIGH 0x1 << 5
 #define ICEMU_SEND_PININPUT 0x2 << 5
 #define ICEMU_SEND_PINOUTPUT 0x3 << 5
-#define ICEMU_SEND_ENDINTERRUPT 0x4 << 5
+#define ICEMU_SEND_DEBUG 0x4 << 5
 
 #define ICEMU_RECV_PINLOW 0x0 << 5
 #define ICEMU_RECV_PINHIGH 0x1 << 5
 #define ICEMU_RECV_TICK 0x2 << 5 // Time passes by, increment counters
-#define ICEMU_RECV_INTERRUPT 0x3 << 5 // interrupt triggered
 // next msg is repeated X times (0x0 means once, 0x1f (max) means 32 times)
-// for now, only used for interrupts.
-#define ICEMU_RECV_REPEAT 0x4 << 5
+#define ICEMU_RECV_REPEAT 0x3 << 5
 
 // 1 tick == ICEMU_TIME_RESOLUTION usecs
 static unsigned long current_ticks = 0;
 static unsigned long timers_resolution[MAX_TIMERS] = {0}; // in ticks. 0 = disabled
 static unsigned long timers_counter[MAX_TIMERS] = {0}; // in ticks. 0 = threshold reached, time to set flag
 static bool timers_flag[MAX_TIMERS] = {0}; // timer triggered
-// There can ever only be one interrupt running at once. -1 means no interrupt
+static bool interrupt_on_rising[MAX_PINS] = {0};
+static bool interrupt_on_falling[MAX_PINS] = {0};
 static char current_interrupt_id = -1;
-static unsigned int current_interrupt_count = 0;
 static bool pins_high[MAX_PINS] = {0}; // Whether a pin is high
 static unsigned int repeat_counter = 0;
 
@@ -65,13 +63,6 @@ static void tick()
             }
         }
     }
-}
-
-static void interrupt(unsigned char msg)
-{
-    assert(current_interrupt_id == -1);
-    current_interrupt_id = msg & MAX_5BITS;
-    current_interrupt_count = repeat_counter + 1;
 }
 
 static unsigned char readchar()
@@ -92,10 +83,22 @@ static bool process_message(unsigned char msg) {
     arg = msg & MAX_5BITS;
     switch (msg & 0xe0) {
         case ICEMU_RECV_PINLOW:
-            pins_high[arg] = false;
+            if (pins_high[arg]) {
+                pins_high[arg] = false;
+                if (interrupt_on_falling[arg]) {
+                    assert(current_interrupt_id == -1);
+                    current_interrupt_id = arg;
+                }
+            }
             break;
         case ICEMU_RECV_PINHIGH:
-            pins_high[arg] = true;
+            if (!pins_high[arg]) {
+                pins_high[arg] = true;
+                if (interrupt_on_rising[arg]) {
+                    assert(current_interrupt_id == -1);
+                    current_interrupt_id = arg;
+                }
+            }
             break;
         case ICEMU_RECV_TICK:
             tick();
@@ -103,9 +106,6 @@ static bool process_message(unsigned char msg) {
                 tick();
                 arg--;
             }
-            break;
-        case ICEMU_RECV_INTERRUPT:
-            interrupt(msg);
             break;
         case ICEMU_RECV_REPEAT:
             repeat_counter += (msg & MAX_5BITS) + 1;
@@ -129,27 +129,22 @@ void icemu_pinset(unsigned char pin, bool high)
 
 void icemu_pinsetmode(unsigned char pin, bool output)
 {
-    unsigned char r;
     unsigned char msg;
 
     msg = output ? ICEMU_SEND_PINOUTPUT : ICEMU_SEND_PININPUT;
     putchar(msg | (pin & MAX_5BITS));
     fflush(stdout);
-
-    while (!output) {
-        r = readchar();
-        assert(process_message(r));
-        msg = r & 0xe0;
-        // waiting for a pin set...
-        if (((msg == ICEMU_RECV_PINLOW) || (msg == ICEMU_RECV_PINHIGH)) && ((r & MAX_5BITS) == (pin & MAX_5BITS))) {
-            break;
-        }
-    }
 }
 
 bool icemu_pinread(unsigned char pin)
 {
     return pins_high[pin];
+}
+
+void icemu_send_debug_value(unsigned char val)
+{
+    putchar(ICEMU_SEND_DEBUG | (val & MAX_5BITS));
+    fflush(stdout);
 }
 
 void icemu_delay_us(unsigned int us)
@@ -168,22 +163,26 @@ void icemu_delay_ms(unsigned int ms)
     icemu_delay_us(ms * 1000);
 }
 
-// Returns the ID of the current interrupt, or -1 if none.
-// if an interrupt is returned, you have to call icemu_end_interrupt()
-// as soon as the interrupt is finished.
-char icemu_check_interrupt()
+void icemu_enable_interrupt(unsigned char pin, bool rising, bool falling)
 {
-    return current_interrupt_id;
+    if (rising) {
+        interrupt_on_rising[pin] = true;
+    }
+    if (falling) {
+        interrupt_on_falling[pin] = true;
+    }
 }
 
-void icemu_end_interrupt()
+// Returns the ID of the current interrupt, or -1 if none.
+char icemu_check_interrupt()
 {
-    assert(current_interrupt_id >= 0);
-    current_interrupt_count--;
-    if (current_interrupt_count == 0) {
+    char res;
+    if (current_interrupt_id > -1) {
+        res = current_interrupt_id;
         current_interrupt_id = -1;
-        putchar(ICEMU_SEND_ENDINTERRUPT);
-        fflush(stdout);
+        return res;
+    } else {
+        return -1;
     }
 }
 
@@ -212,8 +211,15 @@ bool icemu_check_timer(unsigned char timer_id)
 
 void icemu_process_messages()
 {
-    unsigned char r;
+    unsigned char r = 0;
 
-    r = readchar();
-    assert(process_message(r));
+    // process messages until we receive a tick
+    while ((r & 0xe0) != ICEMU_RECV_TICK) {
+        if (current_interrupt_id > -1) {
+            // We don't want to process any message until we're done processing interrupts.
+            return;
+        }
+        r = readchar();
+        assert(process_message(r));
+    }
 }

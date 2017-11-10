@@ -1,34 +1,26 @@
 import os
 import subprocess
 import threading
-from collections import namedtuple
 
 from .chip import Chip
-from .util import USECS_PER_SECOND
 
 SEND_PINLOW = 0x0
 SEND_PINHIGH = 0x1
 SEND_PININPUT = 0x2
 SEND_PINOUTPUT = 0x3
-SEND_ENDINTERRUPT = 0x4
+SEND_DEBUG = 0x4
 
 RECV_PINLOW = 0x0
 RECV_PINHIGH = 0x1
 RECV_TICK = 0x2
-RECV_INTERRUPT = 0x3
-RECV_REPEAT = 0x4
+RECV_REPEAT = 0x3
 
 MAX_5BITS = 0x1f
-
-Interrupt = namedtuple('Interrupt', 'code interrupt_id rising falling')
 
 class MCU(Chip):
     TIME_RESOLUTION = 50 # in usecs
 
     def __init__(self):
-        self._waiting_for_interrupt = False
-        # {code: Interrupt}
-        self._interrupt_enabled = {}
         self._debug_msgs_to = None
         # There's too many ticks to debug them. Let's just count them and report the count at every
         # non-tick msg
@@ -39,6 +31,7 @@ class MCU(Chip):
         self.msgin = b''
         self.msgout = b''
         self.running = False
+        self.debug_value = None
         super().__init__()
 
     def _pin_from_intid(self, pinid):
@@ -66,11 +59,12 @@ class MCU(Chip):
     def _pin_change(self, pin):
         if not pin.isoutput() and not pin.is_oscillating_rapidly():
             self._push_pin_state(pin)
-            interrupt = self._interrupt_enabled.get(pin.code)
-            if interrupt is not None:
-                high = pin.ishigh()
-                if (high and interrupt.rising) or (not high and interrupt.falling):
-                    self.interrupt(interrupt.interrupt_id)
+
+    def asciiart(self):
+        result = super().asciiart()
+        if self.debug_value is not None:
+            result += "\nDebug: {}".format(self.debug_value)
+        return result
 
     def run_program(self, executable, debug_msgs_to=None):
         if debug_msgs_to:
@@ -115,49 +109,24 @@ class MCU(Chip):
 
     def process_sent_msg(self, msg):
         msgid = msg >> 5
-        pinid = msg & MAX_5BITS
-        pin = self._pin_from_intid(pinid)
+        arg = msg & MAX_5BITS
         if msgid == SEND_PINLOW:
+            pin = self._pin_from_intid(arg)
             pin.setlow()
         elif msgid == SEND_PINHIGH:
+            pin = self._pin_from_intid(arg)
             pin.sethigh()
         elif msgid == SEND_PININPUT:
+            pin = self._pin_from_intid(arg)
             pin.setinput()
             self._push_pin_state(pin)
         elif msgid == SEND_PINOUTPUT:
+            pin = self._pin_from_intid(arg)
             pin.setoutput()
-        elif msgid == SEND_ENDINTERRUPT:
-            self._waiting_for_interrupt = False
-
-    def enable_interrupt_on_pin(self, pin, rising=False, falling=False):
-        assert pin.code in self.INTERRUPT_PINS
-        assert rising or falling
-        interrupt_id = self.INTERRUPT_PINS.index(pin.code)
-        interrupt = Interrupt(pin.code, interrupt_id, rising, falling)
-        self._interrupt_enabled[pin.code] = interrupt
-
-    def interrupt(self, interrupt_id, count=1):
-        while count >= 1:
-            self._waiting_for_interrupt = True
-            subcount = min(MAX_5BITS + 1, count)
-            count -= subcount
-            if subcount > 1:
-                self.push_msgin((RECV_REPEAT << 5) | (subcount - 1))
-            self.push_msgin((RECV_INTERRUPT << 5) | interrupt_id)
-            while self._waiting_for_interrupt:
-                self.process_msgout()
+        elif msgid == SEND_DEBUG:
+            self.debug_value = arg
 
     def tick(self, usecs):
-        for interrupt in self._interrupt_enabled.values():
-            pin = self.getpin(interrupt.code)
-            if pin.is_oscillating_rapidly():
-                count = (pin.oscillating_freq() / USECS_PER_SECOND) * usecs
-                if interrupt.rising and interrupt.falling:
-                    count *= 2
-                count = round(count)
-                if count >= 1:
-                    self.interrupt(self.INTERRUPT_PINS.index(pin.code), count=int(count))
-
         self._elapsed_usecs += usecs
         while self._elapsed_usecs >= self.TIME_RESOLUTION:
             # we can only send a maximum of 32 ticks at once
@@ -169,5 +138,4 @@ class MCU(Chip):
 
 class ATtiny(MCU):
     INPUT_PINS = ['B0', 'B1', 'B2', 'B3', 'B4', 'B5']
-    INTERRUPT_PINS = INPUT_PINS # all pins have an associated interrupt
 

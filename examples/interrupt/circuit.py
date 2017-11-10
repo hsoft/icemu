@@ -8,7 +8,6 @@ class Circuit(SimulationWithUI):
         self.button_pin = Pin(code='BTN', output=True)
         self.mcu = self.add_chip(ATtiny())
         self.mcu.pin_B0.wire_to(self.button_pin)
-        self.mcu.enable_interrupt_on_pin(self.mcu.pin_B0, rising=True, falling=True)
         self.mcu.run_program('interrupt')
         self.uiscreen.add_element(
             "MCU:",

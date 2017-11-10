@@ -4,10 +4,11 @@
 void icemu_pinset(unsigned char pin, bool high);
 void icemu_pinsetmode(unsigned char pin, bool output);
 bool icemu_pinread(unsigned char pin);
+void icemu_send_debug_value(unsigned char val);
 void icemu_delay_us(unsigned int us);
 void icemu_delay_ms(unsigned int ms);
+void icemu_enable_interrupt(unsigned char pin, bool rising, bool falling);
 char icemu_check_interrupt();
-void icemu_end_interrupt();
 bool icemu_start_timer(unsigned char timer_id, unsigned long usecs);
 bool icemu_check_timer(unsigned char timer_id);
 void icemu_process_messages();

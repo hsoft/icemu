@@ -20,9 +20,8 @@ int main (void)
     while(1) {
 #ifdef SIMULATION
         icemu_process_messages();
-        if (icemu_check_interrupt(ICEMU_INT0) == ICEMU_INT0) {
+        if (icemu_check_interrupt() == ICEMU_INT0) {
             int0_interrupt();
-            icemu_end_interrupt();
         }
 #endif
     }

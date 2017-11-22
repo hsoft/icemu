@@ -11,5 +11,12 @@ typedef struct Pin {
     bool high;
 } Pin;
 
+typedef struct {
+    uint8_t count;
+    Pin **pins;
+} PinList;
+
 bool icemu_pin_check_if_changed(Pin *pin);
 void icemu_pin_set(Pin *pin, bool high);
+
+void icemu_pinlist_init(PinList *pinlist, uint8_t count);

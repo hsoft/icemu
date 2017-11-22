@@ -9,11 +9,9 @@ static void push_value(Chip *chip, uint8_t val)
     ShiftRegister *sr = (ShiftRegister *)chip->logical_unit;
     uint8_t i;
     bool flag;
-    uint8_t count;
 
-    count = icemu_util_pincount(sr->outputs, MAX_SHIFTREGISTER_OUTPUTS);
-    for (i = 0; i < count; i++) {
-        flag = val & (1 << (count - i - 1));
+    for (i = 0; i < sr->outputs.count; i++) {
+        flag = val & (1 << (sr->outputs.count - i - 1));
         icemu_pin_set(sr->serial1, flag);
         icemu_pin_set(sr->clock, false);
         icemu_pin_set(sr->clock, true);
@@ -27,9 +25,8 @@ static void assert_value(Chip *chip, uint8_t expected_value)
     uint8_t count;
     uint8_t val = 0;
 
-    count = icemu_util_pincount(sr->outputs, MAX_SHIFTREGISTER_OUTPUTS);
-    for (i = 0; i < count; i++) {
-        if (sr->outputs[i]->high) {
+    for (i = 0; i < sr->outputs.count; i++) {
+        if (sr->outputs.pins[i]->high) {
             val |= 1 << i;
         }
     }

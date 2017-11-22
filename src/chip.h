@@ -1,15 +1,13 @@
 #pragma once
 #include "pin.h"
 
-#define MAX_PINS_PER_CHIP 64
-
 typedef void (*PinChangeFunc)(Pin *);
 
 struct Chip {
     void *logical_unit;
     PinChangeFunc pin_change_func;
-    Pin * pins[MAX_PINS_PER_CHIP];
+    PinList pins;
 };
 
-void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func);
+void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func, uint8_t pin_count);
 Pin* icemu_chip_addpin(Chip *chip, char *code, bool output, bool low_means_high);

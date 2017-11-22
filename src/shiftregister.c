@@ -11,8 +11,8 @@ static void shiftregister_updateoutputs(Chip *chip, ShiftRegister *sr)
 {
     uint8_t i;
 
-    for (i = 0; i < icemu_util_pincount(sr->outputs, MAX_SHIFTREGISTER_OUTPUTS); i++) {
-        icemu_pin_set(sr->outputs[i], (sr->buffer >> i) & 0x1);
+    for (i = 0; i < sr->outputs.count; i++) {
+        icemu_pin_set(sr->outputs.pins[i], (sr->buffer >> i) & 0x1);
     }
 }
 
@@ -29,35 +29,37 @@ static void shiftregister_pinchange(Pin *pin)
     }
 }
 
-static ShiftRegister* shiftregister_new(bool isbuffered)
+static ShiftRegister* shiftregister_new(Chip *chip, bool isbuffered, char **output_codes)
 {
     ShiftRegister *sr;
+    uint8_t count;
+    uint8_t total_count;
+    uint8_t i;
 
+    count = icemu_util_chararray_count(output_codes);
+    total_count = count + 3; // clk + serial1 + serial2
     sr = (ShiftRegister *)malloc(sizeof(ShiftRegister));
+    icemu_chip_init(chip, (void *)sr, shiftregister_pinchange, total_count);
     sr->buffer = 0;
     sr->isbuffered = false;
     sr->clock = NULL;
     sr->serial1 = NULL;
     sr->serial2 = NULL;
-    memset(sr->outputs, 0, sizeof(Pin*) * MAX_SHIFTREGISTER_OUTPUTS);
+    icemu_pinlist_init(&sr->outputs, count);
+    for (i = 0; i < count; i++) {
+        sr->outputs.pins[i] = icemu_chip_addpin(chip, output_codes[i], true, false);
+    }
     return sr;
 }
 
 void icemu_CD74AC164_init(Chip *chip)
 {
     ShiftRegister *sr;
-    char * output_code[] = {"Q0", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"};
-    uint8_t i;
+    char * output_codes[] = {"Q0", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", NULL};
 
-    sr = shiftregister_new(false);
-    chip->logical_unit = (void *)sr;
-    chip->pin_change_func = shiftregister_pinchange;
-    memset(chip->pins, 0, sizeof(Pin*) * MAX_PINS_PER_CHIP);
+    sr = shiftregister_new(chip, false, output_codes);
     sr->clock = icemu_chip_addpin(chip, "SRCLK", false, false);
     sr->serial1 = icemu_chip_addpin(chip, "DS1", false, false);
     sr->serial2 = icemu_chip_addpin(chip, "DS2", false, false);
     sr->serial2->high = true;
-    for (i = 0; i < 8; i++) {
-        sr->outputs[i] = icemu_chip_addpin(chip, output_code[i], true, false);
-    }
 }

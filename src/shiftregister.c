@@ -47,7 +47,7 @@ static ShiftRegister* shiftregister_new(Chip *chip, bool isbuffered, char **outp
     sr->serial2 = NULL;
     icemu_pinlist_init(&sr->outputs, count);
     for (i = 0; i < count; i++) {
-        sr->outputs.pins[i] = icemu_chip_addpin(chip, output_codes[i], true, false);
+        icemu_pinlist_add(&sr->outputs, icemu_chip_addpin(chip, output_codes[i], true, false));
     }
     return sr;
 }

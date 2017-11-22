@@ -48,11 +48,11 @@ static Decoder* decoder_new(Chip *chip, char **input_codes, char **output_codes)
     icemu_chip_init(chip, (void *)dec, decoder_pinchange, total_count);
     icemu_pinlist_init(&dec->inputs, input_count);
     for (i = 0; i < input_count; i++) {
-        dec->inputs.pins[i] = icemu_chip_addpin(chip, input_codes[i], false, false);
+        icemu_pinlist_add(&dec->inputs, icemu_chip_addpin(chip, input_codes[i], false, false));
     }
     icemu_pinlist_init(&dec->outputs, output_count);
     for (i = 0; i < output_count; i++) {
-        dec->outputs.pins[i] = icemu_chip_addpin(chip, output_codes[i], true, false);
+        icemu_pinlist_add(&dec->outputs, icemu_chip_addpin(chip, output_codes[i], true, false));
     }
     return dec;
 }

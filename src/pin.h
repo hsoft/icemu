@@ -12,6 +12,7 @@ typedef struct Pin {
 } Pin;
 
 typedef struct {
+    uint8_t capacity;
     uint8_t count;
     Pin **pins;
 } PinList;
@@ -19,4 +20,5 @@ typedef struct {
 bool icemu_pin_check_if_changed(Pin *pin);
 void icemu_pin_set(Pin *pin, bool high);
 
-void icemu_pinlist_init(PinList *pinlist, uint8_t count);
+void icemu_pinlist_init(PinList *pinlist, uint8_t capacity);
+void icemu_pinlist_add(PinList *pinlist, Pin *pin);

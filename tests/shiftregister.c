@@ -22,7 +22,6 @@ static void assert_value(Chip *chip, uint8_t expected_value)
 {
     ShiftRegister *sr = (ShiftRegister *)chip->logical_unit;
     uint8_t i;
-    uint8_t count;
     uint8_t val = 0;
 
     for (i = 0; i < sr->outputs.count; i++) {

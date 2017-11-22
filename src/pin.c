@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 
 #include "pin.h"
 #include "chip.h"
@@ -13,9 +14,18 @@ void icemu_pin_set(Pin *pin, bool high)
     }
 }
 
-void icemu_pinlist_init(PinList *pinlist, uint8_t count)
+void icemu_pinlist_init(PinList *pinlist, uint8_t capacity)
 {
-    pinlist->count = count;
-    pinlist->pins = malloc(sizeof(Pin *) * count);
-    memset(pinlist->pins, 0, sizeof(Pin *) * count);
+    pinlist->capacity = capacity;
+    pinlist->count = 0;
+    pinlist->pins = malloc(sizeof(Pin *) * capacity);
+    memset(pinlist->pins, 0, sizeof(Pin *) * capacity);
+}
+
+void icemu_pinlist_add(PinList *pinlist, Pin *pin)
+{
+    assert(pinlist->count < pinlist->capacity);
+
+    pinlist->pins[pinlist->count] = pin;
+    pinlist->count++;
 }

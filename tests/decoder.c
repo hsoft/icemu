@@ -8,7 +8,6 @@ static void assert_pin_is_selected(Chip *chip, uint8_t selected_pin)
 {
     Decoder *dec = (Decoder *)chip->logical_unit;
     uint8_t i;
-    uint8_t count;
 
     for (i = 0; i < dec->outputs.count; i++) {
         assert(dec->outputs.pins[i]->high == (i != selected_pin));

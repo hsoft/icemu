@@ -15,7 +15,6 @@ void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_fu
 Pin* icemu_chip_addpin(Chip *chip, char *code, bool output, bool low_means_high)
 {
     Pin *result;
-    uint8_t index;
 
     result = (Pin *)malloc(sizeof(Pin));
     result->chip = chip;
@@ -24,8 +23,7 @@ Pin* icemu_chip_addpin(Chip *chip, char *code, bool output, bool low_means_high)
     result->low_means_high = low_means_high;
     result->high = false;
 
-    index = icemu_util_pincount(chip->pins.pins, chip->pins.count);
-    chip->pins.pins[index] = result;
+    icemu_pinlist_add(&chip->pins, result);
     return result;
 }
 

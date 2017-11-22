@@ -1,7 +1,8 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <assert.h>
 
-#include "icemu.h"
+#include "../src/icemu.h"
 
 static void push_value(Chip *chip, uint8_t val)
 {

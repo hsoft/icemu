@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "chip.h"
 
@@ -14,6 +15,13 @@ static uint8_t chip_pincount(Chip *chip)
         }
     }
     return i;
+}
+
+void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func)
+{
+    chip->logical_unit = logical_unit;
+    chip->pin_change_func = pin_change_func;
+    memset(chip->pins, 0, sizeof(Pin*) * MAX_PINS_PER_CHIP);
 }
 
 Pin* icemu_chip_addpin(Chip *chip, char *code, bool output, bool low_means_high)

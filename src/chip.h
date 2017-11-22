@@ -11,4 +11,5 @@ struct Chip {
     Pin * pins[MAX_PINS_PER_CHIP];
 };
 
+void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func);
 Pin* icemu_chip_addpin(Chip *chip, char *code, bool output, bool low_means_high);

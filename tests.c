@@ -49,4 +49,5 @@ static void test_IO_unbuffered()
 int main()
 {
     test_IO_unbuffered();
+    printf("All tests passed.\n");
 }

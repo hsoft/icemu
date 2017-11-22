@@ -15,17 +15,17 @@ TEST_OBJS = $(TEST_SRCS:%.c=%.o)
 all: $(TARGET_LIB)
 
 $(TARGET_LIB): $(OBJS)
-	$(CC) $(LDFLAGS) -o $(.TARGET) $(.ALLSRC)
+	$(CC) $(LDFLAGS) -o $@ $^
 
 .c.o:
-	$(CC) $(CFLAGS) -c -o $(.TARGET) $(.IMPSRC)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 .PHONY: clean
 clean:
 	rm -rf $(OBJS) $(TARGET_LIB) $(TEST_OBJS) $(TEST_TARGET)
 
 $(TEST_TARGET): $(OBJS) $(TEST_OBJS)
-	$(CC) -o $(.TARGET) $(.ALLSRC)
+	$(CC) -o $@ $^
 
 .PHONY: test
 test: $(TEST_TARGET)

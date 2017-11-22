@@ -6,9 +6,9 @@ TEST_TARGET = test_icemu
 CFLAGS = -Wall -fPIC
 LDFLAGS = -shared
 
-SRCS = pin.c chip.c shiftregister.c
+SRCS = pin.c chip.c shiftregister.c util.c
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
-TEST_SRCS = main.c
+TEST_SRCS = main.c shiftregister.c
 TEST_OBJS = $(addprefix tests/, $(TEST_SRCS:%.c=%.o))
 
 .PHONY: all

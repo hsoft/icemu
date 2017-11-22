@@ -3,26 +3,15 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "chip.h"
 #include "shiftregister.h"
-
-uint8_t icemu_shiftregister_outputcount(ShiftRegister *sr)
-{
-    uint8_t i;
-
-    for (i = 0; i < MAX_SHIFTREGISTER_OUTPUTS; i++) {
-        if (sr->outputs[i] == NULL) {
-            break;
-        }
-    }
-    return i;
-}
+#include "chip.h"
+#include "util.h"
 
 static void shiftregister_updateoutputs(Chip *chip, ShiftRegister *sr)
 {
     uint8_t i;
 
-    for (i = 0; i < icemu_shiftregister_outputcount(sr); i++) {
+    for (i = 0; i < icemu_util_pincount(sr->outputs, MAX_SHIFTREGISTER_OUTPUTS); i++) {
         icemu_pin_set(sr->outputs[i], (sr->buffer >> i) & 0x1);
     }
 }

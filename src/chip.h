@@ -3,7 +3,7 @@
 
 #define MAX_PINS_PER_CHIP 64
 
-typedef void (*PinChangeFunc)(Chip *, Pin *);
+typedef void (*PinChangeFunc)(Pin *);
 
 struct Chip {
     void *logical_unit;

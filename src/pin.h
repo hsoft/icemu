@@ -11,4 +11,5 @@ typedef struct Pin {
     bool high;
 } Pin;
 
+bool icemu_pin_check_if_changed(Pin *pin);
 void icemu_pin_set(Pin *pin, bool high);

@@ -27,16 +27,16 @@ static void shiftregister_updateoutputs(Chip *chip, ShiftRegister *sr)
     }
 }
 
-static void shiftregister_pinchange(Chip *chip, Pin *pin)
+static void shiftregister_pinchange(Pin *pin)
 {
-    ShiftRegister *sr = (ShiftRegister *)chip->logical_unit;
+    ShiftRegister *sr = (ShiftRegister *)pin->chip->logical_unit;
 
     if ((pin == sr->clock) && (pin->high)) {
         sr->buffer = sr->buffer << 1;
         if (sr->serial1->high && (sr->serial2 == NULL || sr->serial2->high)) {
             sr->buffer |= 0x1;
         }
-        shiftregister_updateoutputs(chip, sr);
+        shiftregister_updateoutputs(pin->chip, sr);
     }
 }
 

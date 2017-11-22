@@ -17,7 +17,6 @@ static void push_value(Chip *chip, uint8_t val)
         icemu_pin_set(sr->serial1, flag);
         icemu_pin_set(sr->clock, false);
         icemu_pin_set(sr->clock, true);
-        chip->pin_change_func(chip, sr->clock);
     }
 }
 

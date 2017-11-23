@@ -1,5 +1,6 @@
 #pragma once
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct Chip Chip;
 typedef struct PinList PinList;

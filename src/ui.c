@@ -47,6 +47,8 @@ static void ui_refresh_elements()
             // -1 to remove the newline
             mvaddnstr(y+j+1, x, &asciiart.contents[(j * elemw)], elemw - 1);
         }
+
+        x += elemw + 1;
     }
 }
 

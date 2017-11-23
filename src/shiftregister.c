@@ -29,24 +29,27 @@ static void shiftregister_pinchange(Pin *pin)
     }
 }
 
-static ShiftRegister* shiftregister_new(Chip *chip, bool isbuffered, const char **output_codes)
+static ShiftRegister* shiftregister_new(Chip *chip, bool isbuffered, const char **input_codes, const char **output_codes)
 {
     ShiftRegister *sr;
-    uint8_t count;
-    uint8_t total_count;
+    uint8_t icount;
+    uint8_t ocount;
     uint8_t i;
 
-    count = icemu_util_chararray_count(output_codes);
-    total_count = count + 3; // clk + serial1 + serial2
+    icount = icemu_util_chararray_count(input_codes);
+    ocount = icemu_util_chararray_count(output_codes);
     sr = (ShiftRegister *)malloc(sizeof(ShiftRegister));
-    icemu_chip_init(chip, (void *)sr, shiftregister_pinchange, total_count);
+    icemu_chip_init(chip, (void *)sr, shiftregister_pinchange, icount + ocount);
     sr->buffer = 0;
     sr->isbuffered = false;
     sr->clock = NULL;
     sr->serial1 = NULL;
     sr->serial2 = NULL;
-    icemu_pinlist_init(&sr->outputs, count);
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < icount; i++) {
+        icemu_chip_addpin(chip, input_codes[i], false, false);
+    }
+    icemu_pinlist_init(&sr->outputs, ocount);
+    for (i = 0; i < ocount; i++) {
         icemu_pinlist_add(&sr->outputs, icemu_chip_addpin(chip, output_codes[i], true, false));
     }
     return sr;
@@ -55,11 +58,12 @@ static ShiftRegister* shiftregister_new(Chip *chip, bool isbuffered, const char 
 void icemu_CD74AC164_init(Chip *chip)
 {
     ShiftRegister *sr;
+    const char * input_codes[] = {"CP", "DS1", "DS2", NULL};
     const char * output_codes[] = {"Q0", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", NULL};
 
-    sr = shiftregister_new(chip, false, output_codes);
-    sr->clock = icemu_chip_addpin(chip, "CP", false, false);
-    sr->serial1 = icemu_chip_addpin(chip, "DS1", false, false);
-    sr->serial2 = icemu_chip_addpin(chip, "DS2", false, false);
+    sr = shiftregister_new(chip, false, input_codes, output_codes);
+    sr->clock = chip->pins.pins[0];
+    sr->serial1 = chip->pins.pins[1];
+    sr->serial2 = chip->pins.pins[2];
     sr->serial2->high = true;
 }

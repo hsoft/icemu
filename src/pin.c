@@ -21,6 +21,7 @@ static void wire_propagate(PinList *wire)
         p = wire->pins[i];
         if (p->output && p->high) {
             wire_is_high = true;
+            break;
         }
     }
     for (i = 0; i < wire->count; i++) {
@@ -58,7 +59,7 @@ bool icemu_pin_set(Pin *pin, bool high)
         if (pin->output && (pin->wire != NULL)) {
             wire_propagate(pin->wire);
         }
-        if (pin->chip != NULL) {
+        if ((pin->chip != NULL) && (pin->chip->pin_change_func != NULL)) {
             pin->chip->pin_change_func(pin);
         }
         return true;

@@ -51,7 +51,7 @@ static uint8_t chip_asciiart_height(Chip *chip)
 
 static void chip_asciiart(Chip *chip, ChipAsciiArt *dst)
 {
-    uint8_t w, h, mcl, i, right_pin_start;
+    uint8_t w, h, mcl, i, right_pin_start, slen;
     uint16_t loffset;
     Pin *p;
     char *s;
@@ -69,7 +69,8 @@ static void chip_asciiart(Chip *chip, ChipAsciiArt *dst)
     for (i = 0; i < (h - 1); i++) {
         loffset = (uint16_t)(w * (i + 1));
         p = chip->pins.pins[i];
-        strncpy(&s[loffset], p->code, mcl);
+        slen = strnlen(p->code, mcl);
+        memcpy(&s[loffset], p->code, slen);
         s[loffset + mcl] = p->output ? '<' : '>';
         s[loffset + mcl + 1] = '|';
         s[loffset + mcl + 2] = p->high ? '+' : '-';
@@ -79,6 +80,9 @@ static void chip_asciiart(Chip *chip, ChipAsciiArt *dst)
             s[loffset + mcl + 6] = p->high ? '+' : '-';
             s[loffset + mcl + 8] = p->output ? '>' : '<';
             strncpy(&s[loffset + mcl + 9], p->code, mcl);
+        } else {
+            // close the rectangle in odd pins scenarios
+            s[loffset + mcl + 6] = '_';
         }
         s[loffset + w - 1] = '\n';
     }

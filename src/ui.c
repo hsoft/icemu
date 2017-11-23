@@ -41,10 +41,11 @@ static void ui_refresh_elements()
         elemh = icemu_chip_asciiart_height(elements[i]->chip) + 1;
         acc_y = MAX(acc_y, elemh);
 
+        mvaddnstr(y, x, elements[i]->title, elemw - 1);
         icemu_chip_asciiart(elements[i]->chip, asciiart);
-        for (j = 0; j < elemh; j++) {
+        for (j = 0; j < (elemh - 1); j++) {
             // -1 to remove the newline
-            mvaddnstr(y+j, x, &asciiart[(j * elemw)], elemw - 1);
+            mvaddnstr(y+j+1, x, &asciiart[(j * elemw)], elemw - 1);
         }
     }
 }

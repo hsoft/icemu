@@ -8,7 +8,15 @@ quickly becoming an issue.
 I'm trying out C a little harder and see if it leads to something that isn't of an overwhelming
 complexity. So far it's looking good...
 
+# Requirements
+
+* C compiler
+* GNU make
+* ncurses
+
 # Usage
 
-Not usage right now, but there's a test suite. `make test` runs it.
+Not usable right now, but there's a test suite. `make test` runs it.
 
+I've started populating the `example` folder. They're barely working, but still. `cd` into it then
+run `make sim`.

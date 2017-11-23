@@ -33,7 +33,7 @@ void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_fu
     icemu_pinlist_init(&chip->pins, pin_count);
 }
 
-Pin* icemu_chip_addpin(Chip *chip, char *code, bool output, bool low_means_high)
+Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means_high)
 {
     Pin *result;
 

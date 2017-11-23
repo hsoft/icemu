@@ -16,7 +16,7 @@ typedef struct PinList PinList;
 
 typedef struct Pin {
     Chip *chip;
-    char *code;
+    const char *code;
     bool output;
     bool low_means_high;
     bool high;
@@ -29,8 +29,8 @@ struct PinList {
     Pin **pins;
 };
 
-Pin* icemu_pin_new(Chip *chip, char *code, bool output, bool low_means_high);
-void icemu_pin_init(Pin *pin, Chip *chip, char *code, bool output, bool low_means_high);
+Pin* icemu_pin_new(Chip *chip, const char *code, bool output, bool low_means_high);
+void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output, bool low_means_high);
 bool icemu_pin_check_if_changed(Pin *pin);
 bool icemu_pin_set(Pin *pin, bool high); // returns true if a change occurred
 void icemu_pin_wireto(Pin *pin, Pin *other);

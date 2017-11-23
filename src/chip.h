@@ -10,7 +10,7 @@ struct Chip {
 };
 
 void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func, uint8_t pin_count);
-Pin* icemu_chip_addpin(Chip *chip, char *code, bool output, bool low_means_high);
+Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means_high);
 Pin* icemu_chip_getpin(Chip *chip, char *code);
 uint8_t icemu_chip_asciiart_width(Chip *chip);
 uint8_t icemu_chip_asciiart_height(Chip *chip);

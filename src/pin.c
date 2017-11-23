@@ -33,7 +33,7 @@ static void wire_propagate(PinList *wire)
 
 /* Public */
 
-Pin* icemu_pin_new(Chip *chip, char *code, bool output, bool low_means_high)
+Pin* icemu_pin_new(Chip *chip, const char *code, bool output, bool low_means_high)
 {
     Pin *pin;
     pin = malloc(sizeof(Pin));
@@ -41,7 +41,7 @@ Pin* icemu_pin_new(Chip *chip, char *code, bool output, bool low_means_high)
     return pin;
 }
 
-void icemu_pin_init(Pin *pin, Chip *chip, char *code, bool output, bool low_means_high)
+void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output, bool low_means_high)
 {
     pin->chip = chip;
     pin->code = code;

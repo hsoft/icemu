@@ -1,10 +1,9 @@
 CC = cc
 LIBRARY_NAME = icemu
-TARGET_LIB = $(LIBRARY_NAME).so
+TARGET_LIB = lib$(LIBRARY_NAME).a
 TEST_TARGET = test_icemu
 
-CFLAGS = -Wall -fPIC
-LDFLAGS = -shared
+CFLAGS = -Wall
 
 SRCS = pin.c chip.c shiftregister.c decoder.c util.c
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
@@ -15,7 +14,7 @@ TEST_OBJS = $(addprefix tests/, $(TEST_SRCS:%.c=%.o))
 all: $(TARGET_LIB)
 
 $(TARGET_LIB): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^
+	ar rcs $@ $^
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -24,8 +23,8 @@ $(TARGET_LIB): $(OBJS)
 clean:
 	rm -rf $(OBJS) $(TARGET_LIB) $(TEST_OBJS) $(TEST_TARGET)
 
-$(TEST_TARGET): $(OBJS) $(TEST_OBJS)
-	$(CC) -o $@ $^
+$(TEST_TARGET): $(TARGET_LIB) $(TEST_OBJS)
+	$(CC) -static -L. -o $@ $(TEST_OBJS) -l$(LIBRARY_NAME) 
 
 .PHONY: test
 test: $(TEST_TARGET)

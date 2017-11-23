@@ -44,7 +44,7 @@ $(ICEMU_LIB):
 	gmake -C ../..
 
 $(PROGNAME): $(SIM_OBJS) $(ICEMU_LIB)
-	$(CC) `pkg-config --libs ncurses tinfo` -L../.. $(SIM_OBJS) -o $@ -licemu
+	$(CC) `pkg-config --libs ncurses` -L../.. $(SIM_OBJS) -o $@ -licemu
 
 sim: CC = cc
 sim: CFLAGS = -DSIMULATION -Wall `pkg-config --cflags ncurses` -c

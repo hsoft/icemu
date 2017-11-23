@@ -20,13 +20,13 @@ static char * labels[MAX_ELEMENTS] = { 0 };
 /* Private */
 static void ui_refresh_elements()
 {
-    int x, y, acc_y, maxh, maxw, i, j, elemw, elemh;
+    int x, y, acc_y, maxw, i, j, elemw, elemh;
     char asciiart[4096];
 
     y = 0;
     x = 0;
     acc_y = 0;
-    getmaxyx(main_window, maxh, maxw);
+    maxw = getmaxx(main_window);
     for (i = 0; i < MAX_ELEMENTS; i++) {
         if (elements[i] == NULL) {
             break;
@@ -52,9 +52,9 @@ static void ui_refresh_elements()
 
 static void ui_refresh_labels()
 {
-    int x, y, maxh, maxw, i, lblw, lblh;
+    int x, y, maxh, i, lblw, lblh;
 
-    getmaxyx(main_window, maxh, maxw);
+    maxh = getmaxy(main_window);
     lblw = 0;
     for (i = 0; i < MAX_ELEMENTS; i++) {
         if (labels[i] == NULL) {

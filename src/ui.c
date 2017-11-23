@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <ncurses.h>
 
 #include "ui.h"
@@ -14,6 +15,7 @@ typedef struct {
 
 static WINDOW *main_window;
 static Element * elements[MAX_ELEMENTS] = { 0 };
+static char * labels[MAX_ELEMENTS] = { 0 };
 
 /* Private */
 static void ui_refresh_elements()
@@ -44,6 +46,26 @@ static void ui_refresh_elements()
             // -1 to remove the newline
             mvaddnstr(y+j, x, &asciiart[(j * elemw)], elemw - 1);
         }
+    }
+}
+
+static void ui_refresh_labels()
+{
+    int x, y, maxh, maxw, i, lblw, lblh;
+
+    getmaxyx(main_window, maxh, maxw);
+    lblw = 0;
+    for (i = 0; i < MAX_ELEMENTS; i++) {
+        if (labels[i] == NULL) {
+            break;
+        }
+        lblw = MAX(lblw, strnlen(labels[i], 0xff));
+    }
+    lblh = i;
+    y = maxh - lblh - 1;
+    x = 0;
+    for (i = 0; i < lblh; i++) {
+        mvaddnstr(y+i, x, labels[i], lblw);
     }
 }
 
@@ -79,11 +101,24 @@ void icemu_ui_add_element(char *title, Chip *chip)
     elements[i]->chip = chip;
 }
 
+void icemu_ui_add_label(char *name)
+{
+    uint8_t i;
+
+    for (i = 0; i < MAX_ELEMENTS; i++) {
+        if (labels[i] == NULL) {
+            break;
+        }
+    }
+    labels[i] = name;
+}
+
 // Returns the key that was pressed or -1 if none
 int icemu_ui_refresh()
 {
     erase();
     ui_refresh_elements();
+    ui_refresh_labels();
     refresh();
     return getch();
 }

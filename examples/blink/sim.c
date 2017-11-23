@@ -38,7 +38,9 @@ int main()
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();
     icemu_ui_init();
+    icemu_ui_add_label("q - Quit");
     icemu_ui_add_element("MCU:", &mcu);
+    icemu_ui_refresh();
     while (1) {
         loop();
         if (icemu_ui_refresh() == 'q') {

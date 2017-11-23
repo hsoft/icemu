@@ -39,3 +39,4 @@ PinList* icemu_pinlist_new(uint8_t capacity);
 void icemu_pinlist_init(PinList *pinlist, uint8_t capacity);
 void icemu_pinlist_destroy(PinList *pinlist);
 void icemu_pinlist_add(PinList *pinlist, Pin *pin);
+int icemu_pinlist_find(PinList *pinlist, Pin *pin);

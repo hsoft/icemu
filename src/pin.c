@@ -116,3 +116,15 @@ void icemu_pinlist_add(PinList *pinlist, Pin *pin)
     pinlist->pins[pinlist->count] = pin;
     pinlist->count++;
 }
+
+int icemu_pinlist_find(PinList *pinlist, Pin *pin)
+{
+    uint8_t i;
+
+    for (i = 0; i < pinlist->count; i++) {
+        if (pinlist->pins[i] == pin) {
+            return i;
+        }
+    }
+    return -1;
+}

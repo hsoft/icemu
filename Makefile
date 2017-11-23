@@ -8,7 +8,7 @@ LDFLAGS = -shared
 
 SRCS = pin.c chip.c shiftregister.c decoder.c util.c
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
-TEST_SRCS = main.c shiftregister.c decoder.c
+TEST_SRCS = main.c shiftregister.c decoder.c circuit.c
 TEST_OBJS = $(addprefix tests/, $(TEST_SRCS:%.c=%.o))
 
 .PHONY: all

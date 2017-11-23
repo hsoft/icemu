@@ -54,6 +54,8 @@ static Decoder* decoder_new(Chip *chip, char **input_codes, char **output_codes)
     for (i = 0; i < output_count; i++) {
         icemu_pinlist_add(&dec->outputs, icemu_chip_addpin(chip, output_codes[i], true, false));
     }
+    // ensure proper initial value
+    decoder_pinchange(dec->inputs.pins[0]);
     return dec;
 }
 

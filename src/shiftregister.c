@@ -58,7 +58,7 @@ void icemu_CD74AC164_init(Chip *chip)
     char * output_codes[] = {"Q0", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", NULL};
 
     sr = shiftregister_new(chip, false, output_codes);
-    sr->clock = icemu_chip_addpin(chip, "SRCLK", false, false);
+    sr->clock = icemu_chip_addpin(chip, "CP", false, false);
     sr->serial1 = icemu_chip_addpin(chip, "DS1", false, false);
     sr->serial2 = icemu_chip_addpin(chip, "DS2", false, false);
     sr->serial2->high = true;

@@ -42,8 +42,26 @@ static void test_IO_unbuffered()
     assert_value(&chip, expected);
 }
 
+static void test_IO_buffered()
+{
+    Chip chip;
+    ShiftRegister *sr;
+    uint8_t expected = 0x42;
+
+    icemu_SN74HC595_init(&chip);
+    sr = (ShiftRegister *)chip.logical_unit;
+    push_value(&chip, expected);
+    assert_value(&chip, 0);
+    icemu_pin_set(sr->buffer_pin, false);
+    icemu_pin_set(sr->buffer_pin, true);
+    assert_value(&chip, expected);
+    push_value(&chip, expected+1);
+    assert_value(&chip, expected);
+}
+
 void test_shiftregister_main()
 {
     printf("Testing shift registers\n");
     test_IO_unbuffered();
+    test_IO_buffered();
 }

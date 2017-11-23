@@ -63,7 +63,7 @@ int main()
     ShiftRegister *srl;
 
     icemu_ATtiny_init(&mcu);
-    icemu_CD74AC164_init(&sr);
+    icemu_SN74HC595_init(&sr);
     icemu_seg7_init(&seg);
     srl = (ShiftRegister *)sr.logical_unit;
 
@@ -71,8 +71,9 @@ int main()
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     pb2 = icemu_chip_getpin(&mcu, "PB2");
 
-    icemu_pin_wireto(pb0, icemu_chip_getpin(&sr, "CP"));
-    icemu_pin_wireto(pb1, icemu_chip_getpin(&sr, "DS1"));
+    icemu_pin_wireto(pb0, icemu_chip_getpin(&sr, "SRCLK"));
+    icemu_pin_wireto(pb1, icemu_chip_getpin(&sr, "SER"));
+    icemu_pin_wireto(pb2, icemu_chip_getpin(&sr, "RCLK"));
 
     for (i = 0; i < 8; i++) {
         icemu_pin_wireto(srl->outputs.pins[i], icemu_chip_getpin(&seg, segorder[i]));

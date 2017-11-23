@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "chip.h"
+#include "mcu.h"
 #include "util.h"
 
 #define MAX_CODE_LEN 10
@@ -98,6 +99,7 @@ void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_fu
     chip->logical_unit = logical_unit;
     chip->pin_change_func = pin_change_func;
     chip->asciiart_func = chip_asciiart;
+    chip->elapse_func = NULL;
     icemu_pinlist_init(&chip->pins, pin_count);
 }
 
@@ -122,3 +124,9 @@ Pin* icemu_chip_getpin(Chip *chip, char *code)
     return NULL;
 }
 
+void icemu_chip_tick(Chip *chip)
+{
+    if (chip->elapse_func != NULL) {
+        chip->elapse_func(chip, MCU_TIME_RESOLUTION);
+    }
+}

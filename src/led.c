@@ -1,8 +1,51 @@
 #include <stdlib.h>
 
 #include "led.h"
+#include "util.h"
+
+// usecs
+#define LED_FADE_DELAY 10000
 
 /* Private */
+void led_init(LED *led, bool anode)
+{
+    led->fade_timeout = 0;
+    led->powered = false;
+    led->anode = anode;
+}
+
+void led_update(LED *led, bool pin_is_high)
+{
+    led->powered = pin_is_high != led->anode;
+    if (!led->powered) {
+        // enable fade timeout
+        led->fade_timeout = LED_FADE_DELAY;
+    }
+}
+
+void led_elapse(LED *led, uint32_t usecs)
+{
+    if (led->fade_timeout > 0) {
+        led->fade_timeout -= MIN(usecs, led->fade_timeout);
+    }
+}
+
+bool led_lit(LED *led)
+{
+    return led->powered || led->fade_timeout > 0;
+}
+
+static void ledmatrix_pinchange(Pin *pin)
+{
+    LEDMatrix *lm = (LEDMatrix *)pin->chip->logical_unit;
+    int pinindex;
+
+    pinindex = icemu_pinlist_find(&pin->chip->pins, pin);
+    if (pinindex >=0) {
+        led_update(&lm->leds[pinindex], pin->high);
+    }
+}
+
 /*  _.  A.
  * |_| FGB
  * |_| EDC
@@ -36,11 +79,9 @@ static void ledmatrix_asciiart(Chip *chip, ChipAsciiArt *dst)
 {
     uint8_t i, offset;
     char *s;
-    Pin **pins;
     LEDMatrix *lm;
 
     lm = (LEDMatrix *)chip->logical_unit;
-    pins = chip->pins.pins;
     s = dst->contents;
     dst->width = lm->width + 1; // + 1 for \n
     dst->height = lm->height;
@@ -51,9 +92,20 @@ static void ledmatrix_asciiart(Chip *chip, ChipAsciiArt *dst)
     for (i = 0; i < (lm->width * lm->height); i++) {
         // for every line, we accumulate an offset to insert newlines
         offset = i / lm->width;
-        s[i + offset] = !pins[i]->high ? 'X' : '.';
+        s[i + offset] = led_lit(&lm->leds[i]) ? 'X' : '.';
     }
     s[lm->width * lm->height] = '\0';
+}
+
+static void ledmatrix_elapse(Chip *chip, uint32_t usecs)
+{
+    int i;
+    LEDMatrix *lm;
+
+    lm = (LEDMatrix *)chip->logical_unit;
+    for (i = 0; i < lm->width * lm->height; i++) {
+        led_elapse(&lm->leds[i], usecs);
+    }
 }
 
 /* Public */
@@ -75,11 +127,14 @@ void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
     uint8_t i;
 
     lm = (LEDMatrix *)malloc(sizeof(LEDMatrix));
-    icemu_chip_init(chip, (void *)lm, NULL, width * height);
+    icemu_chip_init(chip, (void *)lm, ledmatrix_pinchange, width * height);
     lm->width = width;
     lm->height = height;
+    lm->leds = malloc(sizeof(LED) * width * height);
     for (i = 0; i < width * height; i++) {
+        led_init(&lm->leds[i], true);
         icemu_chip_addpin(chip, "", false, false);
     }
     chip->asciiart_func = ledmatrix_asciiart;
+    chip->elapse_func = ledmatrix_elapse;
 }

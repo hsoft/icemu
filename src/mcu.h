@@ -4,6 +4,10 @@
 #include "chip.h"
 #include "pin.h"
 
+// this is the number of usecs that elapses at each runloop pass. If our simulation does a pass
+// faster than this, we wait a little bit before continuing.
+#define MCU_TIME_RESOLUTION 50
+
 #define MAX_INTERRUPTS 100
 #define MAX_TIMERS 20
 
@@ -15,7 +19,7 @@ typedef struct {
     time_t elapsed;
     TimerFunc func;
 } MCUTimer;
-    
+
 typedef struct {
     time_t epoch; // usecs
     time_t ticks;

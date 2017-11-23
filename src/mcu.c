@@ -6,10 +6,6 @@
 #include "mcu.h"
 #include "util.h"
 
-// this is the number of usecs that elapses at each runloop pass. If our simulation does a pass
-// faster than this, we wait a little bit before continuing.
-#define MCU_TIME_RESOLUTION 50
-
 /* Private */
 static time_t timestamp() {
     struct timeval tv;

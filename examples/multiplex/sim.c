@@ -79,6 +79,7 @@ int main()
             break;
         }
         icemu_mcu_tick(&mcu);
+        icemu_chip_tick(&lm);
     }
     icemu_ui_deinit();
 }

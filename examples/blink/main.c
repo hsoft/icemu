@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #ifndef SIMULATION
 #include <avr/io.h>
 #include <util/delay.h>
@@ -7,16 +8,22 @@
 
 #define BLINK_DELAY_MS 1000
 
+static bool flag;
+
 void setup()
 {
+    flag = false;
     pinoutputmode();
 }
 
 void loop()
 {
-    pinhigh();
-    _delay_ms(BLINK_DELAY_MS);
-    pinlow();
+    if (flag) {
+        pinhigh();
+    } else {
+        pinlow();
+    }
+    flag = !flag;
     _delay_ms(BLINK_DELAY_MS);
 }
 

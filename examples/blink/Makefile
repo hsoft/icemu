@@ -28,7 +28,7 @@ send: $(PROGNAME).hex
 	avrdude $(AVRDUDEARGS) -p $(AVRDUDEMCU) -U flash:w:$(PROGNAME).hex
 
 clean:
-	rm -f $(OBJS) $(PROGNAME).hex $(PROGNAME).bin
+	rm -f $(OBJS) $(PROGNAME).hex $(PROGNAME).bin $(PROGNAME) $(SIM_OBJS)
 
 $(PROGNAME).bin: $(OBJS)
 	$(CC) $(LDFLAGS) $+ -o $@
@@ -44,9 +44,9 @@ $(ICEMU_LIB):
 	gmake -C ../..
 
 $(PROGNAME): $(SIM_OBJS) $(ICEMU_LIB)
-	$(CC) -L../.. $(SIM_OBJS) -o $@ -licemu
+	$(CC) `pkg-config --libs ncurses tinfo` -L../.. $(SIM_OBJS) -o $@ -licemu
 
 sim: CC = cc
-sim: CFLAGS = -DSIMULATION -Wall -c
+sim: CFLAGS = -DSIMULATION -Wall `pkg-config --cflags ncurses` -c
 sim: $(PROGNAME)
 	@echo Done!

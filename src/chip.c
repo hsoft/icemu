@@ -25,30 +25,6 @@ uint8_t chip_maxcodelen(Chip *chip)
     return result;
 }
 
-// spacer (name + 1) twice and a fixed '_______' (7 chars) and 1 char for \n
-uint8_t chip_asciiart_width(Chip *chip)
-{
-    uint8_t max_pincode_len;
-
-    max_pincode_len = chip_maxcodelen(chip);
-    return (max_pincode_len + 1) * 2 + 7 + 1;
-}
-
-// header line + ceil(nb pins // 2)
-uint8_t chip_asciiart_height(Chip *chip)
-{
-    uint8_t pincount;
-    uint8_t linecount;
-
-    pincount = chip->pins.count;
-    linecount = pincount / 2 + 1;
-    if (pincount % 2 > 0) {
-        // odd number of pins, we need an extra line
-        linecount++;
-    }
-    return linecount;
-}
-
 /* Public */
 void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func, uint8_t pin_count)
 {
@@ -78,12 +54,36 @@ Pin* icemu_chip_getpin(Chip *chip, char *code)
     return NULL;
 }
 
+// spacer (name + 1) twice and a fixed '_______' (7 chars) and 1 char for \n
+uint8_t icemu_chip_asciiart_width(Chip *chip)
+{
+    uint8_t max_pincode_len;
+
+    max_pincode_len = chip_maxcodelen(chip);
+    return (max_pincode_len + 1) * 2 + 7 + 1;
+}
+
+// header line + ceil(nb pins // 2)
+uint8_t icemu_chip_asciiart_height(Chip *chip)
+{
+    uint8_t pincount;
+    uint8_t linecount;
+
+    pincount = chip->pins.count;
+    linecount = pincount / 2 + 1;
+    if (pincount % 2 > 0) {
+        // odd number of pins, we need an extra line
+        linecount++;
+    }
+    return linecount;
+}
+
 uint16_t icemu_chip_asciiart_len(Chip *chip)
 {
     uint8_t w, h;
 
-    w = chip_asciiart_width(chip);
-    h = chip_asciiart_height(chip);
+    w = icemu_chip_asciiart_width(chip);
+    h = icemu_chip_asciiart_height(chip);
 
     return (uint16_t)(w * h);
 }
@@ -95,8 +95,8 @@ void icemu_chip_asciiart(Chip *chip, char *dst)
     uint16_t loffset;
     Pin *p;
 
-    w = chip_asciiart_width(chip);
-    h = chip_asciiart_height(chip);
+    w = icemu_chip_asciiart_width(chip);
+    h = icemu_chip_asciiart_height(chip);
     mcl = chip_maxcodelen(chip);
     right_pin_start = h - 1;
 

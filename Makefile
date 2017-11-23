@@ -3,9 +3,9 @@ LIBRARY_NAME = icemu
 TARGET_LIB = lib$(LIBRARY_NAME).a
 TEST_TARGET = test_icemu
 
-CFLAGS = -Wall
+CFLAGS = -Wall $(pkg-config --cflags ncurses)
 
-SRCS = pin.c chip.c shiftregister.c decoder.c mcu.c util.c
+SRCS = pin.c chip.c shiftregister.c decoder.c mcu.c util.c ui.c
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
 TEST_SRCS = main.c shiftregister.c decoder.c circuit.c
 TEST_OBJS = $(addprefix tests/, $(TEST_SRCS:%.c=%.o))

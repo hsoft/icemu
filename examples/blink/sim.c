@@ -5,6 +5,7 @@
 
 static Chip mcu;
 static Pin *pb1;
+static char asciiart[4096];
 
 /* main.c decl */
 void setup();
@@ -14,13 +15,15 @@ void loop();
 void pinhigh()
 {
     icemu_pin_set(pb1, true);
-    printf("PB1: %d\n", pb1->high);
+    icemu_chip_asciiart(&mcu, asciiart);
+    printf("%s\n", asciiart);
 }
 
 void pinlow()
 {
     icemu_pin_set(pb1, false);
-    printf("PB1: %d\n", pb1->high);
+    icemu_chip_asciiart(&mcu, asciiart);
+    printf("%s\n", asciiart);
 }
 
 void pinoutputmode()

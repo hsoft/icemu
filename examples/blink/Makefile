@@ -9,6 +9,9 @@ OBJS ?= main.o layer.o
 AVRDUDEMCU = t45
 AVRDUDEARGS = -c usbtiny -P usb 
 
+SIM_OBJS = main.o sim.o
+ICEMU_LIB = ../../libicemu.a
+
 # Patterns
 
 %.o: %.c
@@ -37,8 +40,11 @@ $(PROGNAME).hex: $(PROGNAME).bin
 
 .PHONY: sim
 
-$(PROGNAME): main.o sim.o
-	$(CC) -L../.. $+ -o $@ -licemu
+$(ICEMU_LIB):
+	gmake -C ../..
+
+$(PROGNAME): $(SIM_OBJS) $(ICEMU_LIB)
+	$(CC) -L../.. $(SIM_OBJS) -o $@ -licemu
 
 sim: CC = cc
 sim: CFLAGS = -DSIMULATION -Wall -c

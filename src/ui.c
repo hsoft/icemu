@@ -21,7 +21,7 @@ static char * labels[MAX_ELEMENTS] = { 0 };
 static void ui_refresh_elements()
 {
     int x, y, acc_y, maxw, i, j, elemw, elemh;
-    char asciiart[4096];
+    ChipAsciiArt asciiart;
 
     y = 0;
     x = 0;
@@ -31,21 +31,21 @@ static void ui_refresh_elements()
         if (elements[i] == NULL) {
             break;
         }
-        elemw = icemu_chip_asciiart_width(elements[i]->chip);
+        elements[i]->chip->asciiart_func(elements[i]->chip, &asciiart);
+        elemw = asciiart.width;
         if (elemw + x >= maxw) {
             x = 0;
             y += acc_y;
             acc_y = 0;
         }
         // +1 for title
-        elemh = icemu_chip_asciiart_height(elements[i]->chip) + 1;
+        elemh = asciiart.height + 1;
         acc_y = MAX(acc_y, elemh);
 
         mvaddnstr(y, x, elements[i]->title, elemw - 1);
-        icemu_chip_asciiart(elements[i]->chip, asciiart);
         for (j = 0; j < (elemh - 1); j++) {
             // -1 to remove the newline
-            mvaddnstr(y+j+1, x, &asciiart[(j * elemw)], elemw - 1);
+            mvaddnstr(y+j+1, x, &asciiart.contents[(j * elemw)], elemw - 1);
         }
     }
 }

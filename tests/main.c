@@ -10,4 +10,5 @@ int main()
     test_decoder_main();
     test_circuit_main();
     printf("All tests passed.\n");
+    return 0;
 }

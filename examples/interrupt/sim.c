@@ -46,24 +46,12 @@ void toggle_button()
 
 int main()
 {
-    bool running = true;
-
     icemu_ATtiny_init(&mcu);
     pb0 = icemu_chip_getpin(&mcu, "PB0");
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();
-    icemu_ui_init();
-    icemu_ui_add_label("q - Quit");
-    icemu_ui_add_label("b - Toggle button");
+    icemu_sim_init(50, NULL);
+    icemu_sim_add_action('b', "Toggle (b)utton", toggle_button);
     icemu_ui_add_element("MCU:", &mcu);
-    icemu_ui_refresh();
-    while (running) {
-        switch (icemu_ui_refresh()) {
-            case 'b': toggle_button();
-                 break;
-            case 'q': running = false;
-                 break;
-        }
-    }
-    icemu_ui_deinit();
+    icemu_sim_run();
 }

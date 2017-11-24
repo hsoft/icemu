@@ -46,12 +46,12 @@ void pinoutputmode(PinID pin)
 
 void _delay_us(unsigned int us)
 {
-    usleep(us);
+    icemu_sim_delay(us);
 }
 
 void _delay_ms(unsigned int ms)
 {
-    _delay_us(ms * 1000);
+    icemu_sim_delay(ms * 1000);
 }
 
 /* Simulation */
@@ -79,17 +79,9 @@ int main()
         icemu_pin_wireto(srl->outputs.pins[i], icemu_chip_getpin(&seg, segorder[i]));
     }
     setup();
-    icemu_ui_init();
-    icemu_ui_add_label("q - Quit");
+    icemu_sim_init(50, loop);
     icemu_ui_add_element("MCU:", &mcu);
     icemu_ui_add_element("SR:", &sr);
     icemu_ui_add_element("Seg7:", &seg);
-    icemu_ui_refresh();
-    while (1) {
-        loop();
-        if (icemu_ui_refresh() == 'q') {
-            break;
-        }
-    }
-    icemu_ui_deinit();
+    icemu_sim_run();
 }

@@ -37,15 +37,8 @@ int main()
     icemu_ATtiny_init(&mcu);
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();
-    icemu_ui_init();
-    icemu_ui_add_label("q - Quit");
+    icemu_sim_init(50, NULL);
     icemu_ui_add_element("MCU:", &mcu);
-    icemu_ui_refresh();
-    while (1) {
-        if (icemu_ui_refresh() == 'q') {
-            break;
-        }
-        icemu_mcu_tick(&mcu);
-    }
-    icemu_ui_deinit();
+    icemu_sim_add_chip(&mcu);
+    icemu_sim_run();
 }

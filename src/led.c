@@ -23,7 +23,7 @@ void led_update(LED *led, bool pin_is_high)
     }
 }
 
-void led_elapse(LED *led, uint32_t usecs)
+void led_elapse(LED *led, time_t usecs)
 {
     if (led->fade_timeout > 0) {
         led->fade_timeout -= MIN(usecs, led->fade_timeout);
@@ -97,7 +97,7 @@ static void ledmatrix_asciiart(Chip *chip, ChipAsciiArt *dst)
     s[lm->width * lm->height] = '\0';
 }
 
-static void ledmatrix_elapse(Chip *chip, uint32_t usecs)
+static void ledmatrix_elapse(Chip *chip, time_t usecs)
 {
     int i;
     LEDMatrix *lm;

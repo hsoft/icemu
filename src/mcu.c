@@ -7,13 +7,6 @@
 #include "util.h"
 
 /* Private */
-static time_t timestamp() {
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000 * 1000) + tv.tv_usec;
-}
-
 static void mcu_timer_elapse(MCUTimer *timer, time_t usecs)
 {
     timer->elapsed += usecs;
@@ -37,6 +30,20 @@ static void mcu_pinchange(Pin *pin)
     }
 }
 
+static void mcu_elapse(Chip *chip, time_t usecs)
+{
+    uint8_t i;
+    MCU *mcu;
+
+    mcu = (MCU *)chip->logical_unit;
+    for (i = 0; i < MAX_TIMERS; i++) {
+        if (mcu->timers[i].func == NULL) {
+            break;
+        }
+        mcu_timer_elapse(&mcu->timers[i], usecs);
+    }
+}
+
 static MCU* mcu_new(Chip *chip, const char **codes)
 {
     MCU *mcu;
@@ -45,11 +52,10 @@ static MCU* mcu_new(Chip *chip, const char **codes)
 
     count = icemu_util_chararray_count(codes);
     mcu = (MCU *)malloc(sizeof(MCU));
-    mcu->epoch = timestamp();
-    mcu->ticks = 0;
     memset(mcu->interrupts, 0, sizeof(InterruptFunc) * MAX_INTERRUPTS);
     memset(mcu->timers, 0, sizeof(MCUTimer) * MAX_TIMERS);
     icemu_chip_init(chip, (void *)mcu, mcu_pinchange, count);
+    chip->elapse_func = mcu_elapse;
     for (i = 0; i < count; i++) {
         icemu_chip_addpin(chip, codes[i], false, false);
     }
@@ -81,27 +87,6 @@ void icemu_mcu_add_timer(Chip *chip, time_t every_usecs, TimerFunc timer_func)
             mcu->timers[i].func = timer_func;
             break;
         }
-    }
-}
-
-void icemu_mcu_tick(Chip *chip)
-{
-    time_t clock_target, ts;
-    uint8_t i;
-    MCU *mcu;
-
-    mcu = (MCU *)chip->logical_unit;
-    mcu->ticks++;
-    clock_target = mcu->epoch + (mcu->ticks * MCU_TIME_RESOLUTION);
-    ts = timestamp();
-    if (ts < clock_target) {
-        usleep(clock_target - ts);
-    }
-    for (i = 0; i < MAX_TIMERS; i++) {
-        if (mcu->timers[i].func == NULL) {
-            break;
-        }
-        mcu_timer_elapse(&mcu->timers[i], MCU_TIME_RESOLUTION);
     }
 }
 

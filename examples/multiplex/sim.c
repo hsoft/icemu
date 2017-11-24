@@ -69,17 +69,10 @@ int main()
         icemu_pin_wireto(dec_lu->outputs.pins[i], lm.pins.pins[i]);
     }
     setup();
-    icemu_ui_init();
-    icemu_ui_add_label("q - Quit");
+    icemu_sim_init(50, NULL);
     icemu_ui_add_element("MCU:", &mcu);
     icemu_ui_add_element("LED:", &lm);
-    icemu_ui_refresh();
-    while (1) {
-        if (icemu_ui_refresh() == 'q') {
-            break;
-        }
-        icemu_mcu_tick(&mcu);
-        icemu_chip_tick(&lm);
-    }
-    icemu_ui_deinit();
+    icemu_sim_add_chip(&mcu);
+    icemu_sim_add_chip(&lm);
+    icemu_sim_run();
 }

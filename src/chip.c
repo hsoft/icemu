@@ -124,9 +124,9 @@ Pin* icemu_chip_getpin(Chip *chip, char *code)
     return NULL;
 }
 
-void icemu_chip_tick(Chip *chip)
+void icemu_chip_elapse(Chip *chip, time_t usecs)
 {
     if (chip->elapse_func != NULL) {
-        chip->elapse_func(chip, MCU_TIME_RESOLUTION);
+        chip->elapse_func(chip, usecs);
     }
 }

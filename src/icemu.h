@@ -7,3 +7,4 @@
 #include "mcu.h"
 #include "util.h"
 #include "ui.h"
+#include "sim.h"

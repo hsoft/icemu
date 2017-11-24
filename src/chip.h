@@ -1,4 +1,5 @@
 #pragma once
+#include <sys/time.h>
 #include "pin.h"
 
 typedef struct {
@@ -9,7 +10,7 @@ typedef struct {
 
 typedef void (*PinChangeFunc)(Pin *);
 typedef void (*AsciiArtFunc)(Chip *, ChipAsciiArt *);
-typedef void (*ElapseFunc)(Chip *, uint32_t);
+typedef void (*ElapseFunc)(Chip *, time_t);
 
 struct Chip {
     void *logical_unit;
@@ -22,4 +23,4 @@ struct Chip {
 void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func, uint8_t pin_count);
 Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means_high);
 Pin* icemu_chip_getpin(Chip *chip, char *code);
-void icemu_chip_tick(Chip *chip);
+void icemu_chip_elapse(Chip *chip, time_t usecs);

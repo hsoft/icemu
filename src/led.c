@@ -7,16 +7,17 @@
 #define LED_FADE_DELAY 10000
 
 /* Private */
-void led_init(LED *led, bool anode)
+void led_init(LED *led, Pin *vcc, Pin *gnd)
 {
     led->fade_timeout = 0;
     led->powered = false;
-    led->anode = anode;
+    led->vcc = vcc;
+    led->gnd = gnd;
 }
 
-void led_update(LED *led, bool pin_is_high)
+void led_update(LED *led)
 {
-    led->powered = pin_is_high != led->anode;
+    led->powered = led->vcc->high && !led->gnd->high;
     if (!led->powered) {
         // enable fade timeout
         led->fade_timeout = LED_FADE_DELAY;
@@ -42,7 +43,7 @@ static void ledmatrix_pinchange(Pin *pin)
 
     pinindex = icemu_pinlist_find(&pin->chip->pins, pin);
     if (pinindex >=0) {
-        led_update(&lm->leds[pinindex], pin->high);
+        led_update(&lm->leds[pinindex]);
     }
 }
 
@@ -130,11 +131,16 @@ void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
     icemu_chip_init(chip, (void *)lm, ledmatrix_pinchange, width * height);
     lm->width = width;
     lm->height = height;
+    icemu_pin_init(&lm->vcc, chip, "VCC", false, false);
     lm->leds = malloc(sizeof(LED) * width * height);
     for (i = 0; i < width * height; i++) {
-        led_init(&lm->leds[i], true);
-        icemu_chip_addpin(chip, "", false, false);
+        led_init(&lm->leds[i], &lm->vcc, icemu_chip_addpin(chip, "", false, false));
     }
     chip->asciiart_func = ledmatrix_asciiart;
     chip->elapse_func = ledmatrix_elapse;
+}
+
+Pin* icemu_ledmatrix_vcc(Chip *chip)
+{
+    return &((LEDMatrix *)chip->logical_unit)->vcc;
 }

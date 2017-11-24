@@ -1,3 +1,4 @@
 language: c
-install: make ncurses pkg-config
+before_install: sudo apt-get install ncurses pkg-config
+install: make
 script: make test

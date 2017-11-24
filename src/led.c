@@ -114,9 +114,9 @@ void icemu_seg7_init(Chip *chip)
     uint8_t i;
     const char * codes[] = {"A", "B", "C", "D", "E", "F", "G", "DP", NULL};
 
-    icemu_chip_init(chip, NULL, NULL, 8);
+    icemu_ledmatrix_init(chip, 8, 1);
     for (i = 0; i < 8; i++) {
-        icemu_chip_addpin(chip, codes[i], false, false);
+        chip->pins.pins[i]->code = codes[i];
     }
     chip->asciiart_func = seg7_asciiart;
 }

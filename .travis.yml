@@ -1,0 +1,3 @@
+language: c
+install: make ncurses pkg-config
+script: make test

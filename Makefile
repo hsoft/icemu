@@ -3,6 +3,7 @@ LIBRARY_NAME = icemu
 TARGET_LIB = lib$(LIBRARY_NAME).a
 TEST_TARGET = test_icemu
 
+CUNIT_NAME ?= cunit
 PKGCONFIG_LIBS = ncurses
 CFLAGS = -Wall `pkg-config --cflags $(PKGCONFIG_LIBS)`
 
@@ -27,7 +28,7 @@ clean:
 
 $(TEST_TARGET): PKGCONFIG_LIBS += cunit
 $(TEST_TARGET): $(TARGET_LIB) $(TEST_OBJS)
-	$(CC) -static -L. -o $@ $(TEST_OBJS) -l$(LIBRARY_NAME) `pkg-config --libs cunit`
+	$(CC) -static -L. -o $@ $(TEST_OBJS) -l$(LIBRARY_NAME) `pkg-config --libs $(CUNIT_NAME)`
 
 .PHONY: test
 test: $(TEST_TARGET)

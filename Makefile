@@ -3,7 +3,8 @@ LIBRARY_NAME = icemu
 TARGET_LIB = lib$(LIBRARY_NAME).a
 TEST_TARGET = test_icemu
 
-CFLAGS = -Wall $(pkg-config --cflags ncurses)
+PKGCONFIG_LIBS = ncurses
+CFLAGS = -Wall `pkg-config --cflags $(PKGCONFIG_LIBS)`
 
 SRCS = pin.c chip.c shiftregister.c decoder.c led.c mcu.c util.c ui.c sim.c
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
@@ -23,8 +24,10 @@ $(TARGET_LIB): $(OBJS)
 clean:
 	rm -rf $(OBJS) $(TARGET_LIB) $(TEST_OBJS) $(TEST_TARGET)
 
+
+$(TEST_TARGET): PKGCONFIG_LIBS += cunit
 $(TEST_TARGET): $(TARGET_LIB) $(TEST_OBJS)
-	$(CC) -static -L. -o $@ $(TEST_OBJS) -l$(LIBRARY_NAME) 
+	$(CC) -static -L. -o $@ $(TEST_OBJS) -l$(LIBRARY_NAME) `pkg-config --libs cunit`
 
 .PHONY: test
 test: $(TEST_TARGET)

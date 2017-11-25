@@ -13,6 +13,7 @@ complexity. So far it's looking good...
 * C compiler
 * GNU make
 * ncurses
+* CUnit for tests
 
 # Usage
 

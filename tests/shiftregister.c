@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
+#include <CUnit/CUnit.h>
 
 #include "../src/icemu.h"
 
@@ -86,10 +87,12 @@ static void test_disable_doesnt_reset_buffers()
     assert_value(&chip, expected);
 }
 
-void test_shiftregister_main()
+void test_shiftregister_init()
 {
-    printf("Testing shift registers\n");
-    test_IO_unbuffered();
-    test_IO_buffered();
-    test_disable_doesnt_reset_buffers();
+    CU_pSuite s;
+
+    s = CU_add_suite("Shift Registers", NULL, NULL);
+    CU_ADD_TEST(s, test_IO_unbuffered);
+    CU_ADD_TEST(s, test_IO_buffered);
+    CU_ADD_TEST(s, test_disable_doesnt_reset_buffers);
 }

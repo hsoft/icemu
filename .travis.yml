@@ -1,4 +1,4 @@
 language: c
-before_install: sudo apt-get install libncurses5 pkg-config
+before_install: sudo apt-get install libncurses5 pkg-config cunit
 install: make
 script: make test

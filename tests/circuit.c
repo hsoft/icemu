@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
+#include <CUnit/CUnit.h>
 
 #include "../src/icemu.h"
 
@@ -43,9 +44,11 @@ static void test_dec_and_srs()
     assert(!icemu_chip_getpin(&sr1, "Q1")->high);
 }
 
-void test_circuit_main()
+void test_circuit_init()
 {
-    printf("Testing circuits\n");
-    test_dec_and_srs();
+    CU_pSuite s;
+
+    s = CU_add_suite("Circuits", NULL, NULL);
+    CU_ADD_TEST(s, test_dec_and_srs);
 }
 

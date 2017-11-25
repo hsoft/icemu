@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
+#include <CUnit/CUnit.h>
 
 #include "../src/icemu.h"
 
@@ -27,9 +28,11 @@ static void test_IO()
     assert_pin_is_selected(&chip, 2);
 }
 
-void test_decoder_main()
+void test_decoder_init()
 {
-    printf("Testing decoders\n");
-    test_IO();
+    CU_pSuite s;
+
+    s = CU_add_suite("Decoders", NULL, NULL);
+    CU_ADD_TEST(s, test_IO);
 }
 

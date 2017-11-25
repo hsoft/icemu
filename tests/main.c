@@ -1,14 +1,18 @@
 #include <stdio.h>
+#include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
 
-void test_shiftregister_main();
-void test_decoder_main();
-void test_circuit_main();
+void test_shiftregister_init();
+void test_decoder_init();
+void test_circuit_init();
 
 int main()
 {
-    test_shiftregister_main();
-    test_decoder_main();
-    test_circuit_main();
-    printf("All tests passed.\n");
+    CU_initialize_registry();
+    test_shiftregister_init();
+    test_decoder_init();
+    test_circuit_init();
+    CU_basic_run_tests();
+    CU_cleanup_registry();
     return 0;
 }

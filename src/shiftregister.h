@@ -7,6 +7,7 @@ typedef struct {
     Pin *serial1;
     Pin *serial2;
     Pin *buffer_pin;
+    Pin *enable_pin;
     PinList outputs;
 } ShiftRegister;
 

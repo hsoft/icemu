@@ -112,12 +112,17 @@ Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means
     return result;
 }
 
-Pin* icemu_chip_getpin(Chip *chip, char *code)
+Pin* icemu_chip_getpin(Chip *chip, const char *code)
 {
     uint8_t i;
+    const char *chip_code;
 
     for (i = 0; i < chip->pins.count; i++) {
-        if (strncmp(code, chip->pins.pins[i]->code, MAX_CODE_LEN) == 0) {
+        chip_code = chip->pins.pins[i]->code;
+        if (chip_code[0] == '~') {
+            chip_code++;
+        }
+        if (strncmp(code, chip_code, MAX_CODE_LEN) == 0) {
             return chip->pins.pins[i];
         }
     }

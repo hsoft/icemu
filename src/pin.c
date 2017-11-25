@@ -47,7 +47,7 @@ void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output, bool lo
     pin->chip = chip;
     pin->code = code;
     pin->output = output;
-    pin->low_means_high = false;
+    pin->low_means_high = code[0] == '~';
     pin->high = false;
     pin->wire = NULL;
 }
@@ -65,6 +65,19 @@ bool icemu_pin_set(Pin *pin, bool high)
         return true;
     }
     return false;
+}
+
+bool icemu_pin_enable(Pin *pin, bool enabled)
+{
+    bool high;
+
+    high = pin->high != pin->low_means_high;
+    return icemu_pin_set(pin, high);
+}
+
+bool icemu_pin_isenabled(Pin *pin)
+{
+    return pin->high != pin->low_means_high;
 }
 
 PinList* icemu_pinlist_new(uint8_t capacity)

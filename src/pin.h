@@ -32,7 +32,11 @@ struct PinList {
 Pin* icemu_pin_new(Chip *chip, const char *code, bool output, bool low_means_high);
 void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output, bool low_means_high);
 bool icemu_pin_check_if_changed(Pin *pin);
-bool icemu_pin_set(Pin *pin, bool high); // returns true if a change occurred
+// returns true if a change occurred
+bool icemu_pin_set(Pin *pin, bool high); 
+// same as set() if low_means_high is false, otherwise, the opposite.
+bool icemu_pin_enable(Pin *pin, bool enabled); 
+bool icemu_pin_isenabled(Pin *pin); 
 void icemu_pin_wireto(Pin *pin, Pin *other);
 
 PinList* icemu_pinlist_new(uint8_t capacity);

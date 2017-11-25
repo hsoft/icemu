@@ -7,18 +7,10 @@
 #include "chip.h"
 #include "util.h"
 
-static void shiftregister_updateoutputs(Chip *chip, ShiftRegister *sr)
-{
-    uint8_t i;
-
-    for (i = 0; i < sr->outputs.count; i++) {
-        icemu_pin_set(sr->outputs.pins[i], (sr->buffer >> i) & 0x1);
-    }
-}
-
 static void shiftregister_pinchange(Pin *pin)
 {
     ShiftRegister *sr = (ShiftRegister *)pin->chip->logical_unit;
+    uint8_t val;
 
     if ((pin == sr->clock) && (pin->high)) {
         sr->buffer = sr->buffer << 1;
@@ -26,10 +18,17 @@ static void shiftregister_pinchange(Pin *pin)
             sr->buffer |= 0x1;
         }
         if (sr->buffer_pin == NULL) { //unbuffered, update now
-            shiftregister_updateoutputs(pin->chip, sr);
+            icemu_util_set_binary_value(&sr->outputs, sr->buffer);
         }
     } else if ((pin == sr->buffer_pin) && (pin->high)) {
-        shiftregister_updateoutputs(pin->chip, sr);
+        icemu_util_set_binary_value(&sr->outputs, sr->buffer);
+    } else if (pin == sr->enable_pin) {
+        if (icemu_pin_isenabled(pin)) {
+            val = sr->buffer;
+        } else {
+            val = 0;
+        }
+        icemu_util_set_binary_value(&sr->outputs, val);
     }
 }
 
@@ -75,11 +74,12 @@ void icemu_CD74AC164_init(Chip *chip)
 void icemu_SN74HC595_init(Chip *chip)
 {
     ShiftRegister *sr;
-    const char * input_codes[] = {"SER", "SRCLK", "RCLK", NULL};
+    const char * input_codes[] = {"SER", "SRCLK", "RCLK", "~OE", "~SRCLR", NULL};
     const char * output_codes[] = {"QA", "QB", "QC", "QD", "QE", "QF", "QG", "QH", NULL};
 
     sr = shiftregister_new(chip, input_codes, output_codes);
     sr->clock = chip->pins.pins[1];
     sr->serial1 = chip->pins.pins[0];
     sr->buffer_pin = chip->pins.pins[2];
+    sr->enable_pin = chip->pins.pins[3];
 }

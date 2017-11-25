@@ -11,3 +11,13 @@ uint8_t icemu_util_chararray_count(const char **array)
     }
     return result;
 }
+
+void icemu_util_set_binary_value(PinList *pinlist, uint16_t val)
+{
+    uint8_t i;
+
+    for (i = 0; i < pinlist->count; i++) {
+        icemu_pin_set(pinlist->pins[i], (val >> i) & 0x1);
+    }
+}
+

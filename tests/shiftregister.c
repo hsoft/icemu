@@ -4,7 +4,7 @@
 
 #include "../src/icemu.h"
 
-static void push_value(Chip *chip, uint8_t val)
+static void push_value(Chip *chip, uint8_t val, bool buffered)
 {
     ShiftRegister *sr = (ShiftRegister *)chip->logical_unit;
     uint8_t i;
@@ -15,6 +15,10 @@ static void push_value(Chip *chip, uint8_t val)
         icemu_pin_set(sr->serial1, flag);
         icemu_pin_set(sr->clock, false);
         icemu_pin_set(sr->clock, true);
+    }
+    if (buffered) {
+        icemu_pin_set(sr->buffer_pin, false);
+        icemu_pin_set(sr->buffer_pin, true);
     }
 }
 
@@ -38,7 +42,7 @@ static void test_IO_unbuffered()
     uint8_t expected = 0x42;
 
     icemu_CD74AC164_init(&chip);
-    push_value(&chip, expected);
+    push_value(&chip, expected, false);
     assert_value(&chip, expected);
 }
 
@@ -50,12 +54,34 @@ static void test_IO_buffered()
 
     icemu_SN74HC595_init(&chip);
     sr = (ShiftRegister *)chip.logical_unit;
-    push_value(&chip, expected);
+    push_value(&chip, expected, false);
     assert_value(&chip, 0);
     icemu_pin_set(sr->buffer_pin, false);
     icemu_pin_set(sr->buffer_pin, true);
     assert_value(&chip, expected);
-    push_value(&chip, expected+1);
+    push_value(&chip, expected+1, false);
+    assert_value(&chip, expected);
+}
+
+static void test_disable_doesnt_reset_buffers()
+{
+    /* When the "enable" pin is disabled, we don't want to reset the buffer, only make the */
+    /* output pin temporarily have low outputs.                                            */
+    Chip chip;
+    ShiftRegister *sr;
+    uint8_t expected = 0x42;
+
+    icemu_SN74HC595_init(&chip);
+    sr = (ShiftRegister *)chip.logical_unit;
+    push_value(&chip, expected, true);
+    icemu_pin_enable(sr->enable_pin, false);
+    assert_value(&chip, 0);
+
+    /* also, test that clocking the buffer pin doesn't change the output while it's disabled! */
+    icemu_pin_set(sr->buffer_pin, false);
+    icemu_pin_set(sr->buffer_pin, true);
+
+    icemu_pin_enable(sr->enable_pin, true);
     assert_value(&chip, expected);
 }
 
@@ -64,4 +90,5 @@ void test_shiftregister_main()
     printf("Testing shift registers\n");
     test_IO_unbuffered();
     test_IO_buffered();
+    test_disable_doesnt_reset_buffers();
 }

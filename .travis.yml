@@ -1,6 +1,9 @@
 language: c
 before_install: sudo apt-get install libncurses5 pkg-config libcunit1-dev
 install: make
-# cunit pkg is messed up in ubuntu trusty: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=782366
-# don't use pkg-config
-script: CUNIT_LINKING="-lcunit" make test
+script:
+  # In addition to running unit tests, we also want to make sure that all examples build fine.
+  - make -C examples
+  # cunit pkg is messed up in ubuntu trusty: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=782366
+  # don't use pkg-config
+  - CUNIT_LINKING="-lcunit" make test

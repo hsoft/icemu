@@ -28,7 +28,7 @@ clean:
 
 $(TEST_TARGET): PKGCONFIG_LIBS += cunit
 $(TEST_TARGET): $(TARGET_LIB) $(TEST_OBJS)
-	$(CC) -static -L. -o $@ $(TEST_OBJS) -l$(LIBRARY_NAME) $(CUNIT_LINKING)
+	$(CC) -static -L. -L/usr/lib64 -o $@ $(TEST_OBJS) -l$(LIBRARY_NAME) -lcunit
 
 .PHONY: test
 test: $(TEST_TARGET)

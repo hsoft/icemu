@@ -40,7 +40,7 @@ $(PROGNAME).hex: $(PROGNAME).bin
 
 # we always want to run make on the ../.. to make sure we have a fresh lib.
 $(PROGNAME): $(SIM_OBJS)
-	gmake -C ../..
+	$(MAKE) -C ../..
 	$(CC) `pkg-config --libs --static ncurses` -L../.. $(SIM_OBJS) -o $@ -licemu
 
 sim: CC = cc

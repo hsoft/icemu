@@ -40,4 +40,5 @@ int main()
     icemu_sim_init(50, loop);
     icemu_ui_add_element("MCU:", &mcu);
     icemu_sim_run();
+    return 0;
 }

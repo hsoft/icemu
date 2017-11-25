@@ -84,4 +84,5 @@ int main()
     icemu_ui_add_element("SR:", &sr);
     icemu_ui_add_element("Seg7:", &seg);
     icemu_sim_run();
+    return 0;
 }

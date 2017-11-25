@@ -9,6 +9,7 @@ AVRDUDEMCU = t45
 AVRDUDEARGS = -c usbtiny -P usb 
 
 SIM_OBJS = main.o sim.o
+NCURSES_LINKING = `pkg-config --libs --static ncurses`
 
 # Patterns
 
@@ -41,7 +42,7 @@ $(PROGNAME).hex: $(PROGNAME).bin
 # we always want to run make on the ../.. to make sure we have a fresh lib.
 $(PROGNAME): $(SIM_OBJS)
 	$(MAKE) -C ../..
-	$(CC) `pkg-config --libs --static ncurses` -L../.. $(SIM_OBJS) -o $@ -licemu
+	$(CC) -L../.. $(SIM_OBJS) -o $@ -licemu $(NCURSES_LINKING)
 
 sim: CC = cc
 sim: CFLAGS = -DSIMULATION -Wall `pkg-config --cflags ncurses` -c

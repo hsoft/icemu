@@ -75,4 +75,5 @@ int main()
     icemu_sim_add_chip(&mcu);
     icemu_sim_add_chip(&lm);
     icemu_sim_run();
+    return 0;
 }

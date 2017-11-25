@@ -41,4 +41,5 @@ int main()
     icemu_ui_add_element("MCU:", &mcu);
     icemu_sim_add_chip(&mcu);
     icemu_sim_run();
+    return 0;
 }

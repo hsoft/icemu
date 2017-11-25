@@ -29,8 +29,8 @@ struct PinList {
     Pin **pins;
 };
 
-Pin* icemu_pin_new(Chip *chip, const char *code, bool output, bool low_means_high);
-void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output, bool low_means_high);
+Pin* icemu_pin_new(Chip *chip, const char *code, bool output);
+void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output);
 bool icemu_pin_check_if_changed(Pin *pin);
 // returns true if a change occurred
 bool icemu_pin_set(Pin *pin, bool high); 

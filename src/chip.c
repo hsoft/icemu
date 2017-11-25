@@ -107,7 +107,7 @@ Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means
 {
     Pin *result;
 
-    result = icemu_pin_new(chip, code, output, low_means_high);
+    result = icemu_pin_new(chip, code, output);
     icemu_pinlist_add(&chip->pins, result);
     return result;
 }

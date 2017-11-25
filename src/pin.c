@@ -7,6 +7,22 @@
 #include "chip.h"
 
 /* Private */
+static void pin_trigger_change(Pin *pin)
+{
+    if ((pin->chip != NULL) && (pin->chip->pin_change_func != NULL)) {
+        pin->chip->pin_change_func(pin);
+    }
+}
+
+static bool pin_set(Pin *pin, bool high)
+{
+    if (high != pin->high) {
+        pin->high = high;
+        return true;
+    }
+    return false;
+}
+
 static void wire_propagate(PinList *wire)
 {
     // We propagate to one or zero other pin on the wire. Our goal is to:
@@ -16,6 +32,7 @@ static void wire_propagate(PinList *wire)
     bool wire_is_high = false;
     uint8_t i;
     Pin *p;
+    bool changed_pins[MAX_PINS_ON_A_WIRE] = { false };
 
     for (i = 0; i < wire->count; i++) {
         p = wire->pins[i];
@@ -26,23 +43,28 @@ static void wire_propagate(PinList *wire)
     }
     for (i = 0; i < wire->count; i++) {
         p = wire->pins[i];
-        if (!p->output && icemu_pin_set(p, wire_is_high)) {
-            break;
+        if (!p->output && pin_set(p, wire_is_high)) {
+            changed_pins[i] = true;
+        }
+    }
+    for (i = 0; i < wire->count; i++) {
+        if (changed_pins[i]) {
+            pin_trigger_change(wire->pins[i]);
         }
     }
 }
 
 /* Public */
 
-Pin* icemu_pin_new(Chip *chip, const char *code, bool output, bool low_means_high)
+Pin* icemu_pin_new(Chip *chip, const char *code, bool output)
 {
     Pin *pin;
     pin = malloc(sizeof(Pin));
-    icemu_pin_init(pin, chip, code, output, low_means_high);
+    icemu_pin_init(pin, chip, code, output);
     return pin;
 }
 
-void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output, bool low_means_high)
+void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output)
 {
     pin->chip = chip;
     pin->code = code;
@@ -54,14 +76,11 @@ void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output, bool lo
 
 bool icemu_pin_set(Pin *pin, bool high)
 {
-    if (high != pin->high) {
-        pin->high = high;
+    if (pin_set(pin, high)) {
         if (pin->output && (pin->wire != NULL)) {
             wire_propagate(pin->wire);
         }
-        if ((pin->chip != NULL) && (pin->chip->pin_change_func != NULL)) {
-            pin->chip->pin_change_func(pin);
-        }
+        pin_trigger_change(pin);
         return true;
     }
     return false;

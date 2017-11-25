@@ -17,7 +17,7 @@ static void test_dec_and_srs()
     icemu_SN74HC138_init(&dec);
     icemu_CD74AC164_init(&sr1);
     icemu_CD74AC164_init(&sr2);
-    icemu_pin_init(&pin, NULL, "PB4", true, false);
+    icemu_pin_init(&pin, NULL, "PB4", true);
     icemu_pin_set(&pin, true);
 
     icemu_pin_wireto(icemu_chip_getpin(&sr1, "CP"), icemu_chip_getpin(&dec, "Y0"));

@@ -131,7 +131,7 @@ void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
     icemu_chip_init(chip, (void *)lm, ledmatrix_pinchange, width * height);
     lm->width = width;
     lm->height = height;
-    icemu_pin_init(&lm->vcc, chip, "VCC", false, false);
+    icemu_pin_init(&lm->vcc, chip, "VCC", false);
     lm->leds = malloc(sizeof(LED) * width * height);
     for (i = 0; i < width * height; i++) {
         led_init(&lm->leds[i], &lm->vcc, icemu_chip_addpin(chip, "", false, false));

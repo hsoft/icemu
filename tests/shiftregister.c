@@ -34,7 +34,7 @@ static void assert_value(Chip *chip, uint8_t expected_value)
             val |= 1 << i;
         }
     }
-    assert(val == expected_value);
+    CU_ASSERT_EQUAL(val, expected_value);
 }
 
 static void test_IO_unbuffered()
@@ -87,6 +87,30 @@ static void test_disable_doesnt_reset_buffers()
     assert_value(&chip, expected);
 }
 
+static void test_reset()
+{
+    Chip chip;
+    ShiftRegister *sr;
+    uint8_t expected = 0x42;
+
+    icemu_CD74AC164_init(&chip);
+    sr = (ShiftRegister *)chip.logical_unit;
+
+    push_value(&chip, expected, false);
+    assert_value(&chip, expected);
+
+    icemu_pin_enable(sr->reset_pin, true);
+    assert_value(&chip, 0);
+
+    // When reset is enabled, pushing tuff does nothing.
+    push_value(&chip, expected, false);
+    assert_value(&chip, 0);
+
+    // Disabling reset doesn't bring our value back.
+    icemu_pin_enable(sr->reset_pin, true);
+    assert_value(&chip, 0);
+}
+
 void test_shiftregister_init()
 {
     CU_pSuite s;
@@ -95,4 +119,5 @@ void test_shiftregister_init()
     CU_ADD_TEST(s, test_IO_unbuffered);
     CU_ADD_TEST(s, test_IO_buffered);
     CU_ADD_TEST(s, test_disable_doesnt_reset_buffers);
+    CU_ADD_TEST(s, test_reset);
 }

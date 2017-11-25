@@ -8,6 +8,7 @@ typedef struct {
     Pin *serial2;
     Pin *buffer_pin;
     Pin *enable_pin;
+    Pin *reset_pin;
     PinList outputs;
 } ShiftRegister;
 

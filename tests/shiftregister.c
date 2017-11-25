@@ -80,6 +80,7 @@ static void test_disable_doesnt_reset_buffers()
     /* also, test that clocking the buffer pin doesn't change the output while it's disabled! */
     icemu_pin_set(sr->buffer_pin, false);
     icemu_pin_set(sr->buffer_pin, true);
+    assert_value(&chip, 0);
 
     icemu_pin_enable(sr->enable_pin, true);
     assert_value(&chip, expected);

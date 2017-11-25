@@ -7,10 +7,17 @@
 #include "chip.h"
 #include "util.h"
 
+/* Private */
+static void shiftregister_update_output(ShiftRegister *sr)
+{
+    if ((sr->enable_pin == NULL) || icemu_pin_isenabled(sr->enable_pin)) {
+        icemu_util_set_binary_value(&sr->outputs, sr->buffer);
+    }
+}
+
 static void shiftregister_pinchange(Pin *pin)
 {
     ShiftRegister *sr = (ShiftRegister *)pin->chip->logical_unit;
-    uint8_t val;
 
     if ((pin == sr->clock) && (pin->high)) {
         sr->buffer = sr->buffer << 1;
@@ -18,17 +25,16 @@ static void shiftregister_pinchange(Pin *pin)
             sr->buffer |= 0x1;
         }
         if (sr->buffer_pin == NULL) { //unbuffered, update now
-            icemu_util_set_binary_value(&sr->outputs, sr->buffer);
+            shiftregister_update_output(sr);
         }
     } else if ((pin == sr->buffer_pin) && (pin->high)) {
-        icemu_util_set_binary_value(&sr->outputs, sr->buffer);
+        shiftregister_update_output(sr);
     } else if (pin == sr->enable_pin) {
         if (icemu_pin_isenabled(pin)) {
-            val = sr->buffer;
+            shiftregister_update_output(sr);
         } else {
-            val = 0;
+            icemu_util_set_binary_value(&sr->outputs, 0);
         }
-        icemu_util_set_binary_value(&sr->outputs, val);
     }
 }
 
@@ -58,6 +64,7 @@ static ShiftRegister* shiftregister_new(Chip *chip, const char **input_codes, co
     return sr;
 }
 
+/* Public */
 void icemu_CD74AC164_init(Chip *chip)
 {
     ShiftRegister *sr;

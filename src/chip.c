@@ -4,10 +4,9 @@
 #include <string.h>
 
 #include "chip.h"
+#include "pin.h"
 #include "mcu.h"
 #include "util.h"
-
-#define MAX_CODE_LEN 10
 
 /* Private */
 
@@ -103,7 +102,7 @@ void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_fu
     icemu_pinlist_init(&chip->pins, pin_count);
 }
 
-Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means_high)
+Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output)
 {
     Pin *result;
 
@@ -112,21 +111,20 @@ Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means
     return result;
 }
 
+void icemu_chip_addpins(Chip *chip, PinList *dst_pinlist, const char **codes, bool output)
+{
+    uint8_t count, i;
+
+    count = icemu_util_chararray_count(codes);
+    icemu_pinlist_init(dst_pinlist, count);
+    for (i = 0; i < count; i++) {
+        icemu_pinlist_add(dst_pinlist, icemu_chip_addpin(chip, codes[i], output));
+    }
+}
+
 Pin* icemu_chip_getpin(Chip *chip, const char *code)
 {
-    uint8_t i;
-    const char *chip_code;
-
-    for (i = 0; i < chip->pins.count; i++) {
-        chip_code = chip->pins.pins[i]->code;
-        if (chip_code[0] == '~') {
-            chip_code++;
-        }
-        if (strncmp(code, chip_code, MAX_CODE_LEN) == 0) {
-            return chip->pins.pins[i];
-        }
-    }
-    return NULL;
+    return icemu_pinlist_find_by_code(&chip->pins, code);
 }
 
 void icemu_chip_elapse(Chip *chip, time_t usecs)

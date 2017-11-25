@@ -67,11 +67,11 @@ static ShiftRegister* shiftregister_new(Chip *chip, const char **input_codes, co
     sr->serial2 = NULL;
     sr->buffer_pin = NULL;
     for (i = 0; i < icount; i++) {
-        icemu_chip_addpin(chip, input_codes[i], false, false);
+        icemu_chip_addpin(chip, input_codes[i], false);
     }
     icemu_pinlist_init(&sr->outputs, ocount);
     for (i = 0; i < ocount; i++) {
-        icemu_pinlist_add(&sr->outputs, icemu_chip_addpin(chip, output_codes[i], true, false));
+        icemu_pinlist_add(&sr->outputs, icemu_chip_addpin(chip, output_codes[i], true));
     }
     return sr;
 }

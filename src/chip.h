@@ -21,6 +21,7 @@ struct Chip {
 };
 
 void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func, uint8_t pin_count);
-Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output, bool low_means_high);
+Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output);
+void icemu_chip_addpins(Chip *chip, PinList *dst_pinlist, const char **codes, bool output);
 Pin* icemu_chip_getpin(Chip *chip, const char *code);
 void icemu_chip_elapse(Chip *chip, time_t usecs);

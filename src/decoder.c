@@ -7,6 +7,7 @@
 #include "chip.h"
 #include "util.h"
 
+/* Private */
 static uint8_t get_binary_value(PinList *pinlist)
 {
     uint8_t result = 0;
@@ -20,22 +21,34 @@ static uint8_t get_binary_value(PinList *pinlist)
     return result;
 }
 
-static void decoder_pinchange(Pin *pin)
+static void decoder_update_output(Decoder *dec)
 {
     uint8_t value;
     uint8_t i;
-    Decoder *dec = (Decoder *)pin->chip->logical_unit;
 
-    value = get_binary_value(&dec->inputs);
+    if (icemu_pinlist_isenabled_all(&dec->enable_pins)) {
+        value = get_binary_value(&dec->serial_pins);
+    } else {
+        value = 0xff;
+    }
     for (i = 0; i < dec->outputs.count; i++) {
         icemu_pin_set(dec->outputs.pins[i], i != value);
     }
 }
 
-static Decoder* decoder_new(Chip *chip, const char **input_codes, const char **output_codes)
+static void decoder_pinchange(Pin *pin)
+{
+    decoder_update_output((Decoder *)pin->chip->logical_unit);
+}
+
+static Decoder* decoder_new(
+    Chip *chip,
+    const char **input_codes,
+    const char **output_codes,
+    const char **serial_codes,
+    const char **enable_codes)
 {
     Decoder *dec;
-    uint8_t i;
     uint8_t input_count;
     uint8_t output_count;
     uint8_t total_count;
@@ -46,23 +59,23 @@ static Decoder* decoder_new(Chip *chip, const char **input_codes, const char **o
 
     dec = (Decoder *)malloc(sizeof(Decoder));
     icemu_chip_init(chip, (void *)dec, decoder_pinchange, total_count);
-    icemu_pinlist_init(&dec->inputs, input_count);
-    for (i = 0; i < input_count; i++) {
-        icemu_pinlist_add(&dec->inputs, icemu_chip_addpin(chip, input_codes[i], false, false));
-    }
-    icemu_pinlist_init(&dec->outputs, output_count);
-    for (i = 0; i < output_count; i++) {
-        icemu_pinlist_add(&dec->outputs, icemu_chip_addpin(chip, output_codes[i], true, false));
-    }
-    // ensure proper initial value
-    decoder_pinchange(dec->inputs.pins[0]);
+    icemu_chip_addpins(chip, &dec->inputs, input_codes, false);
+    icemu_chip_addpins(chip, &dec->outputs, output_codes, true);
+    icemu_pinlist_subset_of_existing(&dec->serial_pins, &dec->inputs, serial_codes);
+    icemu_pinlist_subset_of_existing(&dec->enable_pins, &dec->inputs, enable_codes);
     return dec;
 }
 
+/* Public */
 void icemu_SN74HC138_init(Chip *chip)
 {
-    const char * input_codes[] = {"A", "B", "C", NULL};
+    const char * input_codes[] = {"A", "B", "C", "G1", "~G2A", "~G2B", NULL};
     const char * output_codes[] = {"Y0", "Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", NULL};
+    const char * serial_codes[] = {"A", "B", "C", NULL};
+    const char * enable_codes[] = {"G1", "G2A", "G2B", NULL};
 
-    decoder_new(chip, input_codes, output_codes);
+    decoder_new(chip, input_codes, output_codes, serial_codes, enable_codes);
+    icemu_chip_getpin(chip, "G1")->high = true;
+    // ensure proper initial value
+    decoder_update_output((Decoder *)chip->logical_unit);
 }

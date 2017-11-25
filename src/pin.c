@@ -5,6 +5,7 @@
 
 #include "pin.h"
 #include "chip.h"
+#include "util.h"
 
 /* Private */
 static void pin_trigger_change(Pin *pin)
@@ -90,7 +91,7 @@ bool icemu_pin_enable(Pin *pin, bool enabled)
 {
     bool high;
 
-    high = pin->high != pin->low_means_high;
+    high = enabled != pin->low_means_high;
     return icemu_pin_set(pin, high);
 }
 
@@ -136,6 +137,19 @@ void icemu_pinlist_init(PinList *pinlist, uint8_t capacity)
     memset(pinlist->pins, 0, sizeof(Pin *) * capacity);
 }
 
+void icemu_pinlist_subset_of_existing(
+    PinList *pinlist, PinList *existing, const char **codes)
+{
+    uint8_t count, i;
+
+    count = icemu_util_chararray_count(codes);
+    icemu_pinlist_init(pinlist, count);
+
+    for (i = 0; i < count; i++) {
+        icemu_pinlist_add(pinlist, icemu_pinlist_find_by_code(existing, codes[i]));
+    }
+}
+
 void icemu_pinlist_destroy(PinList *pinlist)
 {
     free(pinlist->pins);
@@ -145,6 +159,7 @@ void icemu_pinlist_destroy(PinList *pinlist)
 void icemu_pinlist_add(PinList *pinlist, Pin *pin)
 {
     assert(pinlist->count < pinlist->capacity);
+    assert(pin != NULL);
 
     pinlist->pins[pinlist->count] = pin;
     pinlist->count++;
@@ -160,4 +175,65 @@ int icemu_pinlist_find(PinList *pinlist, Pin *pin)
         }
     }
     return -1;
+}
+
+Pin* icemu_pinlist_find_by_code(PinList *pinlist, const char *code)
+{
+    uint8_t i;
+    const char *c;
+
+    for (i = 0; i < pinlist->count; i++) {
+        c = pinlist->pins[i]->code;
+        if (c[0] == '~') {
+            c++;
+        }
+        if (strncmp(code, c, MAX_CODE_LEN) == 0) {
+            return pinlist->pins[i];
+        }
+    }
+    return NULL;
+}
+
+bool icemu_pinlist_ishigh_any(PinList *pinlist)
+{
+    uint8_t i;
+    for (i = 0; i < pinlist->count; i++) {
+        if (pinlist->pins[i]->high) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool icemu_pinlist_ishigh_all(PinList *pinlist)
+{
+    uint8_t i;
+    for (i = 0; i < pinlist->count; i++) {
+        if (!pinlist->pins[i]->high) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool icemu_pinlist_isenabled_any(PinList *pinlist)
+{
+    uint8_t i;
+    for (i = 0; i < pinlist->count; i++) {
+        if (icemu_pin_isenabled(pinlist->pins[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool icemu_pinlist_isenabled_all(PinList *pinlist)
+{
+    uint8_t i;
+    for (i = 0; i < pinlist->count; i++) {
+        if (!icemu_pin_isenabled(pinlist->pins[i])) {
+            return false;
+        }
+    }
+    return true;
 }

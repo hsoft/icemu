@@ -57,7 +57,7 @@ static MCU* mcu_new(Chip *chip, const char **codes)
     icemu_chip_init(chip, (void *)mcu, mcu_pinchange, count);
     chip->elapse_func = mcu_elapse;
     for (i = 0; i < count; i++) {
-        icemu_chip_addpin(chip, codes[i], false, false);
+        icemu_chip_addpin(chip, codes[i], false);
     }
     return mcu;
 }

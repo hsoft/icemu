@@ -80,6 +80,8 @@ int main()
     }
     setup();
     icemu_sim_init(50, loop);
+    icemu_sim_add_chip(&mcu);
+    icemu_sim_add_chip(&seg);
     icemu_ui_add_element("MCU:", &mcu);
     icemu_ui_add_element("SR:", &sr);
     icemu_ui_add_element("Seg7:", &seg);

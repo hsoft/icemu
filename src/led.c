@@ -17,10 +17,15 @@ void led_init(LED *led, Pin *vcc, Pin *gnd)
 
 void led_update(LED *led)
 {
-    led->powered = led->vcc->high && !led->gnd->high;
-    if (!led->powered) {
-        // enable fade timeout
-        led->fade_timeout = LED_FADE_DELAY;
+    bool powered;
+
+    powered = led->vcc->high && !led->gnd->high;
+    if (powered != led->powered) {
+        led->powered = powered;
+        if (!led->powered) {
+            // enable fade timeout
+            led->fade_timeout = LED_FADE_DELAY;
+        }
     }
 }
 
@@ -39,11 +44,16 @@ bool led_lit(LED *led)
 static void ledmatrix_pinchange(Pin *pin)
 {
     LEDMatrix *lm = (LEDMatrix *)pin->chip->logical_unit;
-    int pinindex;
+    int i;
 
-    pinindex = icemu_pinlist_find(&pin->chip->pins, pin);
-    if (pinindex >=0) {
-        led_update(&lm->leds[pinindex]);
+    if (pin == &lm->vcc) {
+        // update all leds
+        for (i = 0; i < lm->width * lm->height; i++) {
+            led_update(&lm->leds[i]);
+        }
+    } else {
+        i = icemu_pinlist_find(&pin->chip->pins, pin);
+        led_update(&lm->leds[i]);
     }
 }
 
@@ -54,24 +64,24 @@ static void ledmatrix_pinchange(Pin *pin)
 static void seg7_asciiart(Chip *chip, ChipAsciiArt *dst)
 {
     char *s;
-    Pin **pins;
+    LEDMatrix *lm;
 
-    pins = chip->pins.pins;
+    lm = (LEDMatrix *)chip->logical_unit;
     s = dst->contents;
     dst->width = 4;
     dst->height = 3;
 
     s[0] = ' '; // always blank;
-    s[1] = !pins[0]->high ? '_' : ' '; // A
-    s[2] = !pins[7]->high ? '.' : ' '; // DP
+    s[1] = led_lit(&lm->leds[0]) ? '_' : ' '; // A
+    s[2] = led_lit(&lm->leds[7]) ? '.' : ' '; // DP
     s[3] = '\n';
-    s[4] = !pins[5]->high ? '|' : ' '; // F
-    s[5] = !pins[6]->high ? '_' : ' '; // G
-    s[6] = !pins[1]->high ? '|' : ' '; // B
+    s[4] = led_lit(&lm->leds[5]) ? '|' : ' '; // F
+    s[5] = led_lit(&lm->leds[6]) ? '_' : ' '; // G
+    s[6] = led_lit(&lm->leds[1]) ? '|' : ' '; // B
     s[7] = '\n';
-    s[8] = !pins[4]->high ? '|' : ' '; // E
-    s[9] = !pins[3]->high ? '_' : ' '; // D
-    s[10] = !pins[2]->high ? '|' : ' '; // C
+    s[8] = led_lit(&lm->leds[4]) ? '|' : ' '; // E
+    s[9] = led_lit(&lm->leds[3]) ? '_' : ' '; // D
+    s[10] = led_lit(&lm->leds[2]) ? '|' : ' '; // C
     s[11] = '\n';
     s[12] = '\0';
 }
@@ -126,18 +136,21 @@ void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
 {
     LEDMatrix *lm;
     uint8_t i;
+    Pin *p;
 
     lm = (LEDMatrix *)malloc(sizeof(LEDMatrix));
     icemu_chip_init(chip, (void *)lm, ledmatrix_pinchange, width * height);
     lm->width = width;
     lm->height = height;
-    icemu_pin_init(&lm->vcc, chip, "VCC", false);
     lm->leds = malloc(sizeof(LED) * width * height);
     for (i = 0; i < width * height; i++) {
-        led_init(&lm->leds[i], &lm->vcc, icemu_chip_addpin(chip, "", false));
+        p = icemu_chip_addpin(chip, "", false);
+        led_init(&lm->leds[i], &lm->vcc, p);
     }
+    icemu_pin_init(&lm->vcc, chip, "VCC", false);
     chip->asciiart_func = ledmatrix_asciiart;
     chip->elapse_func = ledmatrix_elapse;
+    icemu_pin_set(&lm->vcc, true);
 }
 
 Pin* icemu_ledmatrix_vcc(Chip *chip)

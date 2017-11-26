@@ -47,7 +47,7 @@ void icemu_pinlist_subset_of_existing(
     PinList *pinlist, PinList *existing, const char **codes);
 void icemu_pinlist_destroy(PinList *pinlist);
 void icemu_pinlist_add(PinList *pinlist, Pin *pin);
-int icemu_pinlist_find(PinList *pinlist, Pin *pin);
+int icemu_pinlist_find(const PinList *pinlist, const Pin *pin);
 Pin* icemu_pinlist_find_by_code(PinList *pinlist, const char *code);
 bool icemu_pinlist_ishigh_any(PinList *pinlist);
 bool icemu_pinlist_ishigh_all(PinList *pinlist);

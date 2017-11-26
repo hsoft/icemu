@@ -24,12 +24,12 @@ static bool pin_set(Pin *pin, bool high)
     return false;
 }
 
+// We propagate to one or zero other pin on the wire. Our goal is to:
+// 1. propagate state to all wired pins before any pin_change_func() call.
+// 2. call pin_change_func() for each changed pin *after* propagation occured.
+
 static void wire_propagate(PinList *wire)
 {
-    // We propagate to one or zero other pin on the wire. Our goal is to:
-    // 1. propagate state to all wired pins before any pin_change_func() call.
-    // 2. call pin_change_func() for each changed pin *after* propagation occured.
-
     bool wire_is_high = false;
     uint8_t i;
     Pin *p;
@@ -53,6 +53,30 @@ static void wire_propagate(PinList *wire)
             pin_trigger_change(wire->pins[i]);
         }
     }
+}
+
+/* We need to keep wired pins in a specific order to ensure proper execution order of pin_change()
+   operations. This order is the same as the creation order on the chip. Therefore, if you want
+   an input pin on a chip to be triggered before another input pin on the same chip when they're
+   wired together, make sure that this pin is added to the chip first.
+ */
+static int wire_compare_pins(const void *a, const void *b)
+{
+    const Pin *pa = *(const Pin **)a;
+    const Pin *pb = *(const Pin **)b;
+    uint8_t indexa, indexb;
+
+    if (pa->chip != NULL) {
+        indexa = icemu_pinlist_find(&pa->chip->pins, pa);
+    } else {
+        indexa = 0;
+    }
+    if (pb->chip != NULL) {
+        indexb = icemu_pinlist_find(&pb->chip->pins, pb);
+    } else {
+        indexb = 0;
+    }
+    return (int)indexa - (int)indexb;
 }
 
 /* Public */
@@ -126,6 +150,8 @@ void icemu_pin_wireto(Pin *pin, Pin *other)
             // TODO: merge the two wires
         }
     }
+    // we need to sort to ensure proper propagation order. See comment near wire_compare_pins().
+    qsort(pin->wire->pins, pin->wire->count, sizeof(Pin *), wire_compare_pins);
     wire_propagate(pin->wire);
 }
 
@@ -165,7 +191,7 @@ void icemu_pinlist_add(PinList *pinlist, Pin *pin)
     pinlist->count++;
 }
 
-int icemu_pinlist_find(PinList *pinlist, Pin *pin)
+int icemu_pinlist_find(const PinList *pinlist, const Pin *pin)
 {
     uint8_t i;
 

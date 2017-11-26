@@ -111,6 +111,36 @@ static void test_reset()
     assert_value(&chip, 0);
 }
 
+static void test_clock_and_buffer_pins_wired()
+{
+    /* In real life, when SRCLK and RCLK are wired together, the favlue that is sent to the output
+     * pins is *not* the one that is just being pushed by SRCLK, but the one before. We need to
+     * reproduce that behavior in the simulation too.
+     */
+    Chip chip;
+    ShiftRegister *sr;
+    Pin p;
+
+    icemu_SN74HC595_init(&chip);
+    sr = (ShiftRegister *)chip.logical_unit;
+    icemu_pin_init(&p, NULL, "OUT", true);
+    icemu_pin_wireto(&p, sr->clock);
+    icemu_pin_wireto(&p, sr->buffer_pin);
+
+    icemu_pin_set(sr->serial1, true);
+    icemu_pin_set(&p, false);
+    icemu_pin_set(&p, true);
+
+    // SRCLK *just* pushed its value. RCLK didn't catch it.
+    CU_ASSERT_FALSE(sr->outputs.pins[0]->high);
+
+    icemu_pin_set(&p, false);
+    icemu_pin_set(&p, true);
+
+    // *now* it did.
+    CU_ASSERT_TRUE(sr->outputs.pins[0]->high);
+}
+
 void test_shiftregister_init()
 {
     CU_pSuite s;
@@ -120,4 +150,5 @@ void test_shiftregister_init()
     CU_ADD_TEST(s, test_IO_buffered);
     CU_ADD_TEST(s, test_disable_doesnt_reset_buffers);
     CU_ADD_TEST(s, test_reset);
+    CU_ADD_TEST(s, test_clock_and_buffer_pins_wired);
 }

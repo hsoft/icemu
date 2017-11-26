@@ -7,6 +7,12 @@
 #include "chip.h"
 #include "util.h"
 
+/* About buffered SRs and input pins order
+ * The order of the pins in buffered SRs is important. It's important that buffer_pin
+ * come before the clock pin in the definition list so that wire propagation is done
+ * in the proper order. see test_clock_and_buffer_pins_wired().
+ */
+
 /* Private */
 static void shiftregister_update_output(ShiftRegister *sr)
 {
@@ -95,14 +101,14 @@ void icemu_CD74AC164_init(Chip *chip)
 void icemu_SN74HC595_init(Chip *chip)
 {
     ShiftRegister *sr;
-    const char * input_codes[] = {"SER", "SRCLK", "RCLK", "~OE", "~SRCLR", NULL};
+    const char * input_codes[] = {"SER", "RCLK", "~OE", "~SRCLR", "SRCLK", NULL};
     const char * output_codes[] = {"QA", "QB", "QC", "QD", "QE", "QF", "QG", "QH", NULL};
 
     sr = shiftregister_new(chip, input_codes, output_codes);
-    sr->clock = chip->pins.pins[1];
-    sr->serial1 = chip->pins.pins[0];
-    sr->buffer_pin = chip->pins.pins[2];
-    sr->enable_pin = chip->pins.pins[3];
-    sr->reset_pin = chip->pins.pins[4];
+    sr->clock = icemu_chip_getpin(chip, "SRCLK");
+    sr->serial1 = icemu_chip_getpin(chip, "SER");
+    sr->buffer_pin = icemu_chip_getpin(chip, "RCLK");
+    sr->enable_pin = icemu_chip_getpin(chip, "OE");
+    sr->reset_pin = icemu_chip_getpin(chip, "SRCLR");
     sr->reset_pin->high = true;
 }

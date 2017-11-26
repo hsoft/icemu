@@ -4,6 +4,7 @@
 
 #include "sim.h"
 #include "ui.h"
+#include "util.h"
 
 #define MAX_SIM_ACTIONS 30
 #define MAX_SIM_CHIPS 256
@@ -26,13 +27,6 @@ typedef struct {
 static Simulation sim;
 
 /* Private */
-static time_t timestamp() {
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000 * 1000) + tv.tv_usec;
-}
-
 // the timestamp we need to be at to increase the tick
 static time_t sim_clock_target()
 {
@@ -44,7 +38,7 @@ static void sim_wait_until_next_tick()
     time_t ts, target;
 
     target = sim_clock_target();
-    ts = timestamp();
+    ts = icemu_util_timestamp();
     if (ts < target) {
         usleep(target - ts);
     }
@@ -86,7 +80,7 @@ static void sim_tick()
 void icemu_sim_init(time_t resolution, RunloopFunc runloop)
 {
     sim.running = true;
-    sim.epoch = timestamp();
+    sim.epoch = icemu_util_timestamp();
     sim.ticks = 0;
     sim.resolution = resolution;
     sim.runloop = runloop;
@@ -144,11 +138,11 @@ void icemu_sim_delay(time_t usecs)
 {
     time_t ts, target, tick_target;
 
-    ts = timestamp();
+    ts = icemu_util_timestamp();
     target = ts + usecs;
     tick_target = sim_clock_target();
     if (target > tick_target) {
-        while (sim.running && (timestamp() < target)) {
+        while (sim.running && (icemu_util_timestamp() < target)) {
             sim_wait_until_next_tick();
             sim_tick();
         }

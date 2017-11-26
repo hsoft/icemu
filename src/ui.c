@@ -7,6 +7,7 @@
 #include "util.h"
 
 #define MAX_ELEMENTS 100
+#define REFRESH_UI_INTERVAL 200 * 1000
 
 typedef struct {
     char *title;
@@ -16,6 +17,7 @@ typedef struct {
 static WINDOW *main_window;
 static Element * elements[MAX_ELEMENTS] = { 0 };
 static char * labels[MAX_ELEMENTS] = { 0 };
+static time_t last_refresh_ts = 0;
 
 /* Private */
 static void ui_refresh_elements()
@@ -119,9 +121,15 @@ void icemu_ui_add_label(char *name)
 // Returns the key that was pressed or -1 if none
 int icemu_ui_refresh()
 {
-    erase();
-    ui_refresh_elements();
-    ui_refresh_labels();
-    refresh();
+    time_t ts;
+
+    ts = icemu_util_timestamp();
+    if (ts - last_refresh_ts >= REFRESH_UI_INTERVAL) {
+        last_refresh_ts = ts;
+        erase();
+        ui_refresh_elements();
+        ui_refresh_labels();
+        refresh();
+    }
     return getch();
 }

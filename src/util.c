@@ -21,3 +21,10 @@ void icemu_util_set_binary_value(PinList *pinlist, uint16_t val)
     }
 }
 
+time_t icemu_util_timestamp()
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000 * 1000) + tv.tv_usec;
+}

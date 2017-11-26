@@ -150,3 +150,11 @@ void icemu_sim_delay(time_t usecs)
         usleep(usecs);
     }
 }
+
+time_t icemu_sim_elapsed_usecs()
+{
+    time_t ts;
+
+    ts = icemu_util_timestamp();
+    return ts - sim.epoch;
+}

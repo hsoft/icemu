@@ -34,3 +34,4 @@ void icemu_sim_add_chip(Chip *chip);
 void icemu_sim_add_action(char key, char *label, UIActionFunc func);
 void icemu_sim_run();
 void icemu_sim_delay(time_t usecs);
+time_t icemu_sim_elapsed_usecs();

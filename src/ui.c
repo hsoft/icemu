@@ -4,6 +4,7 @@
 
 #include "ui.h"
 #include "chip.h"
+#include "sim.h"
 #include "util.h"
 
 #define MAX_ELEMENTS 100
@@ -18,6 +19,7 @@ static WINDOW *main_window;
 static Element * elements[MAX_ELEMENTS] = { 0 };
 static char * labels[MAX_ELEMENTS] = { 0 };
 static time_t last_refresh_ts = 0;
+static bool show_keybindings = false;
 
 /* Private */
 static void ui_refresh_elements()
@@ -54,7 +56,7 @@ static void ui_refresh_elements()
     }
 }
 
-static void ui_refresh_labels()
+static void ui_draw_menu()
 {
     int x, y, maxh, i, lblw, lblh;
 
@@ -67,11 +69,41 @@ static void ui_refresh_labels()
         lblw = MAX(lblw, strnlen(labels[i], 0xff));
     }
     lblh = i;
+    // -1 because we need one line for the bottom bar
     y = maxh - lblh - 1;
     x = 0;
     for (i = 0; i < lblh; i++) {
         mvaddnstr(y+i, x, labels[i], lblw);
     }
+}
+
+static void ui_draw_bottom_bar()
+{
+    int maxy, count;
+    time_t elapsed;
+    unsigned int elapsed_s, elapsed_sub;
+    char s[20];
+
+    maxy = getmaxy(main_window);
+    mvaddnstr(maxy - 1, 0, "(?) Keybindings", 15);
+
+    elapsed = icemu_sim_elapsed_usecs();
+    elapsed_s = elapsed / (1000 * 1000);
+    elapsed_sub = (elapsed / (100 * 1000)) % 10;
+    count = sprintf(s, "Time: %d.%ds", elapsed_s, elapsed_sub);
+    mvaddnstr(maxy - 1, 18, s, count);
+}
+
+static int ui_getkey()
+{
+    int ch;
+
+    ch = getch();
+    if (ch == '?') {
+        show_keybindings = !show_keybindings;
+        ch = -1;
+    }
+    return ch;
 }
 
 /* Public */
@@ -128,8 +160,11 @@ int icemu_ui_refresh()
         last_refresh_ts = ts;
         erase();
         ui_refresh_elements();
-        ui_refresh_labels();
+        if (show_keybindings) {
+            ui_draw_menu();
+        }
+        ui_draw_bottom_bar();
         refresh();
     }
-    return getch();
+    return ui_getkey();
 }

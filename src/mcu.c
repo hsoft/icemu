@@ -20,12 +20,16 @@ static void mcu_pinchange(Pin *pin)
 {
     int pinindex;
     MCU *mcu;
+    MCUInterruptType t;
 
     pinindex = icemu_pinlist_find(&pin->chip->pins, pin);
     if (pinindex >= 0) {
         mcu = (MCU *)pin->chip->logical_unit;
-        if (mcu->interrupts[pinindex] != NULL) {
-            mcu->interrupts[pinindex]();
+        if (mcu->interrupts[pinindex].func != NULL) {
+            t = mcu->interrupts[pinindex].type;
+            if ((t == INTERRUPT_ON_BOTH) || ((t == INTERRUPT_ON_RISING) == pin->high)) {
+                mcu->interrupts[pinindex].func();
+            }
         }
     }
 }
@@ -52,7 +56,7 @@ static MCU* mcu_new(Chip *chip, const char **codes)
 
     count = icemu_util_chararray_count(codes);
     mcu = (MCU *)malloc(sizeof(MCU));
-    memset(mcu->interrupts, 0, sizeof(InterruptFunc) * MAX_INTERRUPTS);
+    memset(mcu->interrupts, 0, sizeof(MCUInterrupt) * MAX_INTERRUPTS);
     memset(mcu->timers, 0, sizeof(MCUTimer) * MAX_TIMERS);
     icemu_chip_init(chip, (void *)mcu, mcu_pinchange, count);
     chip->elapse_func = mcu_elapse;
@@ -63,7 +67,7 @@ static MCU* mcu_new(Chip *chip, const char **codes)
 }
 
 /* Public */
-void icemu_mcu_add_interrupt(Chip *chip, Pin *pin, InterruptFunc interrupt)
+void icemu_mcu_add_interrupt(Chip *chip, Pin *pin, MCUInterruptType type, InterruptFunc interrupt)
 {
     int pinindex;
     MCU *mcu;
@@ -71,7 +75,8 @@ void icemu_mcu_add_interrupt(Chip *chip, Pin *pin, InterruptFunc interrupt)
     pinindex = icemu_pinlist_find(&chip->pins, pin);
     if (pinindex >= 0) {
         mcu = (MCU *)chip->logical_unit;
-        mcu->interrupts[pinindex] = interrupt;
+        mcu->interrupts[pinindex].type = type;
+        mcu->interrupts[pinindex].func = interrupt;
     }
 }
 

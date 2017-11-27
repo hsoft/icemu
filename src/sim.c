@@ -16,9 +16,10 @@ typedef struct {
 
 typedef struct {
     bool running;
-    time_t epoch; // usecs
+    time_t next_tick_target; // usecs
     time_t ticks;
     time_t resolution; // usecs per tick
+    bool paused;
     RunloopFunc runloop;
     UIAction actions[MAX_SIM_ACTIONS];
     Chip * chips[MAX_SIM_CHIPS];
@@ -27,20 +28,13 @@ typedef struct {
 static Simulation sim;
 
 /* Private */
-// the timestamp we need to be at to increase the tick
-static time_t sim_clock_target()
-{
-    return sim.epoch + sim.ticks * sim.resolution;
-}
-
 static void sim_wait_until_next_tick()
 {
-    time_t ts, target;
+    time_t ts;
 
-    target = sim_clock_target();
     ts = icemu_util_timestamp();
-    if (ts < target) {
-        usleep(target - ts);
+    if (ts < sim.next_tick_target) {
+        usleep(sim.next_tick_target - ts);
     }
 }
 
@@ -61,7 +55,7 @@ static void sim_keypress(char key)
 
 static void sim_tick()
 {
-    int key, i;
+    int i;
 
     sim.ticks++;
     for (i = 0; i < MAX_SIM_CHIPS; i++) {
@@ -69,6 +63,20 @@ static void sim_tick()
             break;
         }
         icemu_chip_elapse(sim.chips[i], sim.resolution);
+    }
+    sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
+}
+
+static void sim_loop_once(RunloopFunc runloop)
+{
+    int key;
+
+    if (!sim.paused) {
+        sim_wait_until_next_tick();
+        if (runloop != NULL) {
+            runloop();
+        }
+        sim_tick();
     }
     key = icemu_ui_refresh();
     if (key >= 0) {
@@ -80,9 +88,10 @@ static void sim_tick()
 void icemu_sim_init(time_t resolution, RunloopFunc runloop)
 {
     sim.running = true;
-    sim.epoch = icemu_util_timestamp();
     sim.ticks = 0;
     sim.resolution = resolution;
+    sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
+    sim.paused = false;
     sim.runloop = runloop;
     memset(sim.actions, 0, sizeof(UIAction) * MAX_SIM_ACTIONS);
     memset(sim.chips, 0, sizeof(Chip *) * MAX_SIM_CHIPS);
@@ -123,38 +132,29 @@ void icemu_sim_run()
 {
     icemu_ui_init();
     icemu_sim_add_action('q', "(Q)uit", icemu_sim_stop);
+    icemu_sim_add_action('p', "(P)ause/Resume", icemu_sim_toggle_paused);
     icemu_ui_refresh();
     while (sim.running) {
-        sim_wait_until_next_tick();
-        if (sim.runloop != NULL) {
-            sim.runloop();
-        }
-        sim_tick();
+        sim_loop_once(sim.runloop);
     }
     icemu_ui_deinit();
 }
 
 void icemu_sim_delay(time_t usecs)
 {
-    time_t ts, target, tick_target;
-
-    ts = icemu_util_timestamp();
-    target = ts + usecs;
-    tick_target = sim_clock_target();
-    if (target > tick_target) {
-        while (sim.running && (icemu_util_timestamp() < target)) {
-            sim_wait_until_next_tick();
-            sim_tick();
-        }
-    } else {
-        usleep(usecs);
+    while (usecs >= sim.resolution) {
+        sim_loop_once(NULL);
+        usecs -= sim.resolution;
     }
+    usleep(usecs);
 }
 
 time_t icemu_sim_elapsed_usecs()
 {
-    time_t ts;
+    return sim.ticks * sim.resolution;
+}
 
-    ts = icemu_util_timestamp();
-    return ts - sim.epoch;
+void icemu_sim_toggle_paused()
+{
+    sim.paused = !sim.paused;
 }

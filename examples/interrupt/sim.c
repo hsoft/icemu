@@ -14,7 +14,7 @@ void int0_interrupt();
 /* layer impl */
 void setup_interrupt()
 {
-    icemu_mcu_add_interrupt(&mcu, pb0, int0_interrupt);
+    icemu_mcu_add_interrupt(&mcu, pb0, INTERRUPT_ON_BOTH, int0_interrupt);
 }
 
 void pinset(bool high)

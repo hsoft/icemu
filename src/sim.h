@@ -24,15 +24,36 @@
    wait 1s, you don't want to stop UI refreshes for this.
  */
 
+#define MAX_SIM_ACTIONS 30
+#define MAX_SIM_CHIPS 256
+
 typedef void (*UIActionFunc)();
 
 typedef void (*RunloopFunc)();
 
+typedef struct {
+    char key;
+    UIActionFunc func;
+} UIAction;
+
+typedef struct {
+    bool running;
+    time_t next_tick_target; // usecs
+    time_t ticks;
+    time_t resolution; // usecs per tick
+    bool paused;
+    RunloopFunc runloop;
+    UIAction actions[MAX_SIM_ACTIONS];
+    Chip * chips[MAX_SIM_CHIPS];
+} Simulation;
+
 void icemu_sim_init(time_t resolution, RunloopFunc runloop);
+Simulation* icemu_sim_get();
 void icemu_sim_stop();
 void icemu_sim_add_chip(Chip *chip);
 void icemu_sim_add_action(char key, char *label, UIActionFunc func);
 void icemu_sim_run();
 void icemu_sim_delay(time_t usecs);
 time_t icemu_sim_elapsed_usecs();
-void icemu_sim_toggle_paused();
+bool icemu_sim_ispaused();
+void icemu_sim_setpaused(bool paused);

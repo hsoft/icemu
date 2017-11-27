@@ -79,19 +79,24 @@ static void ui_draw_menu()
 
 static void ui_draw_bottom_bar()
 {
+    Simulation *sim;
     int maxy, count;
     time_t elapsed;
     unsigned int elapsed_s, elapsed_sub;
-    char s[20];
-
-    maxy = getmaxy(main_window);
-    mvaddnstr(maxy - 1, 0, "(?) Keybindings", 15);
+    char s[100];
+    const char *paused_s;
 
     elapsed = icemu_sim_elapsed_usecs();
     elapsed_s = elapsed / (1000 * 1000);
     elapsed_sub = (elapsed / (100 * 1000)) % 10;
-    count = sprintf(s, "Time: %d.%ds", elapsed_s, elapsed_sub);
-    mvaddnstr(maxy - 1, 18, s, count);
+
+    sim = icemu_sim_get();
+    paused_s = sim->paused ? " (Paused)" : "";
+    count = sprintf(
+        s, "(?) Keybindings  Time: %d.%ds%s Ticks: %ld",
+        elapsed_s, elapsed_sub, paused_s, sim->ticks);
+    maxy = getmaxy(main_window);
+    mvaddnstr(maxy - 1, 0, s, count);
 }
 
 static int ui_getkey()

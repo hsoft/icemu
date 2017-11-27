@@ -6,25 +6,6 @@
 #include "ui.h"
 #include "util.h"
 
-#define MAX_SIM_ACTIONS 30
-#define MAX_SIM_CHIPS 256
-
-typedef struct {
-    char key;
-    UIActionFunc func;
-} UIAction;
-
-typedef struct {
-    bool running;
-    time_t next_tick_target; // usecs
-    time_t ticks;
-    time_t resolution; // usecs per tick
-    bool paused;
-    RunloopFunc runloop;
-    UIAction actions[MAX_SIM_ACTIONS];
-    Chip * chips[MAX_SIM_CHIPS];
-} Simulation;
-
 static Simulation sim;
 
 /* Private */
@@ -84,6 +65,17 @@ static void sim_loop_once(RunloopFunc runloop)
     }
 }
 
+static void sim_toggle_paused()
+{
+    sim.paused = !sim.paused;
+}
+
+static void sim_run_one_tick()
+{
+    sim.paused = true;
+    sim_tick();
+}
+
 /* Public */
 void icemu_sim_init(time_t resolution, RunloopFunc runloop)
 {
@@ -95,6 +87,11 @@ void icemu_sim_init(time_t resolution, RunloopFunc runloop)
     sim.runloop = runloop;
     memset(sim.actions, 0, sizeof(UIAction) * MAX_SIM_ACTIONS);
     memset(sim.chips, 0, sizeof(Chip *) * MAX_SIM_CHIPS);
+}
+
+Simulation* icemu_sim_get()
+{
+    return &sim;
 }
 
 void icemu_sim_stop()
@@ -132,7 +129,8 @@ void icemu_sim_run()
 {
     icemu_ui_init();
     icemu_sim_add_action('q', "(Q)uit", icemu_sim_stop);
-    icemu_sim_add_action('p', "(P)ause/Resume", icemu_sim_toggle_paused);
+    icemu_sim_add_action('p', "(P)ause/Resume", sim_toggle_paused);
+    icemu_sim_add_action('t', "Run one (t)ick", sim_run_one_tick);
     icemu_ui_refresh();
     while (sim.running) {
         sim_loop_once(sim.runloop);
@@ -154,7 +152,3 @@ time_t icemu_sim_elapsed_usecs()
     return sim.ticks * sim.resolution;
 }
 
-void icemu_sim_toggle_paused()
-{
-    sim.paused = !sim.paused;
-}

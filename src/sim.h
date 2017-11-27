@@ -44,24 +44,53 @@ typedef enum {
     SIM_RUNMODE_STOP
 } SimRunMode;
 
-typedef struct {
-    SimRunMode runmode;
-    time_t next_tick_target; // usecs
-    time_t ticks;
-    time_t resolution; // usecs per tick
-    RunloopFunc runloop;
-    UIAction actions[MAX_SIM_ACTIONS];
-    Chip * chips[MAX_SIM_CHIPS];
-    Pin * triggers[MAX_SIM_TRIGGERS];
-} Simulation;
-
+/* Initialize the simulation
+ *
+ * resolution: the amount of usecs that each runloop pass is going to take. If it's executed
+ *             faster, we wait before running the next pass. You should set this value to the
+ *             expected time (including delay() calls) *on the MCU* for a proper simulation.
+ * runloop: a pointer to your runloop. The runloop is a function that executes *one pass*, not
+ *          an infinite loop. This is going to be called once every tick.
+ */
 void icemu_sim_init(time_t resolution, RunloopFunc runloop);
-Simulation* icemu_sim_get();
+
+/* Adds a chip to the simulation
+ *
+ * When doing so, that chips "elapse" function will be called appropriately. Not all chips do
+ * stuff on "elapse()", but it doesn't hurt to add all your chips. You will always want to add
+ * your MCU, otherwise timers won't work.
+ */
 void icemu_sim_add_chip(Chip *chip);
+
+/* Add custom action to the keybindings
+ */
 void icemu_sim_add_action(char key, char *label, UIActionFunc func);
+
+/* Add global pin trigger
+ *
+ * This is for the "Run until next trigger" feature. Adding a pin with this function will make
+ * the simulation stop on that pin's next change when we're in "Run until next trigger" mode.
+ */
 void icemu_sim_add_trigger(Pin *pin);
+
+/* Run the simulation
+ *
+ * This is the main function of the simulation. Run this after you're finished configuring the
+ * thing. This function returns when the user decided to quit de simulation.
+ */
 void icemu_sim_run();
+
+/* Sleep of `usecs`
+ *
+ * This is equivalent to calling `usleep(usecs)`, with one caveat: if `usecs` is greater than
+ * the simulation resolution, this function properly refreshes the UI (without calling the
+ * runloop). Use this function as a shim for "delay()" calls on your MCU.
+ */
 void icemu_sim_delay(time_t usecs);
+
+/* Simulation Properties */
 time_t icemu_sim_elapsed_usecs();
 SimRunMode icemu_sim_runmode();
 void icemu_sim_set_runmode(SimRunMode runmode);
+time_t icemu_sim_resolution();
+time_t icemu_sim_ticks();

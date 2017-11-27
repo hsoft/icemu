@@ -6,6 +6,17 @@
 #include "ui.h"
 #include "util.h"
 
+typedef struct {
+    SimRunMode runmode;
+    time_t next_tick_target; // usecs
+    time_t ticks;
+    time_t resolution; // usecs per tick
+    RunloopFunc runloop;
+    UIAction actions[MAX_SIM_ACTIONS];
+    Chip * chips[MAX_SIM_CHIPS];
+    Pin * triggers[MAX_SIM_TRIGGERS];
+} Simulation;
+
 static Simulation sim;
 
 /* Private */
@@ -201,4 +212,14 @@ SimRunMode icemu_sim_runmode()
 void icemu_sim_set_runmode(SimRunMode runmode)
 {
     sim.runmode = runmode;
+}
+
+time_t icemu_sim_resolution()
+{
+    return sim.resolution;
+}
+
+time_t icemu_sim_ticks()
+{
+    return sim.ticks;
 }

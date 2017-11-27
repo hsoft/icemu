@@ -79,7 +79,6 @@ static void ui_draw_menu()
 
 static void ui_draw_bottom_bar()
 {
-    Simulation *sim;
     int maxy, count;
     time_t elapsed;
     unsigned int elapsed_s, elapsed_sub;
@@ -90,11 +89,10 @@ static void ui_draw_bottom_bar()
     elapsed_s = elapsed / (1000 * 1000);
     elapsed_sub = (elapsed / (100 * 1000)) % 10;
 
-    sim = icemu_sim_get();
-    paused_s = sim->runmode == SIM_RUNMODE_PAUSE ? " (Paused)" : "";
+    paused_s = icemu_sim_runmode() == SIM_RUNMODE_PAUSE ? " (Paused)" : "";
     count = sprintf(
         s, "(?) Keybindings  Time: %d.%ds%s Ticks: %ld",
-        elapsed_s, elapsed_sub, paused_s, sim->ticks);
+        elapsed_s, elapsed_sub, paused_s, icemu_sim_ticks());
     maxy = getmaxy(main_window);
     mvaddnstr(maxy - 1, 0, s, count);
 }

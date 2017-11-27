@@ -21,6 +21,19 @@ void icemu_util_set_binary_value(PinList *pinlist, uint16_t val)
     }
 }
 
+uint16_t icemu_util_get_binary_value(PinList *pinlist)
+{
+    uint8_t i;
+    uint8_t val = 0;
+
+    for (i = 0; i < pinlist->count; i++) {
+        if (pinlist->pins[i]->high) {
+            val |= 1 << i;
+        }
+    }
+    return val;
+}
+
 time_t icemu_util_timestamp()
 {
     struct timeval tv;

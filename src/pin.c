@@ -275,3 +275,19 @@ bool icemu_pinlist_isenabled_all(PinList *pinlist)
     }
     return true;
 }
+
+void icemu_pinlist_set_all(PinList *pinlist, bool high)
+{
+    uint8_t i;
+    for (i = 0; i < pinlist->count; i++) {
+        icemu_pin_set(pinlist->pins[i], high);
+    }
+}
+
+void icemu_pinlist_enable_all(PinList *pinlist, bool enabled)
+{
+    uint8_t i;
+    for (i = 0; i < pinlist->count; i++) {
+        icemu_pin_enable(pinlist->pins[i], enabled);
+    }
+}

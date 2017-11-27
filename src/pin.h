@@ -56,3 +56,5 @@ bool icemu_pinlist_ishigh_any(PinList *pinlist);
 bool icemu_pinlist_ishigh_all(PinList *pinlist);
 bool icemu_pinlist_isenabled_any(PinList *pinlist);
 bool icemu_pinlist_isenabled_all(PinList *pinlist);
+void icemu_pinlist_set_all(PinList *pinlist, bool high);
+void icemu_pinlist_enable_all(PinList *pinlist, bool enabled);

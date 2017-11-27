@@ -26,15 +26,7 @@ static void push_value(Chip *chip, uint8_t val, bool buffered)
 static void assert_value(Chip *chip, uint8_t expected_value)
 {
     ShiftRegister *sr = (ShiftRegister *)chip->logical_unit;
-    uint8_t i;
-    uint8_t val = 0;
-
-    for (i = 0; i < sr->outputs.count; i++) {
-        if (sr->outputs.pins[i]->high) {
-            val |= 1 << i;
-        }
-    }
-    CU_ASSERT_EQUAL(val, expected_value);
+    CU_ASSERT_EQUAL(icemu_util_get_binary_value(&sr->outputs), expected_value);
 }
 
 static void test_IO_unbuffered()

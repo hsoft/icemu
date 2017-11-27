@@ -4,6 +4,7 @@
 #include "decoder.h"
 #include "shiftregister.h"
 #include "counter.h"
+#include "gate.h"
 #include "led.h"
 #include "mcu.h"
 #include "util.h"

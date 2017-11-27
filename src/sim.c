@@ -48,11 +48,11 @@ static void sim_tick()
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
 }
 
-static void sim_loop_once(RunloopFunc runloop)
+static bool sim_loop_once(RunloopFunc runloop)
 {
     int key;
 
-    if (!sim.paused) {
+    if (sim.runmode != SIM_RUNMODE_PAUSE) {
         sim_wait_until_next_tick();
         if (runloop != NULL) {
             runloop();
@@ -63,40 +63,65 @@ static void sim_loop_once(RunloopFunc runloop)
     if (key >= 0) {
         sim_keypress((char)key);
     }
+    return sim.runmode != SIM_RUNMODE_PAUSE;
+}
+
+static void sim_stop()
+{
+    sim.runmode = SIM_RUNMODE_STOP;
 }
 
 static void sim_toggle_paused()
 {
-    sim.paused = !sim.paused;
+    if (sim.runmode == SIM_RUNMODE_PAUSE) {
+        sim.runmode = SIM_RUNMODE_RUN;
+    } else {
+        sim.runmode = SIM_RUNMODE_PAUSE;
+    }
 }
 
 static void sim_run_one_tick()
 {
-    sim.paused = true;
+    sim.runmode = SIM_RUNMODE_PAUSE;
     sim_tick();
+}
+
+static void sim_run_until_trigger()
+{
+    sim.runmode = SIM_RUNMODE_TRIGGER;
+}
+
+static void sim_global_pinchange(Pin *pin)
+{
+    Pin **p;
+
+    if (sim.runmode == SIM_RUNMODE_TRIGGER) {
+        p = sim.triggers;
+        while (*p != NULL) {
+            if (*p == pin) {
+                sim.runmode = SIM_RUNMODE_PAUSE;
+            }
+            p++;
+        }
+    }
 }
 
 /* Public */
 void icemu_sim_init(time_t resolution, RunloopFunc runloop)
 {
-    sim.running = true;
+    sim.runmode = SIM_RUNMODE_RUN;
     sim.ticks = 0;
     sim.resolution = resolution;
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
-    sim.paused = false;
     sim.runloop = runloop;
-    memset(sim.actions, 0, sizeof(UIAction) * MAX_SIM_ACTIONS);
-    memset(sim.chips, 0, sizeof(Chip *) * MAX_SIM_CHIPS);
+    memset(sim.actions, 0, sizeof(sim.actions));
+    memset(sim.chips, 0, sizeof(sim.chips));
+    memset(sim.triggers, 0, sizeof(sim.triggers));
 }
 
 Simulation* icemu_sim_get()
 {
     return &sim;
-}
-
-void icemu_sim_stop()
-{
-    sim.running = false;
 }
 
 void icemu_sim_add_chip(Chip *chip)
@@ -125,14 +150,26 @@ void icemu_sim_add_action(char key, char *label, UIActionFunc func)
     icemu_ui_add_label(label);
 }
 
+void icemu_sim_add_trigger(Pin *pin)
+{
+    Pin **p = sim.triggers;
+
+    while (*p != NULL) p++;
+    *p = pin;
+}
+
 void icemu_sim_run()
 {
     icemu_ui_init();
-    icemu_sim_add_action('q', "(Q)uit", icemu_sim_stop);
+    icemu_sim_add_action('q', "(Q)uit", sim_stop);
     icemu_sim_add_action('p', "(P)ause/Resume", sim_toggle_paused);
     icemu_sim_add_action('t', "Run one (t)ick", sim_run_one_tick);
+    if (sim.triggers[0] != NULL) {
+        icemu_sim_add_action('g', "Run until tri(g)ger", sim_run_until_trigger);
+        icemu_pin_set_global_pinchange_trigger(sim_global_pinchange);
+    }
     icemu_ui_refresh();
-    while (sim.running) {
+    while (sim.runmode != SIM_RUNMODE_STOP) {
         sim_loop_once(sim.runloop);
     }
     icemu_ui_deinit();
@@ -141,8 +178,12 @@ void icemu_sim_run()
 void icemu_sim_delay(time_t usecs)
 {
     while (usecs >= sim.resolution) {
-        sim_loop_once(NULL);
-        usecs -= sim.resolution;
+        if (sim_loop_once(NULL)) {
+            usecs -= sim.resolution;
+        }
+        if (sim.runmode == SIM_RUNMODE_STOP) {
+            return;
+        }
     }
     usleep(usecs);
 }
@@ -152,3 +193,12 @@ time_t icemu_sim_elapsed_usecs()
     return sim.ticks * sim.resolution;
 }
 
+SimRunMode icemu_sim_runmode()
+{
+    return sim.runmode;
+}
+
+void icemu_sim_set_runmode(SimRunMode runmode)
+{
+    sim.runmode = runmode;
+}

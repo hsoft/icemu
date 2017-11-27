@@ -8,7 +8,6 @@ typedef struct {
     char contents[4096]; // should be enough for any chip
 } ChipAsciiArt;
 
-typedef void (*PinChangeFunc)(Pin *);
 typedef void (*AsciiArtFunc)(Chip *, ChipAsciiArt *);
 typedef void (*ElapseFunc)(Chip *, time_t);
 

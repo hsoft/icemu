@@ -7,11 +7,18 @@
 #include "chip.h"
 #include "util.h"
 
+// This is used by the "Run until next trigger" feature in Simulation.
+// If not null, it's called on *every* pin change.
+static PinChangeFunc global_pinchange_trigger = NULL;
+
 /* Private */
 static void pin_trigger_change(Pin *pin)
 {
     if ((pin->chip != NULL) && (pin->chip->pin_change_func != NULL)) {
         pin->chip->pin_change_func(pin);
+    }
+    if (global_pinchange_trigger != NULL) {
+        global_pinchange_trigger(pin);
     }
 }
 
@@ -153,6 +160,11 @@ void icemu_pin_wireto(Pin *pin, Pin *other)
     // we need to sort to ensure proper propagation order. See comment near wire_compare_pins().
     qsort(pin->wire->pins, pin->wire->count, sizeof(Pin *), wire_compare_pins);
     wire_propagate(pin->wire);
+}
+
+void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func)
+{
+    global_pinchange_trigger = func;
 }
 
 void icemu_pinlist_init(PinList *pinlist, uint8_t capacity)

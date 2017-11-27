@@ -39,6 +39,8 @@ int main()
     setup();
     icemu_sim_init(50, loop);
     icemu_ui_add_element("MCU:", &mcu);
+    // Demonstrate the trigger feature in Simulation.
+    icemu_sim_add_trigger(pb1);
     icemu_sim_run();
     return 0;
 }

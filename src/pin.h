@@ -25,6 +25,8 @@ typedef struct Pin {
     PinList *wire;
 } Pin;
 
+typedef void (*PinChangeFunc)(Pin *);
+
 struct PinList {
     uint8_t capacity;
     uint8_t count;
@@ -40,6 +42,7 @@ bool icemu_pin_set(Pin *pin, bool high);
 bool icemu_pin_enable(Pin *pin, bool enabled);
 bool icemu_pin_isenabled(Pin *pin);
 void icemu_pin_wireto(Pin *pin, Pin *other);
+void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func);
 
 PinList* icemu_pinlist_new(uint8_t capacity);
 void icemu_pinlist_init(PinList *pinlist, uint8_t capacity);

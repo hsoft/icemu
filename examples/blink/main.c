@@ -6,7 +6,7 @@
 
 #include "layer.h"
 
-#define BLINK_DELAY_MS 1000
+#define BLINK_DELAY_MS 500
 
 static bool flag;
 

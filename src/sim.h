@@ -26,6 +26,7 @@
 
 #define MAX_SIM_ACTIONS 30
 #define MAX_SIM_CHIPS 256
+#define MAX_SIM_TRIGGERS 100
 
 typedef void (*UIActionFunc)();
 
@@ -36,24 +37,31 @@ typedef struct {
     UIActionFunc func;
 } UIAction;
 
+typedef enum {
+    SIM_RUNMODE_RUN,
+    SIM_RUNMODE_PAUSE,
+    SIM_RUNMODE_TRIGGER,
+    SIM_RUNMODE_STOP
+} SimRunMode;
+
 typedef struct {
-    bool running;
+    SimRunMode runmode;
     time_t next_tick_target; // usecs
     time_t ticks;
     time_t resolution; // usecs per tick
-    bool paused;
     RunloopFunc runloop;
     UIAction actions[MAX_SIM_ACTIONS];
     Chip * chips[MAX_SIM_CHIPS];
+    Pin * triggers[MAX_SIM_TRIGGERS];
 } Simulation;
 
 void icemu_sim_init(time_t resolution, RunloopFunc runloop);
 Simulation* icemu_sim_get();
-void icemu_sim_stop();
 void icemu_sim_add_chip(Chip *chip);
 void icemu_sim_add_action(char key, char *label, UIActionFunc func);
+void icemu_sim_add_trigger(Pin *pin);
 void icemu_sim_run();
 void icemu_sim_delay(time_t usecs);
 time_t icemu_sim_elapsed_usecs();
-bool icemu_sim_ispaused();
-void icemu_sim_setpaused(bool paused);
+SimRunMode icemu_sim_runmode();
+void icemu_sim_set_runmode(SimRunMode runmode);

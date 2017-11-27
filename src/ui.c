@@ -91,7 +91,7 @@ static void ui_draw_bottom_bar()
     elapsed_sub = (elapsed / (100 * 1000)) % 10;
 
     sim = icemu_sim_get();
-    paused_s = sim->paused ? " (Paused)" : "";
+    paused_s = sim->runmode == SIM_RUNMODE_PAUSE ? " (Paused)" : "";
     count = sprintf(
         s, "(?) Keybindings  Time: %d.%ds%s Ticks: %ld",
         elapsed_s, elapsed_sub, paused_s, sim->ticks);

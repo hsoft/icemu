@@ -74,6 +74,7 @@ int main()
     icemu_ui_add_element("LED:", &lm);
     icemu_sim_add_chip(&mcu);
     icemu_sim_add_chip(&lm);
+    icemu_sim_set_slowdown_factor(10);
     icemu_sim_run();
     return 0;
 }

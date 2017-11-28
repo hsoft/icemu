@@ -84,15 +84,21 @@ static void ui_draw_bottom_bar()
     unsigned int elapsed_s, elapsed_sub;
     char s[100];
     const char *paused_s;
+    char slowdown_s[20];;
 
     elapsed = icemu_sim_elapsed_usecs();
     elapsed_s = elapsed / (1000 * 1000);
     elapsed_sub = (elapsed / (100 * 1000)) % 10;
 
     paused_s = icemu_sim_runmode() == ICE_SIM_RUNMODE_PAUSE ? " (Paused)" : "";
+    if (icemu_sim_slowdown_factor() > 1) {
+        sprintf(slowdown_s, " (Slowdown: %dX)", icemu_sim_slowdown_factor());
+    } else {
+        slowdown_s[0] = '\0';
+    }
     count = sprintf(
-        s, "(?) Keybindings  Time: %d.%ds%s Ticks: %ld",
-        elapsed_s, elapsed_sub, paused_s, icemu_sim_ticks());
+        s, "(?) Keybindings  Time: %d.%ds%s%s Ticks: %ld",
+        elapsed_s, elapsed_sub, slowdown_s, paused_s, icemu_sim_ticks());
     maxy = getmaxy(main_window);
     mvaddnstr(maxy - 1, 0, s, count);
 }

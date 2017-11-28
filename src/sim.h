@@ -90,3 +90,5 @@ ICeSimRunMode icemu_sim_runmode();
 void icemu_sim_set_runmode(ICeSimRunMode runmode);
 time_t icemu_sim_resolution();
 time_t icemu_sim_ticks();
+unsigned int icemu_sim_slowdown_factor();
+void icemu_sim_set_slowdown_factor(unsigned int slowdown_factor);

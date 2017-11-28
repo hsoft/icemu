@@ -15,6 +15,7 @@ typedef struct {
     time_t next_tick_target; // usecs
     time_t ticks;
     time_t resolution; // usecs per tick
+    unsigned int slowdown_factor;
     ICeRunloopFunc *runloop;
     ICeUIAction actions[MAX_SIM_ACTIONS];
     ICeChip * chips[MAX_SIM_CHIPS];
@@ -60,7 +61,7 @@ static void sim_tick()
         }
         icemu_chip_elapse(sim.chips[i], sim.resolution);
     }
-    sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
+    sim.next_tick_target = icemu_util_timestamp() + sim.resolution * sim.slowdown_factor;
 }
 
 static bool sim_loop_once(ICeRunloopFunc *runloop)
@@ -127,6 +128,7 @@ void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop)
     sim.runmode = ICE_SIM_RUNMODE_RUN;
     sim.ticks = 0;
     sim.resolution = resolution;
+    sim.slowdown_factor = 1;
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
     sim.runloop = runloop;
     memset(sim.actions, 0, sizeof(sim.actions));
@@ -226,4 +228,14 @@ time_t icemu_sim_resolution()
 time_t icemu_sim_ticks()
 {
     return sim.ticks;
+}
+
+unsigned int icemu_sim_slowdown_factor()
+{
+    return sim.slowdown_factor;
+}
+
+void icemu_sim_set_slowdown_factor(unsigned int slowdown_factor)
+{
+    sim.slowdown_factor = slowdown_factor;
 }

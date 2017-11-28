@@ -69,3 +69,5 @@ There are examples in the `examples` folder. Follow instructions in the README f
 ## License
 
 LGPLv3, Copyright 2017 Virgil Dupras
+
+[seg7-multiplex]: https://github.com/hsoft/seg7-multiplex

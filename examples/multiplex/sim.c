@@ -49,13 +49,13 @@ void set_timer0_mode_to_interrupt()
 
 int main()
 {
-    Decoder *dec_lu;
+    ICeDecoder *dec_lu;
     int i;
 
     icemu_ATtiny_init(&mcu);
     icemu_SN74HC138_init(&dec);
     icemu_ledmatrix_init(&lm, 4, 2);
-    dec_lu = (Decoder *)dec.logical_unit;
+    dec_lu = (ICeDecoder *)dec.logical_unit;
 
     pb0 = icemu_chip_getpin(&mcu, "PB0");
     pb1 = icemu_chip_getpin(&mcu, "PB1");

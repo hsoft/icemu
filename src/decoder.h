@@ -7,7 +7,7 @@ typedef struct {
     ICePinList outputs;
     ICePinList serial_pins;
     ICePinList enable_pins;
-} Decoder;
+} ICeDecoder;
 
 void icemu_SN74HC138_init(ICeChip *chip);
 

@@ -8,7 +8,7 @@
 #include "util.h"
 
 /* Private */
-static void decoder_update_output(Decoder *dec)
+static void decoder_update_output(ICeDecoder *dec)
 {
     uint8_t value;
     uint8_t i;
@@ -24,7 +24,7 @@ static void decoder_update_output(Decoder *dec)
 // is practically random. Let's just be statistical and consider that each possible
 // outputs in the oscillating range is going to get an equal part of the output time.
 // we use the maximum frequency value among input pins.
-static void decoder_oscillate(Decoder *dec)
+static void decoder_oscillate(ICeDecoder *dec)
 {
     ICePin *p;
     unsigned int freq = icemu_pinlist_oscillating_freq(&dec->serial_pins);
@@ -74,7 +74,7 @@ static void decoder_oscillate(Decoder *dec)
 
 static void decoder_pinchange(ICePin *pin)
 {
-    Decoder *dec = pin->chip->logical_unit;
+    ICeDecoder *dec = pin->chip->logical_unit;
 
     if (!icemu_pinlist_isenabled_all(&dec->enable_pins)) {
         icemu_pinlist_set_all(&dec->outputs, true);
@@ -85,14 +85,14 @@ static void decoder_pinchange(ICePin *pin)
     }
 }
 
-static Decoder* decoder_new(
+static ICeDecoder* decoder_new(
     ICeChip *chip,
     const char **input_codes,
     const char **output_codes,
     const char **serial_codes,
     const char **enable_codes)
 {
-    Decoder *dec;
+    ICeDecoder *dec;
     uint8_t input_count;
     uint8_t output_count;
     uint8_t total_count;
@@ -101,7 +101,7 @@ static Decoder* decoder_new(
     output_count = icemu_util_chararray_count(output_codes);
     total_count = input_count + output_count;
 
-    dec = (Decoder *)malloc(sizeof(Decoder));
+    dec = (ICeDecoder *)malloc(sizeof(ICeDecoder));
     icemu_chip_init(chip, (void *)dec, decoder_pinchange, total_count);
     icemu_chip_addpins(chip, &dec->inputs, input_codes, false);
     icemu_chip_addpins(chip, &dec->outputs, output_codes, true);
@@ -121,5 +121,5 @@ void icemu_SN74HC138_init(ICeChip *chip)
     decoder_new(chip, input_codes, output_codes, serial_codes, enable_codes);
     icemu_chip_getpin(chip, "G1")->high = true;
     // ensure proper initial value
-    decoder_update_output((Decoder *)chip->logical_unit);
+    decoder_update_output((ICeDecoder *)chip->logical_unit);
 }

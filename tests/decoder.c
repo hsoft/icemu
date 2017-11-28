@@ -7,7 +7,7 @@
 
 static void assert_pin_is_selected(ICeChip *chip, uint8_t selected_pin)
 {
-    Decoder *dec = (Decoder *)chip->logical_unit;
+    ICeDecoder *dec = (ICeDecoder *)chip->logical_unit;
     uint8_t i;
 
     for (i = 0; i < dec->outputs.count; i++) {
@@ -18,10 +18,10 @@ static void assert_pin_is_selected(ICeChip *chip, uint8_t selected_pin)
 static void test_IO()
 {
     ICeChip chip;
-    Decoder *dec;
+    ICeDecoder *dec;
 
     icemu_SN74HC138_init(&chip);
-    dec = (Decoder *)chip.logical_unit;
+    dec = (ICeDecoder *)chip.logical_unit;
 
     // initially, a decoder has its first pin selected
     assert_pin_is_selected(&chip, 0);

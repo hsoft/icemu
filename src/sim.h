@@ -24,10 +24,6 @@
    wait 1s, you don't want to stop UI refreshes for this.
  */
 
-#define MAX_SIM_ACTIONS 30
-#define MAX_SIM_CHIPS 256
-#define MAX_SIM_TRIGGERS 100
-
 typedef void (ICeUIActionFunc)();
 
 typedef void (ICeRunloopFunc)();
@@ -38,11 +34,11 @@ typedef struct {
 } ICeUIAction;
 
 typedef enum {
-    SIM_RUNMODE_RUN,
-    SIM_RUNMODE_PAUSE,
-    SIM_RUNMODE_TRIGGER,
-    SIM_RUNMODE_STOP
-} SimRunMode;
+    ICE_SIM_RUNMODE_RUN,
+    ICE_SIM_RUNMODE_PAUSE,
+    ICE_SIM_RUNMODE_TRIGGER,
+    ICE_SIM_RUNMODE_STOP
+} ICeSimRunMode;
 
 /* Initialize the simulation
  *
@@ -90,7 +86,7 @@ void icemu_sim_delay(time_t usecs);
 
 /* Simulation Properties */
 time_t icemu_sim_elapsed_usecs();
-SimRunMode icemu_sim_runmode();
-void icemu_sim_set_runmode(SimRunMode runmode);
+ICeSimRunMode icemu_sim_runmode();
+void icemu_sim_set_runmode(ICeSimRunMode runmode);
 time_t icemu_sim_resolution();
 time_t icemu_sim_ticks();

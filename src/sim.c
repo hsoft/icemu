@@ -6,8 +6,12 @@
 #include "ui.h"
 #include "util.h"
 
+#define MAX_SIM_ACTIONS 30
+#define MAX_SIM_CHIPS 256
+#define MAX_SIM_TRIGGERS 100
+
 typedef struct {
-    SimRunMode runmode;
+    ICeSimRunMode runmode;
     time_t next_tick_target; // usecs
     time_t ticks;
     time_t resolution; // usecs per tick
@@ -63,7 +67,7 @@ static bool sim_loop_once(ICeRunloopFunc *runloop)
 {
     int key;
 
-    if (sim.runmode != SIM_RUNMODE_PAUSE) {
+    if (sim.runmode != ICE_SIM_RUNMODE_PAUSE) {
         sim_wait_until_next_tick();
         if (runloop != NULL) {
             runloop();
@@ -74,43 +78,43 @@ static bool sim_loop_once(ICeRunloopFunc *runloop)
     if (key >= 0) {
         sim_keypress((char)key);
     }
-    return sim.runmode != SIM_RUNMODE_PAUSE;
+    return sim.runmode != ICE_SIM_RUNMODE_PAUSE;
 }
 
 static void sim_stop()
 {
-    sim.runmode = SIM_RUNMODE_STOP;
+    sim.runmode = ICE_SIM_RUNMODE_STOP;
 }
 
 static void sim_toggle_paused()
 {
-    if (sim.runmode == SIM_RUNMODE_PAUSE) {
-        sim.runmode = SIM_RUNMODE_RUN;
+    if (sim.runmode == ICE_SIM_RUNMODE_PAUSE) {
+        sim.runmode = ICE_SIM_RUNMODE_RUN;
     } else {
-        sim.runmode = SIM_RUNMODE_PAUSE;
+        sim.runmode = ICE_SIM_RUNMODE_PAUSE;
     }
 }
 
 static void sim_run_one_tick()
 {
-    sim.runmode = SIM_RUNMODE_PAUSE;
+    sim.runmode = ICE_SIM_RUNMODE_PAUSE;
     sim_tick();
 }
 
 static void sim_run_until_trigger()
 {
-    sim.runmode = SIM_RUNMODE_TRIGGER;
+    sim.runmode = ICE_SIM_RUNMODE_TRIGGER;
 }
 
 static void sim_global_pinchange(ICePin *pin)
 {
     ICePin **p;
 
-    if (sim.runmode == SIM_RUNMODE_TRIGGER) {
+    if (sim.runmode == ICE_SIM_RUNMODE_TRIGGER) {
         p = sim.triggers;
         while (*p != NULL) {
             if (*p == pin) {
-                sim.runmode = SIM_RUNMODE_PAUSE;
+                sim.runmode = ICE_SIM_RUNMODE_PAUSE;
             }
             p++;
         }
@@ -120,7 +124,7 @@ static void sim_global_pinchange(ICePin *pin)
 /* Public */
 void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop)
 {
-    sim.runmode = SIM_RUNMODE_RUN;
+    sim.runmode = ICE_SIM_RUNMODE_RUN;
     sim.ticks = 0;
     sim.resolution = resolution;
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
@@ -180,7 +184,7 @@ void icemu_sim_run()
         icemu_pin_set_global_pinchange_trigger(sim_global_pinchange);
     }
     icemu_ui_refresh();
-    while (sim.runmode != SIM_RUNMODE_STOP) {
+    while (sim.runmode != ICE_SIM_RUNMODE_STOP) {
         sim_loop_once(sim.runloop);
     }
     icemu_ui_deinit();
@@ -192,7 +196,7 @@ void icemu_sim_delay(time_t usecs)
         if (sim_loop_once(NULL)) {
             usecs -= sim.resolution;
         }
-        if (sim.runmode == SIM_RUNMODE_STOP) {
+        if (sim.runmode == ICE_SIM_RUNMODE_STOP) {
             return;
         }
     }
@@ -204,12 +208,12 @@ time_t icemu_sim_elapsed_usecs()
     return sim.ticks * sim.resolution;
 }
 
-SimRunMode icemu_sim_runmode()
+ICeSimRunMode icemu_sim_runmode()
 {
     return sim.runmode;
 }
 
-void icemu_sim_set_runmode(SimRunMode runmode)
+void icemu_sim_set_runmode(ICeSimRunMode runmode)
 {
     sim.runmode = runmode;
 }

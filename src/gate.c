@@ -9,7 +9,7 @@
 
 /* Private */
 
-static ICeGateTestResult test_nor(PinList *pinlist)
+static ICeGateTestResult test_nor(ICePinList *pinlist)
 {
     int i;
     ICeGateTestResult r = ICE_TEST_RESULT_HIGH;
@@ -24,7 +24,7 @@ static ICeGateTestResult test_nor(PinList *pinlist)
     return r;
 }
 
-static ICeGateTestResult test_invert(PinList *pinlist)
+static ICeGateTestResult test_invert(ICePinList *pinlist)
 {
     if (pinlist->pins[0]->oscillating_freq > 0) {
         return ICE_TEST_RESULT_OSCILLATE;

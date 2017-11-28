@@ -1,6 +1,7 @@
 #pragma once
 #include <sys/time.h>
 #include "pin.h"
+#include "pinlist.h"
 
 typedef struct {
     uint16_t width;
@@ -16,11 +17,11 @@ struct Chip {
     PinChangeFunc pin_change_func;
     AsciiArtFunc asciiart_func;
     ElapseFunc elapse_func;
-    PinList pins;
+    ICePinList pins;
 };
 
 void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_func, uint8_t pin_count);
 Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output);
-void icemu_chip_addpins(Chip *chip, PinList *dst_pinlist, const char **codes, bool output);
+void icemu_chip_addpins(Chip *chip, ICePinList *dst_pinlist, const char **codes, bool output);
 Pin* icemu_chip_getpin(Chip *chip, const char *code);
 void icemu_chip_elapse(Chip *chip, time_t usecs);

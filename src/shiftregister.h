@@ -1,5 +1,6 @@
 #pragma once
 #include "pin.h"
+#include "pinlist.h"
 
 typedef struct {
     uint8_t buffer;
@@ -9,7 +10,7 @@ typedef struct {
     Pin *buffer_pin;
     Pin *enable_pin;
     Pin *reset_pin;
-    PinList outputs;
+    ICePinList outputs;
 } ShiftRegister;
 
 void icemu_CD74AC164_init(Chip *chip);

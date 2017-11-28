@@ -8,25 +8,12 @@
 #include "util.h"
 
 /* Private */
-static uint8_t get_binary_value(PinList *pinlist)
-{
-    uint8_t result = 0;
-    uint8_t i;
-
-    for (i = 0; i < pinlist->count; i++) {
-        if (pinlist->pins[i]->high) {
-            result |= 1 << i;
-        }
-    }
-    return result;
-}
-
 static void decoder_update_output(Decoder *dec)
 {
     uint8_t value;
     uint8_t i;
 
-    value = get_binary_value(&dec->serial_pins);
+    value = icemu_util_get_binary_value(&dec->serial_pins);
     for (i = 0; i < dec->outputs.count; i++) {
         icemu_pin_set(dec->outputs.pins[i], i != value);
     }

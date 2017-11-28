@@ -5,6 +5,7 @@
 
 #include "chip.h"
 #include "pin.h"
+#include "pinlist.h"
 #include "mcu.h"
 #include "util.h"
 
@@ -152,7 +153,7 @@ Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output)
     return result;
 }
 
-void icemu_chip_addpins(Chip *chip, PinList *dst_pinlist, const char **codes, bool output)
+void icemu_chip_addpins(Chip *chip, ICePinList *dst_pinlist, const char **codes, bool output)
 {
     uint8_t count, i;
 

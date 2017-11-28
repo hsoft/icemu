@@ -1,12 +1,13 @@
 #pragma once
 #include "pin.h"
+#include "pinlist.h"
 
 typedef struct {
     uint8_t value;
     Pin *clock;
-    PinList inputs;
-    PinList outputs;
-    PinList enable_pins;
+    ICePinList inputs;
+    ICePinList outputs;
+    ICePinList enable_pins;
 } BinaryCounter;
 
 void icemu_SN74F161AN_init(Chip *chip);

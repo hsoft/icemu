@@ -6,8 +6,8 @@ TEST_TARGET = test_icemu
 PKGCONFIG_LIBS = ncurses
 CFLAGS = -Wall `pkg-config --cflags $(PKGCONFIG_LIBS)`
 
-SRCS = pin.c chip.c shiftregister.c decoder.c counter.c gate.c led.c \
-	mcu.c util.c ui.c sim.c
+SRCS = pin.c pinlist.c chip.c shiftregister.c decoder.c counter.c \
+	gate.c led.c mcu.c util.c ui.c sim.c
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
 TEST_SRCS = main.c pin.c shiftregister.c decoder.c counter.c \
 	gate.c circuit.c util.c

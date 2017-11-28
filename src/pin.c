@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "pin.h"
+#include "pinlist.h"
 #include "chip.h"
 #include "util.h"
 
@@ -26,7 +27,7 @@ static void pin_trigger_change(Pin *pin)
 // 1. propagate state to all wired pins before any pin_change_func() call.
 // 2. call pin_change_func() for each changed pin *after* propagation occured.
 
-static void wire_propagate(PinList *wire)
+static void wire_propagate(ICePinList *wire)
 {
     bool wire_is_high = false;
     unsigned int freq = 0;
@@ -142,14 +143,6 @@ void icemu_pin_set_oscillating_freq(Pin *pin, unsigned int freq)
     }
 }
 
-PinList* icemu_pinlist_new(uint8_t capacity)
-{
-    PinList *result;
-    result = malloc(sizeof(PinList));
-    icemu_pinlist_init(result, capacity);
-    return result;
-}
-
 void icemu_pin_wireto(Pin *pin, Pin *other)
 {
     if ((pin->wire == NULL) && (other->wire == NULL)) {
@@ -178,137 +171,3 @@ void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func)
     global_pinchange_trigger = func;
 }
 
-void icemu_pinlist_init(PinList *pinlist, uint8_t capacity)
-{
-    pinlist->capacity = capacity;
-    pinlist->count = 0;
-    pinlist->pins = malloc(sizeof(Pin *) * capacity);
-    memset(pinlist->pins, 0, sizeof(Pin *) * capacity);
-}
-
-void icemu_pinlist_subset_of_existing(
-    PinList *pinlist, PinList *existing, const char **codes)
-{
-    uint8_t count, i;
-
-    count = icemu_util_chararray_count(codes);
-    icemu_pinlist_init(pinlist, count);
-
-    for (i = 0; i < count; i++) {
-        icemu_pinlist_add(pinlist, icemu_pinlist_find_by_code(existing, codes[i]));
-    }
-}
-
-void icemu_pinlist_destroy(PinList *pinlist)
-{
-    free(pinlist->pins);
-    free(pinlist);
-}
-
-void icemu_pinlist_add(PinList *pinlist, Pin *pin)
-{
-    assert(pinlist->count < pinlist->capacity);
-    assert(pin != NULL);
-
-    pinlist->pins[pinlist->count] = pin;
-    pinlist->count++;
-}
-
-int icemu_pinlist_find(const PinList *pinlist, const Pin *pin)
-{
-    uint8_t i;
-
-    for (i = 0; i < pinlist->count; i++) {
-        if (pinlist->pins[i] == pin) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-Pin* icemu_pinlist_find_by_code(PinList *pinlist, const char *code)
-{
-    uint8_t i;
-    const char *c;
-
-    for (i = 0; i < pinlist->count; i++) {
-        c = pinlist->pins[i]->code;
-        if (c[0] == '~') {
-            c++;
-        }
-        if (strncmp(code, c, MAX_CODE_LEN) == 0) {
-            return pinlist->pins[i];
-        }
-    }
-    return NULL;
-}
-
-bool icemu_pinlist_ishigh_any(PinList *pinlist)
-{
-    uint8_t i;
-    for (i = 0; i < pinlist->count; i++) {
-        if (pinlist->pins[i]->high) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool icemu_pinlist_ishigh_all(PinList *pinlist)
-{
-    uint8_t i;
-    for (i = 0; i < pinlist->count; i++) {
-        if (!pinlist->pins[i]->high) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool icemu_pinlist_isenabled_any(PinList *pinlist)
-{
-    uint8_t i;
-    for (i = 0; i < pinlist->count; i++) {
-        if (icemu_pin_isenabled(pinlist->pins[i])) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool icemu_pinlist_isenabled_all(PinList *pinlist)
-{
-    uint8_t i;
-    for (i = 0; i < pinlist->count; i++) {
-        if (!icemu_pin_isenabled(pinlist->pins[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void icemu_pinlist_set_all(PinList *pinlist, bool high)
-{
-    uint8_t i;
-    for (i = 0; i < pinlist->count; i++) {
-        icemu_pin_set(pinlist->pins[i], high);
-    }
-}
-
-void icemu_pinlist_enable_all(PinList *pinlist, bool enabled)
-{
-    uint8_t i;
-    for (i = 0; i < pinlist->count; i++) {
-        icemu_pin_enable(pinlist->pins[i], enabled);
-    }
-}
-
-unsigned int icemu_pinlist_oscillating_freq(PinList *pinlist)
-{
-    unsigned int i, result = 0;
-
-    for (i = 0; i < pinlist->count; i++) {
-        result = MAX(pinlist->pins[i]->oscillating_freq, result);
-    }
-    return result;
-}

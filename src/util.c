@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "util.h"
+#include "pinlist.h"
 
 uint8_t icemu_util_chararray_count(const char **array)
 {
@@ -13,7 +14,7 @@ uint8_t icemu_util_chararray_count(const char **array)
     return result;
 }
 
-void icemu_util_set_binary_value(PinList *pinlist, uint16_t val)
+void icemu_util_set_binary_value(ICePinList *pinlist, uint16_t val)
 {
     uint8_t i;
 
@@ -22,7 +23,7 @@ void icemu_util_set_binary_value(PinList *pinlist, uint16_t val)
     }
 }
 
-uint16_t icemu_util_get_binary_value(const PinList *pinlist)
+uint16_t icemu_util_get_binary_value(const ICePinList *pinlist)
 {
     uint8_t i;
     uint8_t val = 0;

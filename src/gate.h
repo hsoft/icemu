@@ -1,5 +1,6 @@
 #pragma once
 #include "pin.h"
+#include "pinlist.h"
 
 #define MAX_GATE_COUNT 10
 
@@ -9,11 +10,11 @@ typedef enum {
     ICE_TEST_RESULT_OSCILLATE = 2
 } ICeGateTestResult;
 
-typedef ICeGateTestResult (GateTestFunc)(PinList *);
+typedef ICeGateTestResult (GateTestFunc)(ICePinList *);
 
 typedef struct {
     GateTestFunc *test_func;
-    PinList inputs;
+    ICePinList inputs;
     Pin *output;
 } Gate;
 

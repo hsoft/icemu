@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 typedef struct Chip Chip;
-typedef struct PinList PinList;
+typedef struct ICePinList ICePinList;
 
 #define MAX_PINS_ON_A_WIRE 128
 #define MAX_CODE_LEN 10
@@ -23,16 +23,10 @@ typedef struct Pin {
     bool low_means_high;
     bool high;
     unsigned int oscillating_freq;
-    PinList *wire;
+    ICePinList *wire;
 } Pin;
 
 typedef void (*PinChangeFunc)(Pin *);
-
-struct PinList {
-    uint8_t capacity;
-    uint8_t count;
-    Pin **pins;
-};
 
 Pin* icemu_pin_new(Chip *chip, const char *code, bool output);
 void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output);
@@ -45,19 +39,3 @@ bool icemu_pin_isenabled(Pin *pin);
 void icemu_pin_set_oscillating_freq(Pin *pin, unsigned int freq);
 void icemu_pin_wireto(Pin *pin, Pin *other);
 void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func);
-
-PinList* icemu_pinlist_new(uint8_t capacity);
-void icemu_pinlist_init(PinList *pinlist, uint8_t capacity);
-void icemu_pinlist_subset_of_existing(
-    PinList *pinlist, PinList *existing, const char **codes);
-void icemu_pinlist_destroy(PinList *pinlist);
-void icemu_pinlist_add(PinList *pinlist, Pin *pin);
-int icemu_pinlist_find(const PinList *pinlist, const Pin *pin);
-Pin* icemu_pinlist_find_by_code(PinList *pinlist, const char *code);
-bool icemu_pinlist_ishigh_any(PinList *pinlist);
-bool icemu_pinlist_ishigh_all(PinList *pinlist);
-bool icemu_pinlist_isenabled_any(PinList *pinlist);
-bool icemu_pinlist_isenabled_all(PinList *pinlist);
-void icemu_pinlist_set_all(PinList *pinlist, bool high);
-void icemu_pinlist_enable_all(PinList *pinlist, bool enabled);
-unsigned int icemu_pinlist_oscillating_freq(PinList *pinlist);

@@ -22,7 +22,7 @@ before debugging the really hairy stuff.
 
 Here's a little video of the simulated `seg7` example (see `examples` folder):
 
-[![asciinema](https://asciinema.org/a/LCF3EGRiJFK1LzXwn2R6XUgGb.png)](https://asciinema.org/a/LCF3EGRiJFK1LzXwn2R6XUgGb)
+[![asciinema](https://asciinema.org/a/LLNB2fvP0nPhn1CazSQ1y9ymT.png)](https://asciinema.org/a/LLNB2fvP0nPhn1CazSQ1y9ymT)
 
 and here is the video of the **exact same code** running in real life!
 

@@ -3,10 +3,16 @@
 
 #define MAX_GATE_COUNT 10
 
-typedef bool (*GateTestFunc)(PinList *);
+typedef enum {
+    ICE_TEST_RESULT_HIGH = 0,
+    ICE_TEST_RESULT_LOW = 1,
+    ICE_TEST_RESULT_OSCILLATE = 2
+} ICeGateTestResult;
+
+typedef ICeGateTestResult (GateTestFunc)(PinList *);
 
 typedef struct {
-    GateTestFunc test_func;
+    GateTestFunc *test_func;
     PinList inputs;
     Pin *output;
 } Gate;

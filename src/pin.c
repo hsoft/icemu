@@ -132,7 +132,9 @@ void icemu_pin_set_oscillating_freq(Pin *pin, unsigned int freq)
 {
     if (freq != pin->oscillating_freq) {
         pin->oscillating_freq = freq;
-        pin->high = true;
+        if (freq > 0) {
+            pin->high = true;
+        }
         if (pin->output && (pin->wire != NULL)) {
             wire_propagate(pin->wire);
         }

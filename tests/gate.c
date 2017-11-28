@@ -10,6 +10,7 @@ static void test_NOR()
 
     icemu_CD4001B_init(&chip);
     // Initial state: all input low -> output high
+    CU_ASSERT_FALSE(icemu_chip_getpin(&chip, "A")->high);
     CU_ASSERT_TRUE(icemu_chip_getpin(&chip, "J")->high);
     // Any input goes high: output low
     icemu_pin_set(icemu_chip_getpin(&chip, "A"), true);
@@ -66,6 +67,41 @@ static void test_INVERT()
     CU_ASSERT_TRUE(icemu_chip_getpin(&chip, "6Y")->high);
 }
 
+static void test_NOR_oscillate()
+{
+    Chip chip;
+    Pin pin;
+    int freq = 4242;
+
+    icemu_CD4001B_init(&chip);
+    icemu_pin_init(&pin, NULL, "FOO", true);
+    icemu_pin_set_oscillating_freq(&pin, freq);
+
+    icemu_pin_wireto(&pin, icemu_chip_getpin(&chip, "A"));
+    // Because the position of pin_B makes a positive outcome for pin_J possible, it's oscillating.
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "J")->oscillating_freq, freq);
+
+    icemu_pin_set(icemu_chip_getpin(&chip, "B"), true);
+    // Because the position of pin_B makes a positive outcome for pin_J impossible, it's not oscillating.
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "J")->oscillating_freq, 0);
+    CU_ASSERT_FALSE(icemu_chip_getpin(&chip, "J")->high);
+}
+
+static void test_INVERT_oscillate()
+{
+    Chip chip;
+    Pin pin;
+    int freq = 4242;
+
+    icemu_SN74HC14_init(&chip);
+    icemu_pin_init(&pin, NULL, "FOO", true);
+    icemu_pin_set_oscillating_freq(&pin, freq);
+
+    icemu_pin_wireto(&pin, icemu_chip_getpin(&chip, "1A"));
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "1Y")->oscillating_freq, freq);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "2Y")->oscillating_freq, 0);
+}
+
 void test_gate_init()
 {
     CU_pSuite s;
@@ -74,6 +110,8 @@ void test_gate_init()
     CU_ADD_TEST(s, test_NOR);
     CU_ADD_TEST(s, test_sr_latch);
     CU_ADD_TEST(s, test_INVERT);
+    CU_ADD_TEST(s, test_NOR_oscillate);
+    CU_ADD_TEST(s, test_INVERT_oscillate);
 }
 
 

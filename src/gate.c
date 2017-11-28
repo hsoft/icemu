@@ -8,20 +8,29 @@
 #include "util.h"
 
 /* Private */
-static bool test_nor(PinList *pinlist)
+
+static ICeGateTestResult test_nor(PinList *pinlist)
 {
     int i;
+    ICeGateTestResult r = ICE_TEST_RESULT_HIGH;
+
     for (i = 0; i < pinlist->count; i++) {
-        if (pinlist->pins[i]->high) {
-            return false;
+        if (pinlist->pins[i]->oscillating_freq > 0) {
+            r = ICE_TEST_RESULT_OSCILLATE;
+        } else if (pinlist->pins[i]->high) {
+            return ICE_TEST_RESULT_LOW;
         }
     }
-    return true;
+    return r;
 }
 
-static bool test_invert(PinList *pinlist)
+static ICeGateTestResult test_invert(PinList *pinlist)
 {
-    return !pinlist->pins[0]->high;
+    if (pinlist->pins[0]->oscillating_freq > 0) {
+        return ICE_TEST_RESULT_OSCILLATE;
+    } else {
+        return pinlist->pins[0]->high ? ICE_TEST_RESULT_LOW : ICE_TEST_RESULT_HIGH;
+    }
 }
 
 static bool gate_haspin(const Gate *gate, const Pin *pin)
@@ -44,7 +53,18 @@ static Gate* gateset_find_pin(GateSet *gateset, const Pin *pin)
 static void gate_pinchange(Pin *pin)
 {
     Gate *g = gateset_find_pin((GateSet *)pin->chip->logical_unit, pin);
-    icemu_pin_set(g->output, g->test_func(&g->inputs));
+    switch (g->test_func(&g->inputs)) {
+        case ICE_TEST_RESULT_HIGH:
+            icemu_pin_set(g->output, true);
+            break;
+        case ICE_TEST_RESULT_LOW:
+            icemu_pin_set(g->output, false);
+            break;
+        case ICE_TEST_RESULT_OSCILLATE:
+            icemu_pin_set_oscillating_freq(
+                g->output, icemu_pinlist_oscillating_freq(&g->inputs));
+            break;
+    }
 }
 
 static Gate* gate_new(
@@ -59,7 +79,7 @@ static Gate* gate_new(
     g->test_func = test_func;
     icemu_chip_addpins(chip, &g->inputs, input_codes, false);
     g->output = icemu_chip_addpin(chip, output_code, true);
-    g->output->high = test_func(&g->inputs);
+    g->output->high = test_func(&g->inputs) == ICE_TEST_RESULT_HIGH;
     return g;
 }
 

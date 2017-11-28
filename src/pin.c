@@ -103,8 +103,9 @@ void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output)
 
 bool icemu_pin_set(Pin *pin, bool high)
 {
-    if (high != pin->high) {
+    if ((high != pin->high) || (pin->oscillating_freq > 0)) {
         pin->high = high;
+        pin->oscillating_freq = 0;
         if (pin->output && (pin->wire != NULL)) {
             wire_propagate(pin->wire);
         }
@@ -298,4 +299,14 @@ void icemu_pinlist_enable_all(PinList *pinlist, bool enabled)
     for (i = 0; i < pinlist->count; i++) {
         icemu_pin_enable(pinlist->pins[i], enabled);
     }
+}
+
+unsigned int icemu_pinlist_oscillating_freq(PinList *pinlist)
+{
+    unsigned int i, result = 0;
+
+    for (i = 0; i < pinlist->count; i++) {
+        result = MAX(pinlist->pins[i]->oscillating_freq, result);
+    }
+    return result;
 }

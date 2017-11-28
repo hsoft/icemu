@@ -26,19 +26,76 @@ static void decoder_update_output(Decoder *dec)
     uint8_t value;
     uint8_t i;
 
-    if (icemu_pinlist_isenabled_all(&dec->enable_pins)) {
-        value = get_binary_value(&dec->serial_pins);
-    } else {
-        value = 0xff;
-    }
+    value = get_binary_value(&dec->serial_pins);
     for (i = 0; i < dec->outputs.count; i++) {
         icemu_pin_set(dec->outputs.pins[i], i != value);
     }
 }
 
+// determining oscillating behavior in a decoder when considering the possibility
+// of more than one input pin oscillating quickly becomes complicated: the output
+// is practically random. Let's just be statistical and consider that each possible
+// outputs in the oscillating range is going to get an equal part of the output time.
+// we use the maximum frequency value among input pins.
+static void decoder_oscillate(Decoder *dec)
+{
+    Pin *p;
+    unsigned int freq = icemu_pinlist_oscillating_freq(&dec->serial_pins);
+    uint16_t base_value = icemu_util_get_binary_value(&dec->serial_pins);
+    unsigned int oscillating_count = 0;
+    unsigned int oscillating_mask = 0;
+    int i, j;
+    unsigned int match;
+
+    // Compute the output freq, that is, divide by two for each oscillating pin
+    for (i = 0; i < dec->serial_pins.count; i++) {
+        if (dec->serial_pins.pins[i]->oscillating_freq > 0) {
+            oscillating_count++;
+            oscillating_mask |= 1 << i;
+        }
+    }
+    freq /= (1 << (oscillating_count - 1));
+    for (i = 0; i < dec->outputs.count; i++) {
+        // how to determine if an output pin is part of the oscillating mask?
+        // take the binary value of the index and see if its possible to attain that index
+        // with any combination of bits within the oscillating_mask applied to base_value
+        p = dec->outputs.pins[i];
+        if ((i & base_value) != i) {
+            // index is never selected
+            icemu_pin_set(p, true);
+            continue;
+        }
+        match = base_value;
+        // now let's take "match" and try to bring it to "i" through toggling pins in
+        // "oscillating_mask". If we can, our pin is oscillating.
+        for (j = 0; j < dec->serial_pins.count; j++) {
+            if (match == i) break;
+            if (oscillating_mask & (1 << j)) {
+                if (!(i & (1 << j))) {
+                    match &= ~(1 << j);
+                }
+            }
+        }
+        if (match == i) {
+            icemu_pin_set_oscillating_freq(dec->outputs.pins[i], freq);
+        } else {
+            // pin is never selected
+            icemu_pin_set(p, true);
+        }
+    }
+}
+
 static void decoder_pinchange(Pin *pin)
 {
-    decoder_update_output((Decoder *)pin->chip->logical_unit);
+    Decoder *dec = pin->chip->logical_unit;
+
+    if (!icemu_pinlist_isenabled_all(&dec->enable_pins)) {
+        icemu_pinlist_set_all(&dec->outputs, true);
+    } else if (icemu_pinlist_oscillating_freq(&dec->serial_pins)) {
+        decoder_oscillate(dec);
+    } else {
+        decoder_update_output(dec);
+    }
 }
 
 static Decoder* decoder_new(

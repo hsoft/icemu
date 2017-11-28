@@ -22,7 +22,7 @@ void icemu_util_set_binary_value(PinList *pinlist, uint16_t val)
     }
 }
 
-uint16_t icemu_util_get_binary_value(PinList *pinlist)
+uint16_t icemu_util_get_binary_value(const PinList *pinlist)
 {
     uint8_t i;
     uint8_t val = 0;

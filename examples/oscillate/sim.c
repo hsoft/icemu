@@ -16,7 +16,7 @@ static void faster()
 
 static void slower()
 {
-    icemu_pin_set_oscillating_freq(&oscillator, MIN(1, oscillator.oscillating_freq / 10));
+    icemu_pin_set_oscillating_freq(&oscillator, MAX(1, oscillator.oscillating_freq / 10));
 }
 
 int main()

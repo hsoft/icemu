@@ -48,6 +48,41 @@ static void test_disabled()
     assert_pin_is_selected(&chip, 0xff);
 }
 
+static void test_oscillate()
+{
+    Chip chip;
+    Pin pin;
+    int freq = 4242;
+
+    icemu_SN74HC138_init(&chip);
+
+    icemu_pin_init(&pin, NULL, "FOO", true);
+    icemu_pin_set_oscillating_freq(&pin, freq);
+
+    icemu_pin_wireto(&pin, icemu_chip_getpin(&chip, "B"));
+    // 2 oscillating pins
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y0")->oscillating_freq, freq);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y2")->oscillating_freq, freq);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y1")->oscillating_freq, 0);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y6")->oscillating_freq, 0);
+    CU_ASSERT_TRUE(icemu_chip_getpin(&chip, "Y1")->high);
+
+    icemu_pin_set(icemu_chip_getpin(&chip, "C"), true);
+    // 2 oscillating pins, but higher ones
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y4")->oscillating_freq, freq);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y6")->oscillating_freq, freq);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y2")->oscillating_freq, 0);
+    CU_ASSERT_TRUE(icemu_chip_getpin(&chip, "Y2")->high);
+
+    icemu_pin_wireto(&pin, icemu_chip_getpin(&chip, "A"));
+    // 4 oscillating pins
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y4")->oscillating_freq, freq / 2);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y5")->oscillating_freq, freq / 2);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y6")->oscillating_freq, freq / 2);
+    CU_ASSERT_EQUAL(icemu_chip_getpin(&chip, "Y7")->oscillating_freq, freq / 2);
+    CU_ASSERT_TRUE(icemu_chip_getpin(&chip, "Y0")->high);
+}
+
 void test_decoder_init()
 {
     CU_pSuite s;
@@ -55,5 +90,6 @@ void test_decoder_init()
     s = CU_add_suite("Decoders", NULL, NULL);
     CU_ADD_TEST(s, test_IO);
     CU_ADD_TEST(s, test_disabled);
+    CU_ADD_TEST(s, test_oscillate);
 }
 

@@ -103,6 +103,106 @@ void icemu_CD4001B_init(Chip *chip)
     }
 }
 
+void icemu_CD4002B_init(Chip *chip)
+{
+    GateSet *gs;
+    int i;
+    const char * input_codes[2][5] = {
+        {"A", "B", "C", "D", NULL},
+        {"E", "F", "G", "H", NULL},
+    };
+    const char * output_codes[2] = {"J", "K"};
+
+    gs = gateset_new(chip, 2, 2 * 5);
+    for (i = 0; i < 2; i++) {
+        gateset_add_gate(gs,
+            gate_new(chip, test_nor, input_codes[i], output_codes[i]));
+    }
+}
+
+void icemu_CD4025B_init(Chip *chip)
+{
+    GateSet *gs;
+    int i;
+    const char * input_codes[3][4] = {
+        {"A", "B", "C", NULL},
+        {"D", "E", "F", NULL},
+        {"G", "H", "I", NULL},
+    };
+    const char * output_codes[3] = {"J", "K", "L"};
+
+    gs = gateset_new(chip, 3, 3 * 4);
+    for (i = 0; i < 3; i++) {
+        gateset_add_gate(gs,
+            gate_new(chip, test_nor, input_codes[i], output_codes[i]));
+    }
+}
+
+void icemu_SN74LS02_init(Chip *chip)
+{
+    GateSet *gs;
+    int i;
+    const char * input_codes[4][3] = {
+        {"A1", "B1", NULL},
+        {"A2", "B2", NULL},
+        {"A3", "B3", NULL},
+        {"A4", "B4", NULL},
+    };
+    const char * output_codes[4] = {"Y1", "Y2", "Y3", "Y4"};
+
+    gs = gateset_new(chip, 4, 4 * 3);
+    for (i = 0; i < 4; i++) {
+        gateset_add_gate(gs,
+            gate_new(chip, test_nor, input_codes[i], output_codes[i]));
+    }
+}
+
+void icemu_SN74LS27_init(Chip *chip)
+{
+    GateSet *gs;
+    int i;
+    const char * input_codes[3][4] = {
+        {"A1", "B1", "C1", NULL},
+        {"A2", "B2", "C2", NULL},
+        {"A3", "B3", "C3", NULL},
+    };
+    const char * output_codes[3] = {"Y1", "Y2", "Y3"};
+
+    gs = gateset_new(chip, 3, 3 * 4);
+    for (i = 0; i < 3; i++) {
+        gateset_add_gate(gs,
+            gate_new(chip, test_nor, input_codes[i], output_codes[i]));
+    }
+}
+
+void icemu_SN54ALS27A_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN54AAS27_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN5427_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN7427_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN54LS27_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN74ALS27A_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN74AS27_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+
+void icemu_SN54S260_init(Chip *chip)
+{
+    GateSet *gs;
+    int i;
+    const char * input_codes[2][6] = {
+        {"A1", "B1", "C1", "D1", "E1", NULL},
+        {"A2", "B2", "C2", "D2", "E2", NULL},
+    };
+    const char * output_codes[2] = {"Y1", "Y2"};
+
+    gs = gateset_new(chip, 2, 2 * 6);
+    for (i = 0; i < 2; i++) {
+        gateset_add_gate(gs,
+            gate_new(chip, test_nor, input_codes[i], output_codes[i]));
+    }
+}
+
+void icemu_SN74S260_init(Chip *chip) { icemu_SN54S260_init(chip); }
+void icemu_SN74F260_init(Chip *chip) { icemu_SN54S260_init(chip); }
+
 /* Inverter */
 void icemu_SN74HC14_init(Chip *chip)
 {

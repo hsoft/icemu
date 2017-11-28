@@ -6,15 +6,15 @@
 static Chip mcu;
 static Chip dec;
 static Chip lm;
-static Pin *pb0;
-static Pin *pb1;
-static Pin *pb2;
+static ICePin *pb0;
+static ICePin *pb1;
+static ICePin *pb2;
 
 /* main.c decl */
 void setup();
 void myinterrupt();
 
-static Pin* pinid(PinID pin)
+static ICePin* pinid(PinID pin)
 {
     switch (pin) {
         case PinB0: return pb0;

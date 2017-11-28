@@ -16,7 +16,7 @@ static void mcu_timer_elapse(MCUTimer *timer, time_t usecs)
     }
 }
 
-static void mcu_pinchange(Pin *pin)
+static void mcu_pinchange(ICePin *pin)
 {
     int pinindex;
     MCU *mcu;
@@ -67,7 +67,7 @@ static MCU* mcu_new(Chip *chip, const char **codes)
 }
 
 /* Public */
-void icemu_mcu_add_interrupt(Chip *chip, Pin *pin, MCUInterruptType type, InterruptFunc interrupt)
+void icemu_mcu_add_interrupt(Chip *chip, ICePin *pin, MCUInterruptType type, InterruptFunc interrupt)
 {
     int pinindex;
     MCU *mcu;

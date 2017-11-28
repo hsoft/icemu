@@ -1,5 +1,6 @@
 #pragma once
 #include "pin.h"
+#include "pinlist.h"
 #include "chip.h"
 #include "decoder.h"
 #include "shiftregister.h"

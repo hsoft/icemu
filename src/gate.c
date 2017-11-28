@@ -33,12 +33,12 @@ static ICeGateTestResult test_invert(ICePinList *pinlist)
     }
 }
 
-static bool gate_haspin(const Gate *gate, const Pin *pin)
+static bool gate_haspin(const Gate *gate, const ICePin *pin)
 {
     return icemu_pinlist_find(&gate->inputs, pin) >= 0 || pin == gate->output;
 }
 
-static Gate* gateset_find_pin(GateSet *gateset, const Pin *pin)
+static Gate* gateset_find_pin(GateSet *gateset, const ICePin *pin)
 {
     Gate **g = gateset->gates;
     while (*g != NULL) {
@@ -50,7 +50,7 @@ static Gate* gateset_find_pin(GateSet *gateset, const Pin *pin)
     return NULL;
 }
 
-static void gate_pinchange(Pin *pin)
+static void gate_pinchange(ICePin *pin)
 {
     Gate *g = gateset_find_pin((GateSet *)pin->chip->logical_unit, pin);
     switch (g->test_func(&g->inputs)) {

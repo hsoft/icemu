@@ -12,7 +12,7 @@ static void test_dec_and_srs()
     // same output pin.
 
     Chip dec, sr1, sr2;
-    Pin pin;
+    ICePin pin;
 
     icemu_SN74HC138_init(&dec);
     icemu_CD74AC164_init(&sr1);

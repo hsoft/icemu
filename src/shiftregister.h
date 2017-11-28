@@ -4,12 +4,12 @@
 
 typedef struct {
     uint8_t buffer;
-    Pin *clock;
-    Pin *serial1;
-    Pin *serial2;
-    Pin *buffer_pin;
-    Pin *enable_pin;
-    Pin *reset_pin;
+    ICePin *clock;
+    ICePin *serial1;
+    ICePin *serial2;
+    ICePin *buffer_pin;
+    ICePin *enable_pin;
+    ICePin *reset_pin;
     ICePinList outputs;
 } ShiftRegister;
 

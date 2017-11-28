@@ -25,7 +25,7 @@ static void test_IO()
 void test_oscillate()
 {
     Chip chip;
-    Pin pin;
+    ICePin pin;
     int freq = 1000 * 1000;
 
     icemu_pin_init(&pin, NULL, "FOO", true);

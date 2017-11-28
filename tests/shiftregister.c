@@ -111,7 +111,7 @@ static void test_clock_and_buffer_pins_wired()
      */
     Chip chip;
     ShiftRegister *sr;
-    Pin p;
+    ICePin p;
 
     icemu_SN74HC595_init(&chip);
     sr = (ShiftRegister *)chip.logical_unit;

@@ -7,7 +7,7 @@
 #define LED_FADE_DELAY 10000
 
 /* Private */
-void led_init(LED *led, Pin *vcc, Pin *gnd)
+void led_init(LED *led, ICePin *vcc, ICePin *gnd)
 {
     led->fade_timeout = 0;
     led->powered = false;
@@ -41,7 +41,7 @@ bool led_lit(LED *led)
     return led->powered || led->fade_timeout > 0;
 }
 
-static void ledmatrix_pinchange(Pin *pin)
+static void ledmatrix_pinchange(ICePin *pin)
 {
     LEDMatrix *lm = (LEDMatrix *)pin->chip->logical_unit;
     int i;
@@ -136,7 +136,7 @@ void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
 {
     LEDMatrix *lm;
     uint8_t i;
-    Pin *p;
+    ICePin *p;
 
     lm = (LEDMatrix *)malloc(sizeof(LEDMatrix));
     icemu_chip_init(chip, (void *)lm, ledmatrix_pinchange, width * height);
@@ -153,7 +153,7 @@ void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
     icemu_pin_set(&lm->vcc, true);
 }
 
-Pin* icemu_ledmatrix_vcc(Chip *chip)
+ICePin* icemu_ledmatrix_vcc(Chip *chip)
 {
     return &((LEDMatrix *)chip->logical_unit)->vcc;
 }

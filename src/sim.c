@@ -14,7 +14,7 @@ typedef struct {
     RunloopFunc runloop;
     UIAction actions[MAX_SIM_ACTIONS];
     Chip * chips[MAX_SIM_CHIPS];
-    Pin * triggers[MAX_SIM_TRIGGERS];
+    ICePin * triggers[MAX_SIM_TRIGGERS];
 } Simulation;
 
 static Simulation sim;
@@ -102,9 +102,9 @@ static void sim_run_until_trigger()
     sim.runmode = SIM_RUNMODE_TRIGGER;
 }
 
-static void sim_global_pinchange(Pin *pin)
+static void sim_global_pinchange(ICePin *pin)
 {
-    Pin **p;
+    ICePin **p;
 
     if (sim.runmode == SIM_RUNMODE_TRIGGER) {
         p = sim.triggers;
@@ -161,9 +161,9 @@ void icemu_sim_add_action(char key, char *label, UIActionFunc func)
     icemu_ui_add_label(label);
 }
 
-void icemu_sim_add_trigger(Pin *pin)
+void icemu_sim_add_trigger(ICePin *pin)
 {
-    Pin **p = sim.triggers;
+    ICePin **p = sim.triggers;
 
     while (*p != NULL) p++;
     *p = pin;

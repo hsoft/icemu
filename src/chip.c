@@ -17,7 +17,7 @@ static uint8_t chip_maxcodelen(Chip *chip)
     uint8_t i, l;
     int charcount;
     char tmpfmt[10];
-    Pin *p;
+    ICePin *p;
 
     for (i = 0; i < chip->pins.count; i++) {
         p = chip->pins.pins[i];
@@ -59,7 +59,7 @@ static uint8_t chip_asciiart_height(Chip *chip)
     return linecount;
 }
 
-static char chip_asciiart_pstatus(Pin *pin)
+static char chip_asciiart_pstatus(ICePin *pin)
 {
     if (pin->oscillating_freq > 0) {
         return '~';
@@ -68,7 +68,7 @@ static char chip_asciiart_pstatus(Pin *pin)
     }
 }
 
-static void chip_asciiart_add_freq_display(char *dst, Pin *pin, bool rightalign)
+static void chip_asciiart_add_freq_display(char *dst, ICePin *pin, bool rightalign)
 {
     char tmpfmt[10];
     int charcount;
@@ -90,7 +90,7 @@ static void chip_asciiart(Chip *chip, ChipAsciiArt *dst)
 {
     uint8_t w, h, mcl, i, right_pin_start, slen;
     uint16_t loffset, codeoffset;
-    Pin *p;
+    ICePin *p;
     char *s;
 
     s = dst->contents;
@@ -144,9 +144,9 @@ void icemu_chip_init(Chip *chip, void *logical_unit, PinChangeFunc pin_change_fu
     icemu_pinlist_init(&chip->pins, pin_count);
 }
 
-Pin* icemu_chip_addpin(Chip *chip, const char *code, bool output)
+ICePin* icemu_chip_addpin(Chip *chip, const char *code, bool output)
 {
-    Pin *result;
+    ICePin *result;
 
     result = icemu_pin_new(chip, code, output);
     icemu_pinlist_add(&chip->pins, result);
@@ -164,7 +164,7 @@ void icemu_chip_addpins(Chip *chip, ICePinList *dst_pinlist, const char **codes,
     }
 }
 
-Pin* icemu_chip_getpin(Chip *chip, const char *code)
+ICePin* icemu_chip_getpin(Chip *chip, const char *code)
 {
     return icemu_pinlist_find_by_code(&chip->pins, code);
 }

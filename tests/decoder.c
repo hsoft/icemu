@@ -51,7 +51,7 @@ static void test_disabled()
 static void test_oscillate()
 {
     Chip chip;
-    Pin pin;
+    ICePin pin;
     int freq = 4242;
 
     icemu_SN74HC138_init(&chip);

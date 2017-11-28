@@ -35,7 +35,7 @@ typedef struct {
     MCUTimer timers[MAX_TIMERS];
 } MCU;
 
-void icemu_mcu_add_interrupt(Chip *chip, Pin *pin, MCUInterruptType type, InterruptFunc interrupt);
+void icemu_mcu_add_interrupt(Chip *chip, ICePin *pin, MCUInterruptType type, InterruptFunc interrupt);
 void icemu_mcu_add_timer(Chip *chip, time_t every_usecs, TimerFunc timer_func);
 
 void icemu_ATtiny_init(Chip *chip);

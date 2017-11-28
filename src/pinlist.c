@@ -19,8 +19,8 @@ void icemu_pinlist_init(ICePinList *pinlist, uint8_t capacity)
 {
     pinlist->capacity = capacity;
     pinlist->count = 0;
-    pinlist->pins = malloc(sizeof(Pin *) * capacity);
-    memset(pinlist->pins, 0, sizeof(Pin *) * capacity);
+    pinlist->pins = malloc(sizeof(ICePin *) * capacity);
+    memset(pinlist->pins, 0, sizeof(ICePin *) * capacity);
 }
 
 void icemu_pinlist_subset_of_existing(
@@ -42,7 +42,7 @@ void icemu_pinlist_destroy(ICePinList *pinlist)
     free(pinlist);
 }
 
-void icemu_pinlist_add(ICePinList *pinlist, Pin *pin)
+void icemu_pinlist_add(ICePinList *pinlist, ICePin *pin)
 {
     assert(pinlist->count < pinlist->capacity);
     assert(pin != NULL);
@@ -51,7 +51,7 @@ void icemu_pinlist_add(ICePinList *pinlist, Pin *pin)
     pinlist->count++;
 }
 
-int icemu_pinlist_find(const ICePinList *pinlist, const Pin *pin)
+int icemu_pinlist_find(const ICePinList *pinlist, const ICePin *pin)
 {
     uint8_t i;
 
@@ -63,7 +63,7 @@ int icemu_pinlist_find(const ICePinList *pinlist, const Pin *pin)
     return -1;
 }
 
-Pin* icemu_pinlist_find_by_code(const ICePinList *pinlist, const char *code)
+ICePin* icemu_pinlist_find_by_code(const ICePinList *pinlist, const char *code)
 {
     uint8_t i;
     const char *c;

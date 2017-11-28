@@ -26,7 +26,7 @@ static bool shiftregister_is_resetting(ShiftRegister *sr)
     return (sr->reset_pin != NULL) && icemu_pin_isenabled(sr->reset_pin);
 }
 
-static void shiftregister_pinchange(Pin *pin)
+static void shiftregister_pinchange(ICePin *pin)
 {
     ShiftRegister *sr = (ShiftRegister *)pin->chip->logical_unit;
 

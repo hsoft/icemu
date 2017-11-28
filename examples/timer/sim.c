@@ -4,7 +4,7 @@
 #include "../../src/icemu.h"
 
 static Chip mcu;
-static Pin *pb1;
+static ICePin *pb1;
 
 /* main.c decl */
 void setup();

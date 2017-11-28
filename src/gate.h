@@ -15,7 +15,7 @@ typedef ICeGateTestResult (GateTestFunc)(ICePinList *);
 typedef struct {
     GateTestFunc *test_func;
     ICePinList inputs;
-    Pin *output;
+    ICePin *output;
 } Gate;
 
 typedef struct {

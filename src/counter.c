@@ -24,7 +24,7 @@ static void binarycounter_oscillate(BinaryCounter *bc)
     }
 }
 
-static void binarycounter_pinchange(Pin *pin)
+static void binarycounter_pinchange(ICePin *pin)
 {
     BinaryCounter *bc = (BinaryCounter *)pin->chip->logical_unit;
 

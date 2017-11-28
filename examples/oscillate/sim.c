@@ -5,7 +5,7 @@
 static Chip cnt;
 static Chip cnt2;
 static Chip dec;
-static Pin oscillator;
+static ICePin oscillator;
 
 /* Simulation */
 

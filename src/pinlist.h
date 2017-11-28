@@ -7,7 +7,7 @@
 struct ICePinList {
     uint8_t capacity;
     uint8_t count;
-    Pin **pins;
+    ICePin **pins;
 };
 
 ICePinList* icemu_pinlist_new(uint8_t capacity);
@@ -15,9 +15,9 @@ void icemu_pinlist_init(ICePinList *ICePinList, uint8_t capacity);
 void icemu_pinlist_subset_of_existing(
     ICePinList *pinlist, const ICePinList *existing, const char **codes);
 void icemu_pinlist_destroy(ICePinList *pinlist);
-void icemu_pinlist_add(ICePinList *pinlist, Pin *pin);
-int icemu_pinlist_find(const ICePinList *pinlist, const Pin *pin);
-Pin* icemu_pinlist_find_by_code(const ICePinList *pinlist, const char *code);
+void icemu_pinlist_add(ICePinList *pinlist, ICePin *pin);
+int icemu_pinlist_find(const ICePinList *pinlist, const ICePin *pin);
+ICePin* icemu_pinlist_find_by_code(const ICePinList *pinlist, const char *code);
 bool icemu_pinlist_ishigh_any(const ICePinList *pinlist);
 bool icemu_pinlist_ishigh_all(const ICePinList *pinlist);
 bool icemu_pinlist_isenabled_any(const ICePinList *pinlist);

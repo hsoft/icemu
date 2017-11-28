@@ -16,7 +16,7 @@ typedef struct ICePinList ICePinList;
 // wire, we add ourselves to that wire. If we connect two pins with different wires, we merge the
 // two wires.
 
-typedef struct Pin {
+typedef struct ICePin {
     Chip *chip;
     const char *code;
     bool output;
@@ -24,18 +24,17 @@ typedef struct Pin {
     bool high;
     unsigned int oscillating_freq;
     ICePinList *wire;
-} Pin;
+} ICePin;
 
-typedef void (*PinChangeFunc)(Pin *);
+typedef void (*PinChangeFunc)(ICePin *);
 
-Pin* icemu_pin_new(Chip *chip, const char *code, bool output);
-void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output);
-bool icemu_pin_check_if_changed(Pin *pin);
+ICePin* icemu_pin_new(Chip *chip, const char *code, bool output);
+void icemu_pin_init(ICePin *pin, Chip *chip, const char *code, bool output);
 // returns true if a change occurred
-bool icemu_pin_set(Pin *pin, bool high);
+bool icemu_pin_set(ICePin *pin, bool high);
 // same as set() if low_means_high is false, otherwise, the opposite.
-bool icemu_pin_enable(Pin *pin, bool enabled);
-bool icemu_pin_isenabled(Pin *pin);
-void icemu_pin_set_oscillating_freq(Pin *pin, unsigned int freq);
-void icemu_pin_wireto(Pin *pin, Pin *other);
+bool icemu_pin_enable(ICePin *pin, bool enabled);
+bool icemu_pin_isenabled(const ICePin *pin);
+void icemu_pin_set_oscillating_freq(ICePin *pin, unsigned int freq);
+void icemu_pin_wireto(ICePin *pin, ICePin *other);
 void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func);

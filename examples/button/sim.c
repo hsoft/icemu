@@ -3,8 +3,8 @@
 #include "../../src/icemu.h"
 
 static Chip mcu;
-static Pin *pb0;
-static Pin *pb1;
+static ICePin *pb0;
+static ICePin *pb1;
 
 /* main.c decl */
 void setup();

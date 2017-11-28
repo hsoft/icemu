@@ -71,7 +71,7 @@ void icemu_sim_add_action(char key, char *label, UIActionFunc func);
  * This is for the "Run until next trigger" feature. Adding a pin with this function will make
  * the simulation stop on that pin's next change when we're in "Run until next trigger" mode.
  */
-void icemu_sim_add_trigger(Pin *pin);
+void icemu_sim_add_trigger(ICePin *pin);
 
 /* Run the simulation
  *

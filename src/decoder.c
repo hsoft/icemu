@@ -26,7 +26,7 @@ static void decoder_update_output(Decoder *dec)
 // we use the maximum frequency value among input pins.
 static void decoder_oscillate(Decoder *dec)
 {
-    Pin *p;
+    ICePin *p;
     unsigned int freq = icemu_pinlist_oscillating_freq(&dec->serial_pins);
     uint16_t base_value = icemu_util_get_binary_value(&dec->serial_pins);
     unsigned int oscillating_count = 0;
@@ -72,7 +72,7 @@ static void decoder_oscillate(Decoder *dec)
     }
 }
 
-static void decoder_pinchange(Pin *pin)
+static void decoder_pinchange(ICePin *pin)
 {
     Decoder *dec = pin->chip->logical_unit;
 

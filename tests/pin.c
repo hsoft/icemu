@@ -4,7 +4,7 @@
 
 static void test_wire_propagation_3pins()
 {
-    Pin p1, p2, p3;
+    ICePin p1, p2, p3;
 
     icemu_pin_init(&p1, NULL, "P1", true);
     icemu_pin_init(&p2, NULL, "P2", false);
@@ -28,7 +28,7 @@ static void test_wire_propagation_3pins()
 // is always considered high.
 void test_oscillate_wire_high()
 {
-    Pin p1, p2;
+    ICePin p1, p2;
 
     icemu_pin_init(&p1, NULL, "P1", true);
     icemu_pin_init(&p2, NULL, "P2", false);

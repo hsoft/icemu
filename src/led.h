@@ -6,17 +6,17 @@
 typedef struct {
     uint32_t fade_timeout;
     bool powered;
-    Pin *vcc;
-    Pin *gnd;
+    ICePin *vcc;
+    ICePin *gnd;
 } LED;
 
 typedef struct {
     uint8_t width;
     uint8_t height;
-    Pin vcc;
+    ICePin vcc;
     LED *leds;
 } LEDMatrix;
 
 void icemu_seg7_init(Chip *chip);
 void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height);
-Pin* icemu_ledmatrix_vcc(Chip *chip);
+ICePin* icemu_ledmatrix_vcc(Chip *chip);

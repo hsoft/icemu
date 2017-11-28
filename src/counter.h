@@ -4,7 +4,7 @@
 
 typedef struct {
     uint8_t value;
-    Pin *clock;
+    ICePin *clock;
     ICePinList inputs;
     ICePinList outputs;
     ICePinList enable_pins;

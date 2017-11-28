@@ -11,8 +11,8 @@
 #define REFRESH_UI_INTERVAL 200 * 1000
 
 typedef struct {
-    char *title;
-    Chip *chip;
+    const char *title;
+    const ICeChip *chip;
 } Element;
 
 static WINDOW *main_window;
@@ -25,7 +25,7 @@ static bool show_keybindings = false;
 static void ui_refresh_elements()
 {
     int x, y, acc_y, maxw, i, j, elemw, elemh;
-    ChipAsciiArt asciiart;
+    ICeChipAsciiArt asciiart;
 
     y = 0;
     x = 0;
@@ -127,7 +127,7 @@ void icemu_ui_deinit()
     curs_set(1);
 }
 
-void icemu_ui_add_element(char *title, Chip *chip)
+void icemu_ui_add_element(char *title, const ICeChip *chip)
 {
     uint8_t i;
 

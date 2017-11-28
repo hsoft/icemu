@@ -6,7 +6,7 @@
 
 static void test_NOR()
 {
-    Chip chip;
+    ICeChip chip;
 
     icemu_CD4001B_init(&chip);
     // Initial state: all input low -> output high
@@ -23,7 +23,7 @@ static void test_sr_latch()
 {
     // let's implement an S-R latch!
     // https://en.wikipedia.org/wiki/Flip-flop_(electronics)
-    Chip chip;
+    ICeChip chip;
     ICePin *d, *j, *b, *k, *c, *a;
 
     icemu_CD4001B_init(&chip);
@@ -55,7 +55,7 @@ static void test_sr_latch()
 
 static void test_INVERT()
 {
-    Chip chip;
+    ICeChip chip;
 
     icemu_SN74HC14_init(&chip);
     // Initial state: all input low -> output high
@@ -69,7 +69,7 @@ static void test_INVERT()
 
 static void test_NOR_oscillate()
 {
-    Chip chip;
+    ICeChip chip;
     ICePin pin;
     int freq = 4242;
 
@@ -89,7 +89,7 @@ static void test_NOR_oscillate()
 
 static void test_INVERT_oscillate()
 {
-    Chip chip;
+    ICeChip chip;
     ICePin pin;
     int freq = 4242;
 

@@ -68,7 +68,7 @@ static void gate_pinchange(ICePin *pin)
 }
 
 static Gate* gate_new(
-    Chip *chip,
+    ICeChip *chip,
     GateTestFunc test_func,
     const char **input_codes,
     const char *output_code)
@@ -83,7 +83,7 @@ static Gate* gate_new(
     return g;
 }
 
-static GateSet* gateset_new(Chip *chip, int gate_count, int pin_count)
+static GateSet* gateset_new(ICeChip *chip, int gate_count, int pin_count)
 {
     GateSet *gs;
 
@@ -104,7 +104,7 @@ static void gateset_add_gate(GateSet *gateset, Gate *gate)
 
 /* Public */
 /* NOR */
-void icemu_CD4001B_init(Chip *chip)
+void icemu_CD4001B_init(ICeChip *chip)
 {
     GateSet *gs;
     int i;
@@ -123,7 +123,7 @@ void icemu_CD4001B_init(Chip *chip)
     }
 }
 
-void icemu_CD4002B_init(Chip *chip)
+void icemu_CD4002B_init(ICeChip *chip)
 {
     GateSet *gs;
     int i;
@@ -140,7 +140,7 @@ void icemu_CD4002B_init(Chip *chip)
     }
 }
 
-void icemu_CD4025B_init(Chip *chip)
+void icemu_CD4025B_init(ICeChip *chip)
 {
     GateSet *gs;
     int i;
@@ -158,7 +158,7 @@ void icemu_CD4025B_init(Chip *chip)
     }
 }
 
-void icemu_SN74LS02_init(Chip *chip)
+void icemu_SN74LS02_init(ICeChip *chip)
 {
     GateSet *gs;
     int i;
@@ -177,7 +177,7 @@ void icemu_SN74LS02_init(Chip *chip)
     }
 }
 
-void icemu_SN74LS27_init(Chip *chip)
+void icemu_SN74LS27_init(ICeChip *chip)
 {
     GateSet *gs;
     int i;
@@ -195,15 +195,15 @@ void icemu_SN74LS27_init(Chip *chip)
     }
 }
 
-void icemu_SN54ALS27A_init(Chip *chip) { icemu_SN74LS27_init(chip); }
-void icemu_SN54AAS27_init(Chip *chip) { icemu_SN74LS27_init(chip); }
-void icemu_SN5427_init(Chip *chip) { icemu_SN74LS27_init(chip); }
-void icemu_SN7427_init(Chip *chip) { icemu_SN74LS27_init(chip); }
-void icemu_SN54LS27_init(Chip *chip) { icemu_SN74LS27_init(chip); }
-void icemu_SN74ALS27A_init(Chip *chip) { icemu_SN74LS27_init(chip); }
-void icemu_SN74AS27_init(Chip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN54ALS27A_init(ICeChip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN54AAS27_init(ICeChip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN5427_init(ICeChip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN7427_init(ICeChip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN54LS27_init(ICeChip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN74ALS27A_init(ICeChip *chip) { icemu_SN74LS27_init(chip); }
+void icemu_SN74AS27_init(ICeChip *chip) { icemu_SN74LS27_init(chip); }
 
-void icemu_SN54S260_init(Chip *chip)
+void icemu_SN54S260_init(ICeChip *chip)
 {
     GateSet *gs;
     int i;
@@ -220,11 +220,11 @@ void icemu_SN54S260_init(Chip *chip)
     }
 }
 
-void icemu_SN74S260_init(Chip *chip) { icemu_SN54S260_init(chip); }
-void icemu_SN74F260_init(Chip *chip) { icemu_SN54S260_init(chip); }
+void icemu_SN74S260_init(ICeChip *chip) { icemu_SN54S260_init(chip); }
+void icemu_SN74F260_init(ICeChip *chip) { icemu_SN54S260_init(chip); }
 
 /* Inverter */
-void icemu_SN74HC14_init(Chip *chip)
+void icemu_SN74HC14_init(ICeChip *chip)
 {
     GateSet *gs;
     int i;

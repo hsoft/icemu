@@ -10,5 +10,5 @@ typedef struct {
     ICePinList enable_pins;
 } BinaryCounter;
 
-void icemu_SN74F161AN_init(Chip *chip);
+void icemu_SN74F161AN_init(ICeChip *chip);
 

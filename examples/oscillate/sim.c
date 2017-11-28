@@ -2,9 +2,9 @@
 #include <unistd.h>
 #include "../../src/icemu.h"
 
-static Chip cnt;
-static Chip cnt2;
-static Chip dec;
+static ICeChip cnt;
+static ICeChip cnt2;
+static ICeChip dec;
 static ICePin oscillator;
 
 /* Simulation */

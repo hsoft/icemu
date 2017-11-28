@@ -3,7 +3,7 @@
 #include "layer.h"
 #include "../../src/icemu.h"
 
-static Chip mcu;
+static ICeChip mcu;
 static ICePin *pb1;
 
 /* main.c decl */

@@ -3,9 +3,9 @@
 #include "layer.h"
 #include "../../src/icemu.h"
 
-static Chip mcu;
-static Chip dec;
-static Chip lm;
+static ICeChip mcu;
+static ICeChip dec;
+static ICeChip lm;
 static ICePin *pb0;
 static ICePin *pb1;
 static ICePin *pb2;

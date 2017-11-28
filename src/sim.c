@@ -13,7 +13,7 @@ typedef struct {
     time_t resolution; // usecs per tick
     RunloopFunc runloop;
     UIAction actions[MAX_SIM_ACTIONS];
-    Chip * chips[MAX_SIM_CHIPS];
+    ICeChip * chips[MAX_SIM_CHIPS];
     ICePin * triggers[MAX_SIM_TRIGGERS];
 } Simulation;
 
@@ -135,7 +135,7 @@ Simulation* icemu_sim_get()
     return &sim;
 }
 
-void icemu_sim_add_chip(Chip *chip)
+void icemu_sim_add_chip(ICeChip *chip)
 {
     int i;
 

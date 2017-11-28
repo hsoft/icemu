@@ -34,7 +34,7 @@ static void mcu_pinchange(ICePin *pin)
     }
 }
 
-static void mcu_elapse(Chip *chip, time_t usecs)
+static void mcu_elapse(ICeChip *chip, time_t usecs)
 {
     uint8_t i;
     MCU *mcu;
@@ -48,7 +48,7 @@ static void mcu_elapse(Chip *chip, time_t usecs)
     }
 }
 
-static MCU* mcu_new(Chip *chip, const char **codes)
+static MCU* mcu_new(ICeChip *chip, const char **codes)
 {
     MCU *mcu;
     uint8_t count;
@@ -67,7 +67,7 @@ static MCU* mcu_new(Chip *chip, const char **codes)
 }
 
 /* Public */
-void icemu_mcu_add_interrupt(Chip *chip, ICePin *pin, MCUInterruptType type, InterruptFunc interrupt)
+void icemu_mcu_add_interrupt(ICeChip *chip, ICePin *pin, MCUInterruptType type, InterruptFunc interrupt)
 {
     int pinindex;
     MCU *mcu;
@@ -80,7 +80,7 @@ void icemu_mcu_add_interrupt(Chip *chip, ICePin *pin, MCUInterruptType type, Int
     }
 }
 
-void icemu_mcu_add_timer(Chip *chip, time_t every_usecs, TimerFunc timer_func)
+void icemu_mcu_add_timer(ICeChip *chip, time_t every_usecs, TimerFunc timer_func)
 {
     uint8_t i;
     MCU *mcu;
@@ -95,7 +95,7 @@ void icemu_mcu_add_timer(Chip *chip, time_t every_usecs, TimerFunc timer_func)
     }
 }
 
-void icemu_ATtiny_init(Chip *chip)
+void icemu_ATtiny_init(ICeChip *chip)
 {
     const char * codes[] = {"PB0", "PB1", "PB2", "PB3", "PB4", "PB5", NULL};
 

@@ -5,7 +5,7 @@
 
 #include "../src/icemu.h"
 
-static void assert_pin_is_selected(Chip *chip, uint8_t selected_pin)
+static void assert_pin_is_selected(ICeChip *chip, uint8_t selected_pin)
 {
     Decoder *dec = (Decoder *)chip->logical_unit;
     uint8_t i;
@@ -17,7 +17,7 @@ static void assert_pin_is_selected(Chip *chip, uint8_t selected_pin)
 
 static void test_IO()
 {
-    Chip chip;
+    ICeChip chip;
     Decoder *dec;
 
     icemu_SN74HC138_init(&chip);
@@ -36,7 +36,7 @@ static void test_IO()
 // a decoder is diabled when any of its enable pins is disabled
 static void test_disabled()
 {
-    Chip chip;
+    ICeChip chip;
 
     icemu_SN74HC138_init(&chip);
 
@@ -50,7 +50,7 @@ static void test_disabled()
 
 static void test_oscillate()
 {
-    Chip chip;
+    ICeChip chip;
     ICePin pin;
     int freq = 4242;
 

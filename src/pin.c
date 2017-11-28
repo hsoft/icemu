@@ -83,7 +83,7 @@ static int wire_compare_pins(const void *a, const void *b)
 
 /* Public */
 
-ICePin* icemu_pin_new(Chip *chip, const char *code, bool output)
+ICePin* icemu_pin_new(ICeChip *chip, const char *code, bool output)
 {
     ICePin *pin;
     pin = malloc(sizeof(ICePin));
@@ -91,7 +91,7 @@ ICePin* icemu_pin_new(Chip *chip, const char *code, bool output)
     return pin;
 }
 
-void icemu_pin_init(ICePin *pin, Chip *chip, const char *code, bool output)
+void icemu_pin_init(ICePin *pin, ICeChip *chip, const char *code, bool output)
 {
     pin->chip = chip;
     pin->code = code;

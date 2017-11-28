@@ -86,7 +86,7 @@ static void decoder_pinchange(ICePin *pin)
 }
 
 static Decoder* decoder_new(
-    Chip *chip,
+    ICeChip *chip,
     const char **input_codes,
     const char **output_codes,
     const char **serial_codes,
@@ -111,7 +111,7 @@ static Decoder* decoder_new(
 }
 
 /* Public */
-void icemu_SN74HC138_init(Chip *chip)
+void icemu_SN74HC138_init(ICeChip *chip)
 {
     const char * input_codes[] = {"A", "B", "C", "G1", "~G2A", "~G2B", NULL};
     const char * output_codes[] = {"Y0", "Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", NULL};

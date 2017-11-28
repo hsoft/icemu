@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct Chip Chip;
+typedef struct ICeChip ICeChip;
 typedef struct ICePinList ICePinList;
 
 #define MAX_PINS_ON_A_WIRE 128
@@ -17,7 +17,7 @@ typedef struct ICePinList ICePinList;
 // two wires.
 
 typedef struct ICePin {
-    Chip *chip;
+    ICeChip *chip;
     const char *code;
     bool output;
     bool low_means_high;
@@ -28,8 +28,8 @@ typedef struct ICePin {
 
 typedef void (*PinChangeFunc)(ICePin *);
 
-ICePin* icemu_pin_new(Chip *chip, const char *code, bool output);
-void icemu_pin_init(ICePin *pin, Chip *chip, const char *code, bool output);
+ICePin* icemu_pin_new(ICeChip *chip, const char *code, bool output);
+void icemu_pin_init(ICePin *pin, ICeChip *chip, const char *code, bool output);
 // returns true if a change occurred
 bool icemu_pin_set(ICePin *pin, bool high);
 // same as set() if low_means_high is false, otherwise, the opposite.

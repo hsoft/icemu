@@ -11,7 +11,7 @@ static void test_dec_and_srs()
     // SRs' clock are connected to the decoder, but their DS1 is connected to the
     // same output pin.
 
-    Chip dec, sr1, sr2;
+    ICeChip dec, sr1, sr2;
     ICePin pin;
 
     icemu_SN74HC138_init(&dec);

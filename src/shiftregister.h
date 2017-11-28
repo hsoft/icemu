@@ -13,5 +13,5 @@ typedef struct {
     ICePinList outputs;
 } ShiftRegister;
 
-void icemu_CD74AC164_init(Chip *chip);
-void icemu_SN74HC595_init(Chip *chip);
+void icemu_CD74AC164_init(ICeChip *chip);
+void icemu_SN74HC595_init(ICeChip *chip);

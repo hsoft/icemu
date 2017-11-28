@@ -42,7 +42,7 @@ static void binarycounter_pinchange(ICePin *pin)
 }
 
 static BinaryCounter* binarycounter_new(
-    Chip *chip,
+    ICeChip *chip,
     const char **input_codes,
     const char **output_codes,
     const char **enable_codes,
@@ -66,7 +66,7 @@ static BinaryCounter* binarycounter_new(
 }
 
 /* Public */
-void icemu_SN74F161AN_init(Chip *chip)
+void icemu_SN74F161AN_init(ICeChip *chip)
 {
     const char * input_codes[] = {"CLK", "ENT", "ENP", NULL};
     const char * output_codes[] = {"QA", "QB", "QC", "QD", NULL};

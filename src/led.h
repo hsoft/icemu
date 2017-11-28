@@ -17,6 +17,6 @@ typedef struct {
     LED *leds;
 } LEDMatrix;
 
-void icemu_seg7_init(Chip *chip);
-void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height);
-ICePin* icemu_ledmatrix_vcc(Chip *chip);
+void icemu_seg7_init(ICeChip *chip);
+void icemu_ledmatrix_init(ICeChip *chip, uint8_t width, uint8_t height);
+ICePin* icemu_ledmatrix_vcc(ICeChip *chip);

@@ -5,7 +5,7 @@
 
 #include "../src/icemu.h"
 
-static void push_value(Chip *chip, uint8_t val, bool buffered)
+static void push_value(ICeChip *chip, uint8_t val, bool buffered)
 {
     ShiftRegister *sr = (ShiftRegister *)chip->logical_unit;
     uint8_t i;
@@ -23,7 +23,7 @@ static void push_value(Chip *chip, uint8_t val, bool buffered)
     }
 }
 
-static void assert_value(Chip *chip, uint8_t expected_value)
+static void assert_value(ICeChip *chip, uint8_t expected_value)
 {
     ShiftRegister *sr = (ShiftRegister *)chip->logical_unit;
     CU_ASSERT_EQUAL(icemu_util_get_binary_value(&sr->outputs), expected_value);
@@ -31,7 +31,7 @@ static void assert_value(Chip *chip, uint8_t expected_value)
 
 static void test_IO_unbuffered()
 {
-    Chip chip;
+    ICeChip chip;
     uint8_t expected = 0x42;
 
     icemu_CD74AC164_init(&chip);
@@ -41,7 +41,7 @@ static void test_IO_unbuffered()
 
 static void test_IO_buffered()
 {
-    Chip chip;
+    ICeChip chip;
     ShiftRegister *sr;
     uint8_t expected = 0x42;
 
@@ -60,7 +60,7 @@ static void test_disable_doesnt_reset_buffers()
 {
     /* When the "enable" pin is disabled, we don't want to reset the buffer, only make the */
     /* output pin temporarily have low outputs.                                            */
-    Chip chip;
+    ICeChip chip;
     ShiftRegister *sr;
     uint8_t expected = 0x42;
 
@@ -81,7 +81,7 @@ static void test_disable_doesnt_reset_buffers()
 
 static void test_reset()
 {
-    Chip chip;
+    ICeChip chip;
     ShiftRegister *sr;
     uint8_t expected = 0x42;
 
@@ -109,7 +109,7 @@ static void test_clock_and_buffer_pins_wired()
      * pins is *not* the one that is just being pushed by SRCLK, but the one before. We need to
      * reproduce that behavior in the simulation too.
      */
-    Chip chip;
+    ICeChip chip;
     ShiftRegister *sr;
     ICePin p;
 

@@ -56,7 +56,7 @@ static void shiftregister_pinchange(ICePin *pin)
     }
 }
 
-static ShiftRegister* shiftregister_new(Chip *chip, const char **input_codes, const char **output_codes)
+static ShiftRegister* shiftregister_new(ICeChip *chip, const char **input_codes, const char **output_codes)
 {
     ShiftRegister *sr;
     uint8_t icount;
@@ -83,7 +83,7 @@ static ShiftRegister* shiftregister_new(Chip *chip, const char **input_codes, co
 }
 
 /* Public */
-void icemu_CD74AC164_init(Chip *chip)
+void icemu_CD74AC164_init(ICeChip *chip)
 {
     ShiftRegister *sr;
     const char * input_codes[] = {"CP", "DS1", "DS2", "~MR", NULL};
@@ -98,7 +98,7 @@ void icemu_CD74AC164_init(Chip *chip)
     sr->reset_pin->high = true;
 }
 
-void icemu_SN74HC595_init(Chip *chip)
+void icemu_SN74HC595_init(ICeChip *chip)
 {
     ShiftRegister *sr;
     const char * input_codes[] = {"SER", "RCLK", "~OE", "~SRCLR", "SRCLK", NULL};

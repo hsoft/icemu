@@ -9,5 +9,5 @@ typedef struct {
     ICePinList enable_pins;
 } Decoder;
 
-void icemu_SN74HC138_init(Chip *chip);
+void icemu_SN74HC138_init(ICeChip *chip);
 

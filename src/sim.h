@@ -60,7 +60,7 @@ void icemu_sim_init(time_t resolution, RunloopFunc runloop);
  * stuff on "elapse()", but it doesn't hurt to add all your chips. You will always want to add
  * your MCU, otherwise timers won't work.
  */
-void icemu_sim_add_chip(Chip *chip);
+void icemu_sim_add_chip(ICeChip *chip);
 
 /* Add custom action to the keybindings
  */

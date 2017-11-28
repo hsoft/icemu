@@ -61,7 +61,7 @@ static void ledmatrix_pinchange(ICePin *pin)
  * |_| FGB
  * |_| EDC
  */
-static void seg7_asciiart(Chip *chip, ChipAsciiArt *dst)
+static void seg7_asciiart(const ICeChip *chip, ICeChipAsciiArt *dst)
 {
     char *s;
     LEDMatrix *lm;
@@ -86,7 +86,7 @@ static void seg7_asciiart(Chip *chip, ChipAsciiArt *dst)
     s[12] = '\0';
 }
 
-static void ledmatrix_asciiart(Chip *chip, ChipAsciiArt *dst)
+static void ledmatrix_asciiart(const ICeChip *chip, ICeChipAsciiArt *dst)
 {
     uint8_t i, offset;
     char *s;
@@ -108,7 +108,7 @@ static void ledmatrix_asciiart(Chip *chip, ChipAsciiArt *dst)
     s[lm->width * lm->height] = '\0';
 }
 
-static void ledmatrix_elapse(Chip *chip, time_t usecs)
+static void ledmatrix_elapse(ICeChip *chip, time_t usecs)
 {
     int i;
     LEDMatrix *lm;
@@ -120,7 +120,7 @@ static void ledmatrix_elapse(Chip *chip, time_t usecs)
 }
 
 /* Public */
-void icemu_seg7_init(Chip *chip)
+void icemu_seg7_init(ICeChip *chip)
 {
     uint8_t i;
     const char * codes[] = {"A", "B", "C", "D", "E", "F", "G", "DP", NULL};
@@ -132,7 +132,7 @@ void icemu_seg7_init(Chip *chip)
     chip->asciiart_func = seg7_asciiart;
 }
 
-void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
+void icemu_ledmatrix_init(ICeChip *chip, uint8_t width, uint8_t height)
 {
     LEDMatrix *lm;
     uint8_t i;
@@ -153,7 +153,7 @@ void icemu_ledmatrix_init(Chip *chip, uint8_t width, uint8_t height)
     icemu_pin_set(&lm->vcc, true);
 }
 
-ICePin* icemu_ledmatrix_vcc(Chip *chip)
+ICePin* icemu_ledmatrix_vcc(ICeChip *chip)
 {
     return &((LEDMatrix *)chip->logical_unit)->vcc;
 }

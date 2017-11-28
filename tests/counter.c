@@ -6,7 +6,7 @@
 
 static void test_IO()
 {
-    Chip chip;
+    ICeChip chip;
     BinaryCounter *bc;
     int expected = 12;
     int i;
@@ -24,7 +24,7 @@ static void test_IO()
 // various rates. Pin 1 is going to be freq/2, Pin2, freq/4 and so on.
 void test_oscillate()
 {
-    Chip chip;
+    ICeChip chip;
     ICePin pin;
     int freq = 1000 * 1000;
 

@@ -10,4 +10,6 @@ void pinset(bool high);
 bool pinishigh();
 void pininputmode();
 void pinoutputmode();
+#ifdef SIMULATION
 void _delay_ms(unsigned int ms);
+#endif

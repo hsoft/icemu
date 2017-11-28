@@ -1,16 +1,16 @@
 #include "layer.h"
 
-void pinhigh(Pin pin)
+void pinhigh(PinID pin)
 {
     sbi(PORTB, pin & 0b111);
 }
 
-void pinlow(Pin pin)
+void pinlow(PinID pin)
 {
     cbi(PORTB, pin & 0b111);
 }
 
-void pinset(Pin pin, bool high)
+void pinset(PinID pin, bool high)
 {
     if (high) {
         pinhigh(pin);
@@ -19,7 +19,7 @@ void pinset(Pin pin, bool high)
     }
 }
 
-void pinoutputmode(Pin pin)
+void pinoutputmode(PinID pin)
 {
     sbi(DDRB, pin & 0b111);
 }

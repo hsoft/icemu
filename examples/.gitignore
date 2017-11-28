@@ -1,3 +1,5 @@
+*.bin
+*.hex
 /blink/blink
 /button/button
 /interrupt/interrupt

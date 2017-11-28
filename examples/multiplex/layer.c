@@ -10,7 +10,7 @@
 
 #define USECS_PER_SECOND 1000000UL
 
-void pinset(Pin pin, bool high)
+void pinset(PinID pin, bool high)
 {
     if (high) {
         sbi(PORTB, pin & 0b111);
@@ -19,7 +19,7 @@ void pinset(Pin pin, bool high)
     }
 }
 
-void pinoutputmode(Pin pin)
+void pinoutputmode(PinID pin)
 {
     sbi(DDRB, pin & 0b111);
 }

@@ -77,7 +77,11 @@ static void chip_asciiart_add_freq_display(char *dst, Pin *pin, bool rightalign)
     }
     *dst = '@';
     charcount = icemu_util_fmthertz(tmpfmt, pin->oscillating_freq);
-    dst -= charcount;
+    if (rightalign) {
+        dst -= charcount;
+    } else {
+        dst++;
+    }
     memcpy(dst, tmpfmt, charcount);
 }
 
@@ -114,7 +118,8 @@ static void chip_asciiart(Chip *chip, ChipAsciiArt *dst)
             s[loffset + mcl + 6] = chip_asciiart_pstatus(p);
             s[loffset + mcl + 8] = p->output ? '>' : '<';
             codeoffset = loffset + mcl + 9;
-            strncpy(&s[codeoffset], p->code, mcl);
+            slen = strnlen(p->code, mcl);
+            strncpy(&s[codeoffset], p->code, slen);
             chip_asciiart_add_freq_display(&s[codeoffset + slen], p, false);
         } else {
             // close the rectangle in odd pins scenarios

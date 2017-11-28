@@ -10,7 +10,7 @@
 
 // This is used by the "Run until next trigger" feature in Simulation.
 // If not null, it's called on *every* pin change.
-static PinChangeFunc global_pinchange_trigger = NULL;
+static ICePinChangeFunc *global_pinchange_trigger = NULL;
 
 /* Private */
 static void pin_trigger_change(ICePin *pin)
@@ -166,7 +166,7 @@ void icemu_pin_wireto(ICePin *pin, ICePin *other)
     wire_propagate(pin->wire);
 }
 
-void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func)
+void icemu_pin_set_global_pinchange_trigger(ICePinChangeFunc *func)
 {
     global_pinchange_trigger = func;
 }

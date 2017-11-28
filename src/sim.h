@@ -28,14 +28,14 @@
 #define MAX_SIM_CHIPS 256
 #define MAX_SIM_TRIGGERS 100
 
-typedef void (*UIActionFunc)();
+typedef void (ICeUIActionFunc)();
 
-typedef void (*RunloopFunc)();
+typedef void (ICeRunloopFunc)();
 
 typedef struct {
     char key;
-    UIActionFunc func;
-} UIAction;
+    ICeUIActionFunc *func;
+} ICeUIAction;
 
 typedef enum {
     SIM_RUNMODE_RUN,
@@ -52,7 +52,7 @@ typedef enum {
  * runloop: a pointer to your runloop. The runloop is a function that executes *one pass*, not
  *          an infinite loop. This is going to be called once every tick.
  */
-void icemu_sim_init(time_t resolution, RunloopFunc runloop);
+void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop);
 
 /* Adds a chip to the simulation
  *
@@ -64,7 +64,7 @@ void icemu_sim_add_chip(ICeChip *chip);
 
 /* Add custom action to the keybindings
  */
-void icemu_sim_add_action(char key, char *label, UIActionFunc func);
+void icemu_sim_add_action(char key, char *label, ICeUIActionFunc *func);
 
 /* Add global pin trigger
  *

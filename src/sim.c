@@ -11,8 +11,8 @@ typedef struct {
     time_t next_tick_target; // usecs
     time_t ticks;
     time_t resolution; // usecs per tick
-    RunloopFunc runloop;
-    UIAction actions[MAX_SIM_ACTIONS];
+    ICeRunloopFunc *runloop;
+    ICeUIAction actions[MAX_SIM_ACTIONS];
     ICeChip * chips[MAX_SIM_CHIPS];
     ICePin * triggers[MAX_SIM_TRIGGERS];
 } Simulation;
@@ -59,7 +59,7 @@ static void sim_tick()
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
 }
 
-static bool sim_loop_once(RunloopFunc runloop)
+static bool sim_loop_once(ICeRunloopFunc *runloop)
 {
     int key;
 
@@ -118,7 +118,7 @@ static void sim_global_pinchange(ICePin *pin)
 }
 
 /* Public */
-void icemu_sim_init(time_t resolution, RunloopFunc runloop)
+void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop)
 {
     sim.runmode = SIM_RUNMODE_RUN;
     sim.ticks = 0;
@@ -147,7 +147,7 @@ void icemu_sim_add_chip(ICeChip *chip)
     }
 }
 
-void icemu_sim_add_action(char key, char *label, UIActionFunc func)
+void icemu_sim_add_action(char key, char *label, ICeUIActionFunc *func)
 {
     int i;
 

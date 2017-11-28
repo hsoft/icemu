@@ -67,7 +67,8 @@ static MCU* mcu_new(ICeChip *chip, const char **codes)
 }
 
 /* Public */
-void icemu_mcu_add_interrupt(ICeChip *chip, ICePin *pin, MCUInterruptType type, InterruptFunc interrupt)
+void icemu_mcu_add_interrupt(
+    ICeChip *chip, ICePin *pin, MCUInterruptType type, ICeInterruptFunc *interrupt)
 {
     int pinindex;
     MCU *mcu;
@@ -80,7 +81,7 @@ void icemu_mcu_add_interrupt(ICeChip *chip, ICePin *pin, MCUInterruptType type, 
     }
 }
 
-void icemu_mcu_add_timer(ICeChip *chip, time_t every_usecs, TimerFunc timer_func)
+void icemu_mcu_add_timer(ICeChip *chip, time_t every_usecs, ICeTimerFunc *timer_func)
 {
     uint8_t i;
     MCU *mcu;

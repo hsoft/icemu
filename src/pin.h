@@ -26,7 +26,7 @@ typedef struct ICePin {
     ICePinList *wire;
 } ICePin;
 
-typedef void (*PinChangeFunc)(ICePin *);
+typedef void (ICePinChangeFunc)(ICePin *);
 
 ICePin* icemu_pin_new(ICeChip *chip, const char *code, bool output);
 void icemu_pin_init(ICePin *pin, ICeChip *chip, const char *code, bool output);
@@ -37,4 +37,4 @@ bool icemu_pin_enable(ICePin *pin, bool enabled);
 bool icemu_pin_isenabled(const ICePin *pin);
 void icemu_pin_set_oscillating_freq(ICePin *pin, unsigned int freq);
 void icemu_pin_wireto(ICePin *pin, ICePin *other);
-void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func);
+void icemu_pin_set_global_pinchange_trigger(ICePinChangeFunc *func);

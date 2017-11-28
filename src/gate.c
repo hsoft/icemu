@@ -69,7 +69,7 @@ static void gate_pinchange(ICePin *pin)
 
 static Gate* gate_new(
     ICeChip *chip,
-    GateTestFunc test_func,
+    ICeGateTestFunc *test_func,
     const char **input_codes,
     const char *output_code)
 {

@@ -10,10 +10,10 @@ typedef enum {
     ICE_TEST_RESULT_OSCILLATE = 2
 } ICeGateTestResult;
 
-typedef ICeGateTestResult (GateTestFunc)(ICePinList *);
+typedef ICeGateTestResult (ICeGateTestFunc)(ICePinList *);
 
 typedef struct {
-    GateTestFunc *test_func;
+    ICeGateTestFunc *test_func;
     ICePinList inputs;
     ICePin *output;
 } Gate;

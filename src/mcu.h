@@ -7,7 +7,7 @@
 #define MAX_INTERRUPTS 100
 #define MAX_TIMERS 20
 
-typedef void (*InterruptFunc)();
+typedef void (ICeInterruptFunc)();
 
 typedef enum {
     INTERRUPT_ON_RISING,
@@ -17,15 +17,15 @@ typedef enum {
 
 typedef struct {
     MCUInterruptType type;
-    InterruptFunc func;
+    ICeInterruptFunc *func;
 } MCUInterrupt;
 
-typedef void (*TimerFunc)();
+typedef void (ICeTimerFunc)();
 
 typedef struct {
     time_t every; // usecs
     time_t elapsed;
-    TimerFunc func;
+    ICeTimerFunc *func;
 } MCUTimer;
 
 typedef struct {
@@ -35,7 +35,8 @@ typedef struct {
     MCUTimer timers[MAX_TIMERS];
 } MCU;
 
-void icemu_mcu_add_interrupt(ICeChip *chip, ICePin *pin, MCUInterruptType type, InterruptFunc interrupt);
-void icemu_mcu_add_timer(ICeChip *chip, time_t every_usecs, TimerFunc timer_func);
+void icemu_mcu_add_interrupt(
+    ICeChip *chip, ICePin *pin, MCUInterruptType type, ICeInterruptFunc *interrupt);
+void icemu_mcu_add_timer(ICeChip *chip, time_t every_usecs, ICeTimerFunc *timer_func);
 
 void icemu_ATtiny_init(ICeChip *chip);

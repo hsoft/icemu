@@ -145,6 +145,9 @@ void icemu_pin_set_oscillating_freq(ICePin *pin, unsigned int freq)
 
 void icemu_pin_wireto(ICePin *pin, ICePin *other)
 {
+    ICePinList *old;
+    int i;
+
     if ((pin->wire == NULL) && (other->wire == NULL)) {
         pin->wire = icemu_pinlist_new(MAX_PINS_ON_A_WIRE);
         icemu_pinlist_add(pin->wire, pin);
@@ -158,7 +161,12 @@ void icemu_pin_wireto(ICePin *pin, ICePin *other)
             icemu_pinlist_add(pin->wire, other);
             other->wire = pin->wire;
         } else {
-            // TODO: merge the two wires
+            old = other->wire;
+            icemu_pinlist_add_multiple(pin->wire, other->wire);
+            for (i = 0; i < old->count; i++) {
+                old->pins[i]->wire = pin->wire;
+            }
+            icemu_pinlist_destroy(old);
         }
     }
     // we need to sort to ensure proper propagation order. See comment near wire_compare_pins().

@@ -16,6 +16,7 @@ void icemu_pinlist_subset_of_existing(
     ICePinList *pinlist, const ICePinList *existing, const char **codes);
 void icemu_pinlist_destroy(ICePinList *pinlist);
 void icemu_pinlist_add(ICePinList *pinlist, ICePin *pin);
+void icemu_pinlist_add_multiple(ICePinList *pinlist, const ICePinList *other);
 int icemu_pinlist_find(const ICePinList *pinlist, const ICePin *pin);
 ICePin* icemu_pinlist_find_by_code(const ICePinList *pinlist, const char *code);
 bool icemu_pinlist_ishigh_any(const ICePinList *pinlist);

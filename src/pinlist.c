@@ -51,6 +51,15 @@ void icemu_pinlist_add(ICePinList *pinlist, ICePin *pin)
     pinlist->count++;
 }
 
+void icemu_pinlist_add_multiple(ICePinList *pinlist, const ICePinList *other)
+{
+    int i;
+
+    for (i = 0; i < other->count; i++) {
+        icemu_pinlist_add(pinlist, other->pins[i]);
+    }
+}
+
 int icemu_pinlist_find(const ICePinList *pinlist, const ICePin *pin)
 {
     uint8_t i;

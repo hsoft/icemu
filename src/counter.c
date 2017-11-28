@@ -13,6 +13,17 @@ static void binarycounter_update_output(BinaryCounter *bc)
     icemu_util_set_binary_value(&bc->outputs, bc->value);
 }
 
+static void binarycounter_oscillate(BinaryCounter *bc)
+{
+    int i, freq;
+
+    freq = bc->clock->oscillating_freq;
+    for (i = 0; i < bc->outputs.count; i++) {
+        freq /= 2;
+        icemu_pin_set_oscillating_freq(bc->outputs.pins[i], freq);
+    }
+}
+
 static void binarycounter_pinchange(Pin *pin)
 {
     BinaryCounter *bc = (BinaryCounter *)pin->chip->logical_unit;
@@ -21,8 +32,12 @@ static void binarycounter_pinchange(Pin *pin)
         return;
     }
     if ((pin == bc->clock) && (pin->high)) {
-        bc->value++;
-        binarycounter_update_output(bc);
+        if (pin->oscillating_freq == 0) {
+            bc->value++;
+            binarycounter_update_output(bc);
+        } else {
+            binarycounter_oscillate(bc);
+        }
     }
 }
 

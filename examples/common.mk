@@ -8,7 +8,7 @@ OBJS ?= main.o layer.o
 AVRDUDEMCU = t45
 AVRDUDEARGS = -c usbtiny -P usb 
 
-SIM_OBJS = main.o sim.o
+SIM_OBJS ?= main.o sim.o
 NCURSES_LINKING = `pkg-config --libs --static ncurses`
 
 # Patterns

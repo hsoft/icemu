@@ -22,6 +22,7 @@ typedef struct Pin {
     bool output;
     bool low_means_high;
     bool high;
+    unsigned int oscillating_freq;
     PinList *wire;
 } Pin;
 
@@ -41,6 +42,7 @@ bool icemu_pin_set(Pin *pin, bool high);
 // same as set() if low_means_high is false, otherwise, the opposite.
 bool icemu_pin_enable(Pin *pin, bool enabled);
 bool icemu_pin_isenabled(Pin *pin);
+void icemu_pin_set_oscillating_freq(Pin *pin, unsigned int freq);
 void icemu_pin_wireto(Pin *pin, Pin *other);
 void icemu_pin_set_global_pinchange_trigger(PinChangeFunc func);
 

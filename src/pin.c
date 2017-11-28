@@ -22,15 +22,6 @@ static void pin_trigger_change(Pin *pin)
     }
 }
 
-static bool pin_set(Pin *pin, bool high)
-{
-    if (high != pin->high) {
-        pin->high = high;
-        return true;
-    }
-    return false;
-}
-
 // We propagate to one or zero other pin on the wire. Our goal is to:
 // 1. propagate state to all wired pins before any pin_change_func() call.
 // 2. call pin_change_func() for each changed pin *after* propagation occured.
@@ -38,6 +29,7 @@ static bool pin_set(Pin *pin, bool high)
 static void wire_propagate(PinList *wire)
 {
     bool wire_is_high = false;
+    unsigned int freq = 0;
     uint8_t i;
     Pin *p;
     bool changed_pins[MAX_PINS_ON_A_WIRE] = { false };
@@ -46,12 +38,14 @@ static void wire_propagate(PinList *wire)
         p = wire->pins[i];
         if (p->output && p->high) {
             wire_is_high = true;
-            break;
+            freq = MAX(freq, p->oscillating_freq);
         }
     }
     for (i = 0; i < wire->count; i++) {
         p = wire->pins[i];
-        if (!p->output && pin_set(p, wire_is_high)) {
+        if (!p->output && ((p->high != wire_is_high) || (p->oscillating_freq != freq))) {
+            p->high = wire_is_high;
+            p->oscillating_freq = freq;
             changed_pins[i] = true;
         }
     }
@@ -103,12 +97,14 @@ void icemu_pin_init(Pin *pin, Chip *chip, const char *code, bool output)
     pin->output = output;
     pin->low_means_high = code[0] == '~';
     pin->high = false;
+    pin->oscillating_freq = 0;
     pin->wire = NULL;
 }
 
 bool icemu_pin_set(Pin *pin, bool high)
 {
-    if (pin_set(pin, high)) {
+    if (high != pin->high) {
+        pin->high = high;
         if (pin->output && (pin->wire != NULL)) {
             wire_propagate(pin->wire);
         }
@@ -129,6 +125,18 @@ bool icemu_pin_enable(Pin *pin, bool enabled)
 bool icemu_pin_isenabled(Pin *pin)
 {
     return pin->high != pin->low_means_high;
+}
+
+void icemu_pin_set_oscillating_freq(Pin *pin, unsigned int freq)
+{
+    if (freq != pin->oscillating_freq) {
+        pin->oscillating_freq = freq;
+        pin->high = true;
+        if (pin->output && (pin->wire != NULL)) {
+            wire_propagate(pin->wire);
+        }
+        pin_trigger_change(pin);
+    }
 }
 
 PinList* icemu_pinlist_new(uint8_t capacity)

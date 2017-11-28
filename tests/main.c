@@ -8,6 +8,7 @@ void test_decoder_init();
 void test_counter_init();
 void test_gate_init();
 void test_circuit_init();
+void test_util_init();
 
 int main()
 {
@@ -18,6 +19,7 @@ int main()
     test_counter_init();
     test_gate_init();
     test_circuit_init();
+    test_util_init();
     CU_basic_run_tests();
     CU_cleanup_registry();
     return 0;

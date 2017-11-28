@@ -24,10 +24,27 @@ static void test_wire_propagation_3pins()
     CU_ASSERT_TRUE(p3.high);
 }
 
+// Oscillation properly propagates through wires and an oscillating pin
+// is always considered high.
+void test_oscillate_wire_high()
+{
+    Pin p1, p2;
+
+    icemu_pin_init(&p1, NULL, "P1", true);
+    icemu_pin_init(&p2, NULL, "P2", false);
+    icemu_pin_wireto(&p1, &p2);
+    icemu_pin_set_oscillating_freq(&p1, 42);
+    CU_ASSERT_EQUAL(p1.oscillating_freq, 42);
+    CU_ASSERT_TRUE(p1.high);
+    CU_ASSERT_EQUAL(p2.oscillating_freq, 42);
+    CU_ASSERT_TRUE(p2.high);
+}
+
 void test_pin_init()
 {
     CU_pSuite s;
 
     s = CU_add_suite("Pins", NULL, NULL);
     CU_ADD_TEST(s, test_wire_propagation_3pins);
+    CU_ADD_TEST(s, test_oscillate_wire_high);
 }

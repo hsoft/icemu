@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "util.h"
 
@@ -40,4 +41,16 @@ time_t icemu_util_timestamp()
 
     gettimeofday(&tv, NULL);
     return (tv.tv_sec * 1000 * 1000) + tv.tv_usec;
+}
+
+int icemu_util_fmthertz(char *dst, uint64_t hertz)
+{
+    const char * suffixes[] = {"Hz", "kHz", "MHz", "THz"};
+    int order = 0;
+
+    while ((order < 4) && (hertz / 1000 > 0)) {
+        hertz /= 1000;
+        order++;
+    }
+    return sprintf(dst, "%d%s", (int)hertz, suffixes[order]);
 }

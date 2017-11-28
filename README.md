@@ -51,6 +51,13 @@ if that happened, please tell me so I can stop working on useless tools.
 and, soon enough, it was. I rewrote the whole thing in C. The old python implementation is still
 available in the `python` branch of the repo.
 
+## Requirements
+
+* C compiler
+* GNU make
+* ncurses
+* CUnit for tests
+
 ## How to use
 
 For now, the API is not stable so it's not a library meant to be installed. What you're going to

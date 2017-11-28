@@ -8,12 +8,12 @@
 #include "util.h"
 
 /* Private */
-static void binarycounter_update_output(BinaryCounter *bc)
+static void binarycounter_update_output(ICeBinaryCounter *bc)
 {
     icemu_util_set_binary_value(&bc->outputs, bc->value);
 }
 
-static void binarycounter_oscillate(BinaryCounter *bc)
+static void binarycounter_oscillate(ICeBinaryCounter *bc)
 {
     int i, freq;
 
@@ -26,7 +26,7 @@ static void binarycounter_oscillate(BinaryCounter *bc)
 
 static void binarycounter_pinchange(ICePin *pin)
 {
-    BinaryCounter *bc = (BinaryCounter *)pin->chip->logical_unit;
+    ICeBinaryCounter *bc = (ICeBinaryCounter *)pin->chip->logical_unit;
 
     if (!icemu_pinlist_isenabled_all(&bc->enable_pins)) {
         return;
@@ -41,20 +41,20 @@ static void binarycounter_pinchange(ICePin *pin)
     }
 }
 
-static BinaryCounter* binarycounter_new(
+static ICeBinaryCounter* binarycounter_new(
     ICeChip *chip,
     const char **input_codes,
     const char **output_codes,
     const char **enable_codes,
     const char *clock_code)
 {
-    BinaryCounter *bc;
+    ICeBinaryCounter *bc;
     uint8_t icount;
     uint8_t ocount;
 
     icount = icemu_util_chararray_count(input_codes);
     ocount = icemu_util_chararray_count(output_codes);
-    bc = (BinaryCounter *)malloc(sizeof(BinaryCounter));
+    bc = (ICeBinaryCounter *)malloc(sizeof(ICeBinaryCounter));
     bc->value = 0;
     icemu_chip_init(chip, (void *)bc, binarycounter_pinchange, icount + ocount);
     icemu_chip_addpins(chip, &bc->inputs, input_codes, false);

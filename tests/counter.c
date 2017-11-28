@@ -7,12 +7,12 @@
 static void test_IO()
 {
     ICeChip chip;
-    BinaryCounter *bc;
+    ICeBinaryCounter *bc;
     int expected = 12;
     int i;
 
     icemu_SN74F161AN_init(&chip);
-    bc = (BinaryCounter *)chip.logical_unit;
+    bc = (ICeBinaryCounter *)chip.logical_unit;
     for (i = 0; i < expected; i++) {
         icemu_pin_set(bc->clock, false);
         icemu_pin_set(bc->clock, true);

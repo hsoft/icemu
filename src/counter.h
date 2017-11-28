@@ -8,7 +8,7 @@ typedef struct {
     ICePinList inputs;
     ICePinList outputs;
     ICePinList enable_pins;
-} BinaryCounter;
+} ICeBinaryCounter;
 
 void icemu_SN74F161AN_init(ICeChip *chip);
 

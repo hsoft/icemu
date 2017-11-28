@@ -19,6 +19,11 @@ static bool test_nor(PinList *pinlist)
     return true;
 }
 
+static bool test_invert(PinList *pinlist)
+{
+    return !pinlist->pins[0]->high;
+}
+
 static bool gate_haspin(const Gate *gate, const Pin *pin)
 {
     return icemu_pinlist_find(&gate->inputs, pin) >= 0 || pin == gate->output;
@@ -78,6 +83,7 @@ static void gateset_add_gate(GateSet *gateset, Gate *gate)
 }
 
 /* Public */
+/* NOR */
 void icemu_CD4001B_init(Chip *chip)
 {
     GateSet *gs;
@@ -94,5 +100,27 @@ void icemu_CD4001B_init(Chip *chip)
     for (i = 0; i < 4; i++) {
         gateset_add_gate(gs,
             gate_new(chip, test_nor, input_codes[i], output_codes[i]));
+    }
+}
+
+/* Inverter */
+void icemu_SN74HC14_init(Chip *chip)
+{
+    GateSet *gs;
+    int i;
+    const char * input_codes[6][2] = {
+        {"1A", NULL},
+        {"2A", NULL},
+        {"3A", NULL},
+        {"4A", NULL},
+        {"5A", NULL},
+        {"6A", NULL},
+    };
+    const char * output_codes[6] = {"1Y", "2Y", "3Y", "4Y", "5Y", "6Y"};
+
+    gs = gateset_new(chip, 6, 6 * 2);
+    for (i = 0; i < 6; i++) {
+        gateset_add_gate(gs,
+            gate_new(chip, test_invert, input_codes[i], output_codes[i]));
     }
 }

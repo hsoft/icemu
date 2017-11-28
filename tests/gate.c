@@ -52,6 +52,20 @@ static void test_sr_latch()
     CU_ASSERT_FALSE(j->high);
 }
 
+static void test_INVERT()
+{
+    Chip chip;
+
+    icemu_SN74HC14_init(&chip);
+    // Initial state: all input low -> output high
+    CU_ASSERT_TRUE(icemu_chip_getpin(&chip, "1Y")->high);
+    // Input high -> output low
+    icemu_pin_set(icemu_chip_getpin(&chip, "1A"), true);
+    CU_ASSERT_FALSE(icemu_chip_getpin(&chip, "1Y")->high);
+    // Other inputs on the chip not affected
+    CU_ASSERT_TRUE(icemu_chip_getpin(&chip, "6Y")->high);
+}
+
 void test_gate_init()
 {
     CU_pSuite s;
@@ -59,6 +73,7 @@ void test_gate_init()
     s = CU_add_suite("Gates", NULL, NULL);
     CU_ADD_TEST(s, test_NOR);
     CU_ADD_TEST(s, test_sr_latch);
+    CU_ADD_TEST(s, test_INVERT);
 }
 
 

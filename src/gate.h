@@ -16,4 +16,5 @@ typedef struct {
 } GateSet;
 
 void icemu_CD4001B_init(Chip *chip);
+void icemu_SN74HC14_init(Chip *chip);
 

@@ -9,6 +9,24 @@
 
 /* Private */
 
+typedef enum {
+    ICE_TEST_RESULT_HIGH = 0,
+    ICE_TEST_RESULT_LOW = 1,
+    ICE_TEST_RESULT_OSCILLATE = 2
+} ICeGateTestResult;
+
+typedef ICeGateTestResult (ICeGateTestFunc)(ICePinList *);
+
+typedef struct {
+    ICeGateTestFunc *test_func;
+    ICePinList inputs;
+    ICePin *output;
+} Gate;
+
+typedef struct {
+    Gate * gates[MAX_GATE_COUNT];
+} GateSet;
+
 static ICeGateTestResult test_nor(ICePinList *pinlist)
 {
     int i;

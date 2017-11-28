@@ -7,6 +7,20 @@
 #define LED_FADE_DELAY 10000
 
 /* Private */
+typedef struct {
+    uint32_t fade_timeout;
+    bool powered;
+    ICePin *vcc;
+    ICePin *gnd;
+} LED;
+
+typedef struct {
+    uint8_t width;
+    uint8_t height;
+    ICePin vcc;
+    LED *leds;
+} LEDMatrix;
+
 void led_init(LED *led, ICePin *vcc, ICePin *gnd)
 {
     led->fade_timeout = 0;

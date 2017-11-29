@@ -6,6 +6,7 @@
 #include "shiftregister.h"
 #include "chip.h"
 #include "util.h"
+#include "private.h"
 
 /* About buffered SRs and input pins order
  * The order of the pins in buffered SRs is important. It's important that buffer_pin

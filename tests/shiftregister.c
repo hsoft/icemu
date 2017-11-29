@@ -4,6 +4,7 @@
 #include <CUnit/CUnit.h>
 
 #include "../src/icemu.h"
+#include "../src/util.h"
 
 static void push_value(ICeChip *chip, uint8_t val, bool buffered)
 {

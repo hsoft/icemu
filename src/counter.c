@@ -6,6 +6,7 @@
 #include "counter.h"
 #include "chip.h"
 #include "util.h"
+#include "private.h"
 
 /* Private */
 static void binarycounter_update_output(ICeBinaryCounter *bc)

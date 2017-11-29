@@ -3,6 +3,18 @@
 #include "pin.h"
 #include "pinlist.h"
 
+/* About chips:
+ *
+ * A chip is a generic integrated circuit. The logic in this unit is the logic that is common to
+ * all ICs, which is mostly about holding pins together and being represented as asciiart.
+ *
+ * Each pin has a `logical_unit` pointer that points to a more specific structure (counter,
+ * decoder, shiftregister, etc.). It's this unt that contains the juicy stuff.
+ *
+ * You don't create generic chips yourself. You create chips through the initializer of their
+ * specific incarnation.
+ */
+
 typedef struct {
     uint16_t width;
     uint16_t height;
@@ -17,9 +29,8 @@ struct ICeChip {
     ICePinList pins;
 };
 
-void icemu_chip_init(
-    ICeChip *chip, void *logical_unit, ICePinChangeFunc *pin_change_func, uint8_t pin_count);
-ICePin* icemu_chip_addpin(ICeChip *chip, const char *code, bool output);
-void icemu_chip_addpins(ICeChip *chip, ICePinList *dst_pinlist, const char **codes, bool output);
+/* Returns the pin belonging to `chip` with specified `code`
+ *
+ * Returns `NULL` if there's no match.
+ */
 ICePin* icemu_chip_getpin(const ICeChip *chip, const char *code);
-void icemu_chip_elapse(ICeChip *chip, time_t usecs);

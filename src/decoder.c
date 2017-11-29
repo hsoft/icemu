@@ -6,6 +6,7 @@
 #include "decoder.h"
 #include "chip.h"
 #include "util.h"
+#include "private.h"
 
 /* Private */
 static void decoder_update_output(ICeDecoder *dec)

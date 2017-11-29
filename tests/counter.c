@@ -3,6 +3,7 @@
 #include <CUnit/CUnit.h>
 
 #include "../src/icemu.h"
+#include "../src/util.h"
 
 static void test_IO()
 {

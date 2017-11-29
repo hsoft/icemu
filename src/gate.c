@@ -6,6 +6,7 @@
 #include "gate.h"
 #include "chip.h"
 #include "util.h"
+#include "private.h"
 
 /* Private */
 

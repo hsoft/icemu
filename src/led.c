@@ -2,6 +2,7 @@
 
 #include "led.h"
 #include "util.h"
+#include "private.h"
 
 // usecs
 #define LED_FADE_DELAY 10000

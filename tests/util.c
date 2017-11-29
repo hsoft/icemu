@@ -1,6 +1,6 @@
 #include <CUnit/CUnit.h>
 
-#include "../src/icemu.h"
+#include "../src/util.h"
 
 void test_fmthertz()
 {

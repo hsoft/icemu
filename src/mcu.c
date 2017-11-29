@@ -5,6 +5,7 @@
 
 #include "mcu.h"
 #include "util.h"
+#include "private.h"
 
 /* Private */
 static void mcu_timer_elapse(ICeMCUTimer *timer, time_t usecs)

@@ -1,7 +1,9 @@
 #pragma once
 #include <stdbool.h>
 
-#ifndef SIMULATION
+#ifdef SIMULATION
+#include "../../src/icemu.h"
+#else
 #include <avr/io.h>
 
 #ifndef cbi

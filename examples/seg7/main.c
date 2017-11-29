@@ -67,6 +67,9 @@ void loop()
     if (current_digit == 10) {
         current_digit = 0;
     }
+#ifdef SIMULATION
+    icemu_sim_set_debug_value("segval", current_digit);
+#endif
     _delay_ms(1000);
 }
 

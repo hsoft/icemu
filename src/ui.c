@@ -6,6 +6,7 @@
 #include "chip.h"
 #include "sim.h"
 #include "util.h"
+#include "private.h"
 
 #define MAX_ELEMENTS 100
 #define REFRESH_UI_INTERVAL 200 * 1000
@@ -74,6 +75,30 @@ static void ui_draw_menu()
     x = 0;
     for (i = 0; i < lblh; i++) {
         mvaddnstr(y+i, x, labels[i], lblw);
+    }
+}
+
+static void ui_draw_debug_values()
+{
+    Simulation *sim = icemu_sim_get();
+    struct DebugValue *dv;
+    int y, x, rightx, scount, i;
+    char s[100];
+
+    if (sim->debug_values[0].name == NULL) {
+        return; // nothing to draw
+    }
+
+    y = getmaxy(main_window) - 2; // -2 because we don't draw over bottom bar
+    rightx = getmaxx(main_window);
+    for (i = 0; i < MAX_DEBUG_VALUES; i++) {
+        dv = &sim->debug_values[i];
+        if (dv->name == NULL) {
+            break;
+        }
+        scount = sprintf(s, "%s: %d", dv->name, dv->val);
+        x = rightx - scount;
+        mvaddnstr(y, x, s, scount);
     }
 }
 
@@ -172,6 +197,7 @@ int icemu_ui_refresh()
         if (show_keybindings) {
             ui_draw_menu();
         }
+        ui_draw_debug_values();
         ui_draw_bottom_bar();
         refresh();
     }

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "layer.h"
-#include "../../src/icemu.h"
 
 static ICeChip mcu;
 static ICeChip sr;

@@ -84,6 +84,12 @@ void icemu_sim_run();
  */
 void icemu_sim_delay(time_t usecs);
 
+/* Add or update a debug value
+ *
+ * This debug value will be displayed in the UI. If `name` was already set, its value is replaced.
+ */
+void icemu_sim_set_debug_value(const char *name, int val);
+
 /* Simulation Properties */
 time_t icemu_sim_elapsed_usecs();
 ICeSimRunMode icemu_sim_runmode();

@@ -7,22 +7,6 @@
 #include "util.h"
 #include "private.h"
 
-#define MAX_SIM_ACTIONS 30
-#define MAX_SIM_CHIPS 256
-#define MAX_SIM_TRIGGERS 100
-
-typedef struct {
-    ICeSimRunMode runmode;
-    time_t next_tick_target; // usecs
-    time_t ticks;
-    time_t resolution; // usecs per tick
-    unsigned int slowdown_factor;
-    ICeRunloopFunc *runloop;
-    ICeUIAction actions[MAX_SIM_ACTIONS];
-    ICeChip * chips[MAX_SIM_CHIPS];
-    ICePin * triggers[MAX_SIM_TRIGGERS];
-} Simulation;
-
 static Simulation sim;
 
 /* Private */
@@ -123,6 +107,12 @@ static void sim_global_pinchange(ICePin *pin)
     }
 }
 
+/* Protected */
+Simulation* icemu_sim_get()
+{
+    return &sim;
+}
+
 /* Public */
 void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop)
 {
@@ -135,11 +125,7 @@ void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop)
     memset(sim.actions, 0, sizeof(sim.actions));
     memset(sim.chips, 0, sizeof(sim.chips));
     memset(sim.triggers, 0, sizeof(sim.triggers));
-}
-
-Simulation* icemu_sim_get()
-{
-    return &sim;
+    memset(sim.debug_values, 0, sizeof(sim.debug_values));
 }
 
 void icemu_sim_add_chip(ICeChip *chip)
@@ -239,4 +225,22 @@ unsigned int icemu_sim_slowdown_factor()
 void icemu_sim_set_slowdown_factor(unsigned int slowdown_factor)
 {
     sim.slowdown_factor = slowdown_factor;
+}
+
+void icemu_sim_set_debug_value(const char *name, int val)
+{
+    int i;
+    struct DebugValue *dv;
+
+    for (i = 0; i < MAX_DEBUG_VALUES; i++) {
+        dv = &sim.debug_values[i];
+        if (dv->name == NULL) {
+            dv->name = name;
+            dv->val = val;
+            break;
+        } else if (strcmp(dv->name, name) == 0) {
+            dv->val = val;
+            break;
+        }
+    }
 }

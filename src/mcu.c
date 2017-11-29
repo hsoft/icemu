@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 
 #include "mcu.h"
 #include "util.h"
@@ -72,6 +73,7 @@ static void mcu_elapse(ICeChip *chip, time_t usecs)
     ICeMCU *mcu;
 
     mcu = (ICeMCU *)chip->logical_unit;
+    mcu->usecs_since_last_run += usecs;
     for (i = 0; i < chip->pins.count; i++) {
         // interrupt array is sparse. We don't break loop on NULL.
         if (mcu->interrupts[i].func != NULL) {
@@ -84,6 +86,12 @@ static void mcu_elapse(ICeChip *chip, time_t usecs)
         }
         mcu_timer_elapse(&mcu->timers[i], usecs);
     }
+    if (!mcu->in_runloop && (mcu->runloop != NULL) && (mcu->usecs_since_last_run >= mcu->resolution)) {
+        mcu->usecs_since_last_run = 0;
+        mcu->in_runloop = true;
+        mcu->runloop();
+        mcu->in_runloop = false;
+    }
 }
 
 static ICeMCU* mcu_new(ICeChip *chip, const char **codes)
@@ -94,6 +102,10 @@ static ICeMCU* mcu_new(ICeChip *chip, const char **codes)
 
     count = icemu_util_chararray_count(codes);
     mcu = (ICeMCU *)malloc(sizeof(ICeMCU));
+    mcu->in_runloop = false;
+    mcu->runloop = NULL;
+    mcu->resolution = icemu_sim_resolution();
+    mcu->usecs_since_last_run = 0;
     memset(mcu->interrupts, 0, sizeof(mcu->interrupts));
     memset(mcu->timers, 0, sizeof(mcu-> timers));
     icemu_chip_init(chip, (void *)mcu, mcu_pinchange, count);
@@ -105,6 +117,14 @@ static ICeMCU* mcu_new(ICeChip *chip, const char **codes)
 }
 
 /* Public */
+void icemu_mcu_set_runloop(ICeChip *chip, ICeRunloopFunc *runloop)
+{
+    ICeMCU *mcu;
+
+    mcu = (ICeMCU *)chip->logical_unit;
+    mcu->runloop = runloop;
+}
+
 void icemu_mcu_add_interrupt(
     ICeChip *chip, ICePin *pin, ICeMCUInterruptType type, ICeInterruptFunc *interrupt)
 {

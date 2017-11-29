@@ -34,10 +34,11 @@ void _delay_ms(unsigned int ms)
 
 int main()
 {
+    icemu_sim_init(50);
     icemu_ATtiny_init(&mcu);
+    icemu_mcu_set_runloop(&mcu, loop);
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();
-    icemu_sim_init(50, loop);
     icemu_ui_add_element("MCU:", &mcu);
     // Demonstrate the trigger feature in Simulation.
     icemu_sim_add_trigger(pb1);

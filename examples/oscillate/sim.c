@@ -45,6 +45,7 @@ static void slower()
 
 int main()
 {
+    icemu_sim_init(50);
     icemu_pin_init(&oscillator, NULL, "XTAL", true);
     icemu_SN74F161AN_init(&cnt);
     icemu_SN74F161AN_init(&cnt2);
@@ -61,12 +62,10 @@ int main()
 
     setup();
 
-    icemu_sim_init(50, NULL);
     icemu_ui_add_element("Counter 1:", &cnt);
     icemu_ui_add_element("Decoder:", &dec);
     icemu_ui_add_element("Counter 2:", &cnt2);
     icemu_ui_add_element("MCU:", &mcu);
-    icemu_sim_add_chip(&mcu);
     icemu_sim_add_action('+', "(+) Faster", faster);
     icemu_sim_add_action('-', "(-) Slower", slower);
     icemu_sim_run();

@@ -61,7 +61,9 @@ int main()
     int i;
     ShiftRegister *srl;
 
+    icemu_sim_init(50);
     icemu_ATtiny_init(&mcu);
+    icemu_mcu_set_runloop(&mcu, loop);
     icemu_SN74HC595_init(&sr);
     icemu_seg7_init(&seg);
     srl = (ShiftRegister *)sr.logical_unit;
@@ -78,9 +80,6 @@ int main()
         icemu_pin_wireto(srl->outputs.pins[i], icemu_chip_getpin(&seg, segorder[i]));
     }
     setup();
-    icemu_sim_init(50, loop);
-    icemu_sim_add_chip(&mcu);
-    icemu_sim_add_chip(&seg);
     icemu_ui_add_element("MCU:", &mcu);
     icemu_ui_add_element("SR:", &sr);
     icemu_ui_add_element("Seg7:", &seg);

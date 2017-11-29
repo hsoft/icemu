@@ -43,11 +43,12 @@ void toggle_button()
 
 int main()
 {
+    icemu_sim_init(50);
     icemu_ATtiny_init(&mcu);
+    icemu_mcu_set_runloop(&mcu, loop);
     pb0 = icemu_chip_getpin(&mcu, "PB0");
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();
-    icemu_sim_init(50, loop);
     icemu_sim_add_action('b', "Toggle (b)utton", toggle_button);
     icemu_ui_add_element("MCU:", &mcu);
     icemu_sim_run();

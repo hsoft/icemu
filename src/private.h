@@ -14,12 +14,12 @@ struct DebugValue {
 };
 
 typedef struct {
+    bool initialized;
     ICeSimRunMode runmode;
     time_t next_tick_target; // usecs
     time_t ticks;
     time_t resolution; // usecs per tick
     unsigned int slowdown_factor;
-    ICeRunloopFunc *runloop;
     ICeUIAction actions[MAX_SIM_ACTIONS];
     ICeChip * chips[MAX_SIM_CHIPS];
     ICePin * triggers[MAX_SIM_TRIGGERS];
@@ -35,3 +35,5 @@ void icemu_chip_addpins(ICeChip *chip, ICePinList *dst_pinlist, const char **cod
 void icemu_chip_elapse(ICeChip *chip, time_t usecs);
 
 Simulation* icemu_sim_get();
+void icemu_sim_add_chip(ICeChip *chip);
+

@@ -49,15 +49,12 @@ static void sim_tick()
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution * sim.slowdown_factor;
 }
 
-static bool sim_loop_once(ICeRunloopFunc *runloop)
+static bool sim_loop_once()
 {
     int key;
 
     if (sim.runmode != ICE_SIM_RUNMODE_PAUSE) {
         sim_wait_until_next_tick();
-        if (runloop != NULL) {
-            runloop();
-        }
         sim_tick();
     }
     key = icemu_ui_refresh();
@@ -113,21 +110,6 @@ Simulation* icemu_sim_get()
     return &sim;
 }
 
-/* Public */
-void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop)
-{
-    sim.runmode = ICE_SIM_RUNMODE_RUN;
-    sim.ticks = 0;
-    sim.resolution = resolution;
-    sim.slowdown_factor = 1;
-    sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
-    sim.runloop = runloop;
-    memset(sim.actions, 0, sizeof(sim.actions));
-    memset(sim.chips, 0, sizeof(sim.chips));
-    memset(sim.triggers, 0, sizeof(sim.triggers));
-    memset(sim.debug_values, 0, sizeof(sim.debug_values));
-}
-
 void icemu_sim_add_chip(ICeChip *chip)
 {
     int i;
@@ -138,6 +120,21 @@ void icemu_sim_add_chip(ICeChip *chip)
             break;
         }
     }
+}
+
+/* Public */
+void icemu_sim_init(time_t resolution)
+{
+    sim.initialized = true;
+    sim.runmode = ICE_SIM_RUNMODE_RUN;
+    sim.ticks = 0;
+    sim.resolution = resolution;
+    sim.slowdown_factor = 1;
+    sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
+    memset(sim.actions, 0, sizeof(sim.actions));
+    memset(sim.chips, 0, sizeof(sim.chips));
+    memset(sim.triggers, 0, sizeof(sim.triggers));
+    memset(sim.debug_values, 0, sizeof(sim.debug_values));
 }
 
 void icemu_sim_add_action(char key, char *label, ICeUIActionFunc *func)
@@ -174,7 +171,7 @@ void icemu_sim_run()
     }
     icemu_ui_refresh();
     while (sim.runmode != ICE_SIM_RUNMODE_STOP) {
-        sim_loop_once(sim.runloop);
+        sim_loop_once();
     }
     icemu_ui_deinit();
 }
@@ -182,7 +179,7 @@ void icemu_sim_run()
 void icemu_sim_delay(time_t usecs)
 {
     while (usecs >= sim.resolution) {
-        if (sim_loop_once(NULL)) {
+        if (sim_loop_once()) {
             usecs -= sim.resolution;
         }
         if (sim.runmode == ICE_SIM_RUNMODE_STOP) {

@@ -52,6 +52,7 @@ int main()
     ICeDecoder *dec_lu;
     int i;
 
+    icemu_sim_init(50);
     icemu_ATtiny_init(&mcu);
     icemu_SN74HC138_init(&dec);
     icemu_ledmatrix_init(&lm, 4, 2);
@@ -69,11 +70,8 @@ int main()
         icemu_pin_wireto(dec_lu->outputs.pins[i], lm.pins.pins[i]);
     }
     setup();
-    icemu_sim_init(50, NULL);
     icemu_ui_add_element("MCU:", &mcu);
     icemu_ui_add_element("LED:", &lm);
-    icemu_sim_add_chip(&mcu);
-    icemu_sim_add_chip(&lm);
     icemu_sim_set_slowdown_factor(10);
     icemu_sim_run();
     return 0;

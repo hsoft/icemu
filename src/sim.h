@@ -26,8 +26,6 @@
 
 typedef void (ICeUIActionFunc)();
 
-typedef void (ICeRunloopFunc)();
-
 typedef struct {
     char key;
     ICeUIActionFunc *func;
@@ -45,18 +43,8 @@ typedef enum {
  * resolution: the amount of usecs that each runloop pass is going to take. If it's executed
  *             faster, we wait before running the next pass. You should set this value to the
  *             expected time (including delay() calls) *on the MCU* for a proper simulation.
- * runloop: a pointer to your runloop. The runloop is a function that executes *one pass*, not
- *          an infinite loop. This is going to be called once every tick.
  */
-void icemu_sim_init(time_t resolution, ICeRunloopFunc *runloop);
-
-/* Adds a chip to the simulation
- *
- * When doing so, that chips "elapse" function will be called appropriately. Not all chips do
- * stuff on "elapse()", but it doesn't hurt to add all your chips. You will always want to add
- * your MCU, otherwise timers won't work.
- */
-void icemu_sim_add_chip(ICeChip *chip);
+void icemu_sim_init(time_t resolution);
 
 /* Add custom action to the keybindings
  */

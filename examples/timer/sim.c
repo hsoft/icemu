@@ -34,12 +34,11 @@ void set_timer0_mode_to_interrupt()
 
 int main()
 {
+    icemu_sim_init(50);
     icemu_ATtiny_init(&mcu);
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();
-    icemu_sim_init(50, NULL);
     icemu_ui_add_element("MCU:", &mcu);
-    icemu_sim_add_chip(&mcu);
     icemu_sim_run();
     return 0;
 }

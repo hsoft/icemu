@@ -2,12 +2,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 
 #include "chip.h"
 #include "pin.h"
 #include "pinlist.h"
 #include "mcu.h"
 #include "util.h"
+#include "private.h"
 
 /* Private */
 
@@ -138,11 +140,14 @@ static void chip_asciiart(const ICeChip *chip, ICeChipAsciiArt *dst)
 void icemu_chip_init(
     ICeChip *chip, void *logical_unit, ICePinChangeFunc *pin_change_func, uint8_t pin_count)
 {
+    // The sim needs to be initialized before creating our first chip.
+    assert(icemu_sim_get()->initialized);
     chip->logical_unit = logical_unit;
     chip->pin_change_func = pin_change_func;
     chip->asciiart_func = chip_asciiart;
     chip->elapse_func = NULL;
     icemu_pinlist_init(&chip->pins, pin_count);
+    icemu_sim_add_chip(chip);
 }
 
 ICePin* icemu_chip_addpin(ICeChip *chip, const char *code, bool output)

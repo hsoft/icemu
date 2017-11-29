@@ -17,7 +17,10 @@ typedef enum {
 
 typedef struct {
     ICeMCUInterruptType type;
+    ICePin *pin;
     ICeInterruptFunc *func;
+    // number of usecs elapsed since last interrupt. Used for oscillating pins.
+    unsigned int usecs_since_last;
 } ICeMCUInterrupt;
 
 typedef void (ICeTimerFunc)();

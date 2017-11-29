@@ -8,6 +8,36 @@
 #include "private.h"
 
 /* Private */
+static void mcu_interrupt_elapse(ICeMCUInterrupt *interrupt, time_t usecs)
+{
+    unsigned int freq, interrupt_count;
+
+    freq = interrupt->pin->oscillating_freq;
+    if (freq > 0) {
+        if (interrupt->type == ICE_INTERRUPT_ON_BOTH) {
+            freq *= 2;
+        }
+        interrupt_count = (freq * usecs) / (1000UL * 1000UL);
+        if (interrupt_count > 0) {
+            // easy: just interrupt "count" times.
+            interrupt->usecs_since_last = 0;
+            while (interrupt_count > 0) {
+                interrupt->func();
+                interrupt_count--;
+            }
+        } else {
+            // we don't interrupt on each tick. use usecs_since_last to know when to interrupt.
+            interrupt->usecs_since_last += usecs;
+            if ((1000UL * 1000UL) / freq < interrupt->usecs_since_last) {
+                interrupt->usecs_since_last = 0;
+                interrupt->func();
+            }
+        }
+    } else {
+        interrupt->usecs_since_last += usecs;
+    }
+}
+
 static void mcu_timer_elapse(ICeMCUTimer *timer, time_t usecs)
 {
     timer->elapsed += usecs;
@@ -29,6 +59,7 @@ static void mcu_pinchange(ICePin *pin)
         if (mcu->interrupts[pinindex].func != NULL) {
             t = mcu->interrupts[pinindex].type;
             if ((t == ICE_INTERRUPT_ON_BOTH) || ((t == ICE_INTERRUPT_ON_RISING) == pin->high)) {
+                mcu->interrupts[pinindex].usecs_since_last = 0;
                 mcu->interrupts[pinindex].func();
             }
         }
@@ -41,6 +72,12 @@ static void mcu_elapse(ICeChip *chip, time_t usecs)
     ICeMCU *mcu;
 
     mcu = (ICeMCU *)chip->logical_unit;
+    for (i = 0; i < chip->pins.count; i++) {
+        // interrupt array is sparse. We don't break loop on NULL.
+        if (mcu->interrupts[i].func != NULL) {
+            mcu_interrupt_elapse(&mcu->interrupts[i], usecs);
+        }
+    }
     for (i = 0; i < ICE_MAX_TIMERS; i++) {
         if (mcu->timers[i].func == NULL) {
             break;
@@ -78,6 +115,7 @@ void icemu_mcu_add_interrupt(
     if (pinindex >= 0) {
         mcu = (ICeMCU *)chip->logical_unit;
         mcu->interrupts[pinindex].type = type;
+        mcu->interrupts[pinindex].pin = pin;
         mcu->interrupts[pinindex].func = interrupt;
     }
 }

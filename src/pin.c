@@ -7,6 +7,7 @@
 #include "pinlist.h"
 #include "chip.h"
 #include "util.h"
+#include "private.h"
 
 // This is used by the "Run until next trigger" feature in Simulation.
 // If not null, it's called on *every* pin change.

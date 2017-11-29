@@ -73,6 +73,11 @@ Then, compile, run and enjoy!
 
 There are examples in the `examples` folder. Follow instructions in the README file of each example.
 
+## Documentation
+
+Documentation is in the header files of the source. `sim.h`, `pin.h` and `chip.h` are good
+starting point after having looked at the examples.
+
 ## License
 
 LGPLv3, Copyright 2017 Virgil Dupras

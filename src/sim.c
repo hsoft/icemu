@@ -5,6 +5,7 @@
 #include "sim.h"
 #include "ui.h"
 #include "util.h"
+#include "private.h"
 
 #define MAX_SIM_ACTIONS 30
 #define MAX_SIM_CHIPS 256

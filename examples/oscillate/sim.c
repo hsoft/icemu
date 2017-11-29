@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "../../src/icemu.h"
+#include "../../src/util.h"
 
 static ICeChip cnt;
 static ICeChip cnt2;

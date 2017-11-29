@@ -8,6 +8,5 @@
 #include "gate.h"
 #include "led.h"
 #include "mcu.h"
-#include "util.h"
 #include "ui.h"
 #include "sim.h"

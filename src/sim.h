@@ -39,12 +39,8 @@ typedef enum {
 } ICeSimRunMode;
 
 /* Initialize the simulation
- *
- * resolution: the amount of usecs that each runloop pass is going to take. If it's executed
- *             faster, we wait before running the next pass. You should set this value to the
- *             expected time (including delay() calls) *on the MCU* for a proper simulation.
  */
-void icemu_sim_init(time_t resolution);
+void icemu_sim_init();
 
 /* Add custom action to the keybindings
  */
@@ -83,6 +79,5 @@ time_t icemu_sim_elapsed_usecs();
 ICeSimRunMode icemu_sim_runmode();
 void icemu_sim_set_runmode(ICeSimRunMode runmode);
 time_t icemu_sim_resolution();
-time_t icemu_sim_ticks();
 unsigned int icemu_sim_slowdown_factor();
 void icemu_sim_set_slowdown_factor(unsigned int slowdown_factor);

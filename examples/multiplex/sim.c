@@ -52,7 +52,7 @@ int main()
     ICeDecoder *dec_lu;
     int i;
 
-    icemu_sim_init(50);
+    icemu_sim_init();
     icemu_ATtiny_init(&mcu);
     icemu_SN74HC138_init(&dec);
     icemu_ledmatrix_init(&lm, 4, 2);

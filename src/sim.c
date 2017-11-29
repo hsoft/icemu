@@ -12,11 +12,12 @@ static Simulation sim;
 /* Private */
 static void sim_wait_until_next_tick()
 {
-    time_t ts;
+    time_t ts, target;
 
+    target = sim.last_tick_ts + sim.elapsing_for;
     ts = icemu_util_timestamp();
-    if (ts < sim.next_tick_target) {
-        usleep(sim.next_tick_target - ts);
+    if (ts < target) {
+        usleep(target - ts);
     }
 }
 
@@ -38,31 +39,45 @@ static void sim_keypress(char key)
 static void sim_tick()
 {
     int i;
+    unsigned int elapse;
+    unsigned int elapse_min = ICE_MAX_CHIP_ELAPSE;
     ICeChip **chip_registry = icemu_chip_get_registry();
 
-    sim.ticks++;
+    // We've *already* elapsed our `elapsing_for` usecs. While we're calling our elapse() funcs,
+    // the clock is still ticking! this is why we take our timestamp now.
+
+    sim.last_tick_ts = icemu_util_timestamp();
+    sim.elapsed += sim.elapsing_for;
     for (i = 0; i < MAX_SIM_CHIPS; i++) {
         if (chip_registry[i] == NULL) {
             break;
         }
-        icemu_chip_elapse(chip_registry[i], sim.resolution);
+        elapse = icemu_chip_elapse(chip_registry[i], sim.elapsing_for);
+        if (elapse > 0) {
+            elapse_min = MIN(elapse_min, elapse);
+        }
     }
-    sim.next_tick_target = icemu_util_timestamp() + sim.resolution * sim.slowdown_factor;
+    sim.elapsing_for = elapse_min;
 }
 
-static bool sim_loop_once()
+// Returns the number of usecs elapsed in the simulation (if paused, returns 0)
+static time_t sim_loop_once()
 {
     int key;
+    time_t result;
 
     if (sim.runmode != ICE_SIM_RUNMODE_PAUSE) {
+        result = sim.elapsing_for;
         sim_wait_until_next_tick();
         sim_tick();
+    } else {
+        result = 0;
     }
     key = icemu_ui_refresh();
     if (key >= 0) {
         sim_keypress((char)key);
     }
-    return sim.runmode != ICE_SIM_RUNMODE_PAUSE;
+    return result;
 }
 
 static void sim_stop()
@@ -112,14 +127,14 @@ Simulation* icemu_sim_get()
 }
 
 /* Public */
-void icemu_sim_init(time_t resolution)
+void icemu_sim_init()
 {
     sim.initialized = true;
     sim.runmode = ICE_SIM_RUNMODE_RUN;
-    sim.ticks = 0;
-    sim.resolution = resolution;
     sim.slowdown_factor = 1;
-    sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
+    sim.last_tick_ts = icemu_util_timestamp();
+    sim.elapsed = 0;
+    sim.elapsing_for = 1;
     memset(sim.actions, 0, sizeof(sim.actions));
     memset(sim.triggers, 0, sizeof(sim.triggers));
     memset(sim.debug_values, 0, sizeof(sim.debug_values));
@@ -152,7 +167,7 @@ void icemu_sim_run()
     icemu_ui_init();
     icemu_sim_add_action('q', "(Q)uit", sim_stop);
     icemu_sim_add_action('p', "(P)ause/Resume", sim_toggle_paused);
-    icemu_sim_add_action('t', "Run one (t)ick", sim_run_one_tick);
+    icemu_sim_add_action('t', "Run one s(t)ep", sim_run_one_tick);
     if (sim.triggers[0] != NULL) {
         icemu_sim_add_action('g', "Run until tri(g)ger", sim_run_until_trigger);
         icemu_pin_set_global_pinchange_trigger(sim_global_pinchange);
@@ -166,20 +181,13 @@ void icemu_sim_run()
 
 void icemu_sim_delay(time_t usecs)
 {
-    while (usecs >= sim.resolution) {
-        if (sim_loop_once()) {
-            usecs -= sim.resolution;
-        }
+    while (usecs >= sim.elapsing_for) {
+        usecs -= sim_loop_once();
         if (sim.runmode == ICE_SIM_RUNMODE_STOP) {
             return;
         }
     }
     usleep(usecs);
-}
-
-time_t icemu_sim_elapsed_usecs()
-{
-    return sim.ticks * sim.resolution;
 }
 
 ICeSimRunMode icemu_sim_runmode()
@@ -190,16 +198,6 @@ ICeSimRunMode icemu_sim_runmode()
 void icemu_sim_set_runmode(ICeSimRunMode runmode)
 {
     sim.runmode = runmode;
-}
-
-time_t icemu_sim_resolution()
-{
-    return sim.resolution;
-}
-
-time_t icemu_sim_ticks()
-{
-    return sim.ticks;
 }
 
 unsigned int icemu_sim_slowdown_factor()

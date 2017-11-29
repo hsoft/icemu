@@ -43,9 +43,10 @@ void toggle_button()
 
 int main()
 {
-    icemu_sim_init(50);
+    icemu_sim_init();
     icemu_ATtiny_init(&mcu);
-    icemu_mcu_set_runloop(&mcu, loop);
+    // 100 * 1000 duration because of our 100ms polling delay
+    icemu_mcu_set_runloop(&mcu, loop, 100 * 1000UL);
     pb0 = icemu_chip_getpin(&mcu, "PB0");
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();

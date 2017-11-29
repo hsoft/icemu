@@ -61,9 +61,9 @@ int main()
     int i;
     ShiftRegister *srl;
 
-    icemu_sim_init(50);
+    icemu_sim_init();
     icemu_ATtiny_init(&mcu);
-    icemu_mcu_set_runloop(&mcu, loop);
+    icemu_mcu_set_runloop(&mcu, loop, 1000UL * 1000UL);
     icemu_SN74HC595_init(&sr);
     icemu_seg7_init(&seg);
     srl = (ShiftRegister *)sr.logical_unit;

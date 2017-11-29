@@ -34,9 +34,10 @@ void _delay_ms(unsigned int ms)
 
 int main()
 {
-    icemu_sim_init(50);
+    icemu_sim_init();
     icemu_ATtiny_init(&mcu);
-    icemu_mcu_set_runloop(&mcu, loop);
+    // 500ms duration because of our 500ms delay;
+    icemu_mcu_set_runloop(&mcu, loop, 500 * 1000UL);
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();
     icemu_ui_add_element("MCU:", &mcu);

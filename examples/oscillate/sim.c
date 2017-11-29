@@ -45,7 +45,7 @@ static void slower()
 
 int main()
 {
-    icemu_sim_init(50);
+    icemu_sim_init();
     icemu_pin_init(&oscillator, NULL, "XTAL", true);
     icemu_SN74F161AN_init(&cnt);
     icemu_SN74F161AN_init(&cnt2);

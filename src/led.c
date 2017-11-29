@@ -44,11 +44,12 @@ void led_update(LED *led)
     }
 }
 
-void led_elapse(LED *led, time_t usecs)
+unsigned int led_elapse(LED *led, time_t usecs)
 {
     if (led->fade_timeout > 0) {
         led->fade_timeout -= MIN(usecs, led->fade_timeout);
     }
+    return led->fade_timeout;
 }
 
 bool led_lit(LED *led)
@@ -123,15 +124,25 @@ static void ledmatrix_asciiart(const ICeChip *chip, ICeChipAsciiArt *dst)
     s[lm->width * lm->height] = '\0';
 }
 
-static void ledmatrix_elapse(ICeChip *chip, time_t usecs)
+static unsigned int ledmatrix_elapse(ICeChip *chip, time_t usecs)
 {
     int i;
     LEDMatrix *lm;
+    unsigned int result = 0;
+    unsigned int next_elapse;
 
     lm = (LEDMatrix *)chip->logical_unit;
     for (i = 0; i < lm->width * lm->height; i++) {
-        led_elapse(&lm->leds[i], usecs);
+        next_elapse = led_elapse(&lm->leds[i], usecs);
+        if (next_elapse > 0) {
+            if (result > 0) {
+                result = MIN(result, next_elapse);
+            } else {
+                result = next_elapse;
+            }
+        }
     }
+    return result;
 }
 
 /* Public */

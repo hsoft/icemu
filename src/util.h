@@ -10,6 +10,7 @@
 #ifndef MIN
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #endif
+#define ICE_USECS_IN_SEC 1000000UL
 
 uint8_t icemu_util_chararray_count(const char **array);
 void icemu_util_set_binary_value(ICePinList *pinlist, uint16_t val);

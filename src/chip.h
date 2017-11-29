@@ -3,6 +3,9 @@
 #include "pin.h"
 #include "pinlist.h"
 
+// maximum number of usecs we allow ourselves to wait in between elapse() calls
+#define ICE_MAX_CHIP_ELAPSE 10000
+
 /* About chips:
  *
  * A chip is a generic integrated circuit. The logic in this unit is the logic that is common to
@@ -21,11 +24,24 @@ typedef struct {
     char contents[4096]; // should be enough for any chip
 } ICeChipAsciiArt;
 
+/* Elapse functions are regularly called by the simulation for every chip that has one. The
+ * `time_t` argument is the number of usecs that has elapsed since the last elapse() call. that
+ * number is not always the same thing and depends on the behavior of other chips.
+ *
+ * The return value is the number of usecs that we need to wait for this particular chip to
+ * have something meaningful to do (other than waiting). The simulation will always call
+ * elapse before that number of usecs, but it might call it sooner if another chip does something
+ * sooner.
+ *
+ * If you don't know how many usecs you need, return 0.
+ */
+typedef unsigned int (ICeElapseFunc)(ICeChip *, time_t);
+
 struct ICeChip {
     void *logical_unit;
     ICePinChangeFunc *pin_change_func;
     void (*asciiart_func)(const ICeChip *, ICeChipAsciiArt *);
-    void (*elapse_func)(ICeChip *, time_t);
+    ICeElapseFunc *elapse_func;
     ICePinList pins;
 };
 

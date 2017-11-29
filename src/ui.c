@@ -105,25 +105,30 @@ static void ui_draw_debug_values()
 static void ui_draw_bottom_bar()
 {
     int maxy, count;
-    time_t elapsed;
-    unsigned int elapsed_s, elapsed_sub;
+    unsigned int elapsed_s, elapsed_ms, elapsed_us;
     char s[100];
-    const char *paused_s;
-    char slowdown_s[20];;
+    char paused_s[30];
+    char slowdown_s[20];
+    Simulation *sim = icemu_sim_get();
 
-    elapsed = icemu_sim_elapsed_usecs();
-    elapsed_s = elapsed / (1000 * 1000);
-    elapsed_sub = (elapsed / (100 * 1000)) % 10;
+    elapsed_s = sim->elapsed / (1000 * 1000);
+    elapsed_ms = (sim->elapsed / 1000) % 1000;
+    elapsed_us = sim->elapsed % 1000;
 
-    paused_s = icemu_sim_runmode() == ICE_SIM_RUNMODE_PAUSE ? " (Paused)" : "";
+
+    if (icemu_sim_runmode() == ICE_SIM_RUNMODE_PAUSE) {
+        sprintf(paused_s, " (Paused. step: %dus)", sim->elapsing_for);
+    } else {
+        paused_s[0] = '\0';
+    }
     if (icemu_sim_slowdown_factor() > 1) {
         sprintf(slowdown_s, " (Slowdown: %dX)", icemu_sim_slowdown_factor());
     } else {
         slowdown_s[0] = '\0';
     }
     count = sprintf(
-        s, "(?) Keybindings  Time: %d.%ds%s%s Ticks: %ld",
-        elapsed_s, elapsed_sub, slowdown_s, paused_s, icemu_sim_ticks());
+        s, "(?) Keybindings  Time: %ds %dms %dus %s%s",
+        elapsed_s, elapsed_ms, elapsed_us, slowdown_s, paused_s);
     maxy = getmaxy(main_window);
     mvaddnstr(maxy - 1, 0, s, count);
 }

@@ -6,7 +6,6 @@
 
 #define ICE_MAX_INTERRUPTS 100
 #define ICE_MAX_TIMERS 20
-#define ICE_MCU_DEFAULT_RESOLUTION 50
 
 typedef void (ICeRunloopFunc)();
 
@@ -37,8 +36,8 @@ typedef struct {
 typedef struct {
     ICeRunloopFunc *runloop;
     bool in_runloop;
-    time_t resolution; // usecs per runloop
-    time_t usecs_since_last_run;
+    unsigned int runloop_duration; // usecs per runloop
+    unsigned int usecs_since_last_run;
     // index of the interrupt func must be the same as the index of the pin the interrupt
     // is bound to.
     ICeMCUInterrupt interrupts[ICE_MAX_INTERRUPTS];
@@ -49,8 +48,15 @@ typedef struct {
  *
  * The runloop is a function that executes *one pass*, not an infinite loop. This is going to be
  * called once every tick.
+ *
+ * The `duration` parameter is the typical time it takes on the MCU for one pass of the runloop
+ * to run. It helps the simulation run with a timing that is similar to real-world situation.
+ *
+ * Important note: is you call iemu_sim_delay() in your runloop, you should make sure that
+ *                 `duration` is higher than the sum of your delay calls. Otherwise, simulation
+ *                 timings can get weird.
  */
-void icemu_mcu_set_runloop(ICeChip *chip, ICeRunloopFunc *runloop);
+void icemu_mcu_set_runloop(ICeChip *chip, ICeRunloopFunc *runloop, unsigned int duration);
 void icemu_mcu_add_interrupt(
     ICeChip *chip, ICePin *pin, ICeMCUInterruptType type, ICeInterruptFunc *interrupt);
 void icemu_mcu_add_timer(ICeChip *chip, time_t every_usecs, ICeTimerFunc *timer_func);

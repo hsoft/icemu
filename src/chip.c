@@ -191,9 +191,10 @@ ICePin* icemu_chip_getpin(const ICeChip *chip, const char *code)
     return icemu_pinlist_find_by_code(&chip->pins, code);
 }
 
-void icemu_chip_elapse(ICeChip *chip, time_t usecs)
+unsigned int icemu_chip_elapse(ICeChip *chip, time_t usecs)
 {
     if (chip->elapse_func != NULL) {
-        chip->elapse_func(chip, usecs);
+        return chip->elapse_func(chip, usecs);
     }
+    return 0;
 }

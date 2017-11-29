@@ -34,7 +34,7 @@ void set_timer0_mode_to_interrupt()
 
 int main()
 {
-    icemu_sim_init(50);
+    icemu_sim_init();
     icemu_ATtiny_init(&mcu);
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     setup();

@@ -16,9 +16,9 @@ struct DebugValue {
 typedef struct {
     bool initialized;
     ICeSimRunMode runmode;
-    time_t next_tick_target; // usecs
-    time_t ticks;
-    time_t resolution; // usecs per tick
+    time_t last_tick_ts; // usecs
+    unsigned int elapsed;
+    unsigned int elapsing_for;
     unsigned int slowdown_factor;
     ICeUIAction actions[MAX_SIM_ACTIONS];
     ICePin * triggers[MAX_SIM_TRIGGERS];
@@ -31,7 +31,7 @@ void icemu_chip_init(
     ICeChip *chip, void *logical_unit, ICePinChangeFunc *pin_change_func, uint8_t pin_count);
 ICePin* icemu_chip_addpin(ICeChip *chip, const char *code, bool output);
 void icemu_chip_addpins(ICeChip *chip, ICePinList *dst_pinlist, const char **codes, bool output);
-void icemu_chip_elapse(ICeChip *chip, time_t usecs);
+unsigned int icemu_chip_elapse(ICeChip *chip, time_t usecs);
 ICeChip** icemu_chip_get_registry();
 
 Simulation* icemu_sim_get();

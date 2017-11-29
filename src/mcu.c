@@ -104,7 +104,7 @@ static ICeMCU* mcu_new(ICeChip *chip, const char **codes)
     mcu = (ICeMCU *)malloc(sizeof(ICeMCU));
     mcu->in_runloop = false;
     mcu->runloop = NULL;
-    mcu->resolution = icemu_sim_resolution();
+    mcu->resolution = ICE_MCU_DEFAULT_RESOLUTION;
     mcu->usecs_since_last_run = 0;
     memset(mcu->interrupts, 0, sizeof(mcu->interrupts));
     memset(mcu->timers, 0, sizeof(mcu-> timers));

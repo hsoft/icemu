@@ -4,9 +4,9 @@
 #include "sim.h"
 
 #define MAX_SIM_ACTIONS 30
-#define MAX_SIM_CHIPS 256
 #define MAX_SIM_TRIGGERS 100
 #define MAX_DEBUG_VALUES 30
+#define MAX_SIM_CHIPS 256
 
 struct DebugValue {
     const char *name;
@@ -21,7 +21,6 @@ typedef struct {
     time_t resolution; // usecs per tick
     unsigned int slowdown_factor;
     ICeUIAction actions[MAX_SIM_ACTIONS];
-    ICeChip * chips[MAX_SIM_CHIPS];
     ICePin * triggers[MAX_SIM_TRIGGERS];
     struct DebugValue debug_values[MAX_DEBUG_VALUES];
 } Simulation;
@@ -33,7 +32,7 @@ void icemu_chip_init(
 ICePin* icemu_chip_addpin(ICeChip *chip, const char *code, bool output);
 void icemu_chip_addpins(ICeChip *chip, ICePinList *dst_pinlist, const char **codes, bool output);
 void icemu_chip_elapse(ICeChip *chip, time_t usecs);
+ICeChip** icemu_chip_get_registry();
 
 Simulation* icemu_sim_get();
-void icemu_sim_add_chip(ICeChip *chip);
 

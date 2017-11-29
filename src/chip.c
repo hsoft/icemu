@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <assert.h>
 
 #include "chip.h"
 #include "pin.h"
@@ -12,6 +11,19 @@
 #include "private.h"
 
 /* Private */
+static ICeChip * chip_registry[MAX_SIM_CHIPS] = { 0 };
+
+void chip_add_to_registry(ICeChip *chip)
+{
+    int i;
+
+    for (i = 0; i < MAX_SIM_CHIPS; i++) {
+        if (chip_registry[i] == NULL) {
+            chip_registry[i] = chip;
+            break;
+        }
+    }
+}
 
 static uint8_t chip_maxcodelen(const ICeChip *chip)
 {
@@ -136,18 +148,22 @@ static void chip_asciiart(const ICeChip *chip, ICeChipAsciiArt *dst)
     dst->height = h;
 }
 
+/* Protected */
+ICeChip** icemu_chip_get_registry()
+{
+    return chip_registry;
+}
+
 /* Public */
 void icemu_chip_init(
     ICeChip *chip, void *logical_unit, ICePinChangeFunc *pin_change_func, uint8_t pin_count)
 {
-    // The sim needs to be initialized before creating our first chip.
-    assert(icemu_sim_get()->initialized);
     chip->logical_unit = logical_unit;
     chip->pin_change_func = pin_change_func;
     chip->asciiart_func = chip_asciiart;
     chip->elapse_func = NULL;
     icemu_pinlist_init(&chip->pins, pin_count);
-    icemu_sim_add_chip(chip);
+    chip_add_to_registry(chip);
 }
 
 ICePin* icemu_chip_addpin(ICeChip *chip, const char *code, bool output)

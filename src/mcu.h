@@ -6,6 +6,7 @@
 
 #define ICE_MAX_INTERRUPTS 100
 #define ICE_MAX_TIMERS 20
+#define ICE_MCU_DEFAULT_RESOLUTION 50
 
 typedef void (ICeRunloopFunc)();
 

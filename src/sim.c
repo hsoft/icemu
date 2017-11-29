@@ -38,13 +38,14 @@ static void sim_keypress(char key)
 static void sim_tick()
 {
     int i;
+    ICeChip **chip_registry = icemu_chip_get_registry();
 
     sim.ticks++;
     for (i = 0; i < MAX_SIM_CHIPS; i++) {
-        if (sim.chips[i] == NULL) {
+        if (chip_registry[i] == NULL) {
             break;
         }
-        icemu_chip_elapse(sim.chips[i], sim.resolution);
+        icemu_chip_elapse(chip_registry[i], sim.resolution);
     }
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution * sim.slowdown_factor;
 }
@@ -110,18 +111,6 @@ Simulation* icemu_sim_get()
     return &sim;
 }
 
-void icemu_sim_add_chip(ICeChip *chip)
-{
-    int i;
-
-    for (i = 0; i < MAX_SIM_CHIPS; i++) {
-        if (sim.chips[i] == NULL) {
-            sim.chips[i] = chip;
-            break;
-        }
-    }
-}
-
 /* Public */
 void icemu_sim_init(time_t resolution)
 {
@@ -132,7 +121,6 @@ void icemu_sim_init(time_t resolution)
     sim.slowdown_factor = 1;
     sim.next_tick_target = icemu_util_timestamp() + sim.resolution;
     memset(sim.actions, 0, sizeof(sim.actions));
-    memset(sim.chips, 0, sizeof(sim.chips));
     memset(sim.triggers, 0, sizeof(sim.triggers));
     memset(sim.debug_values, 0, sizeof(sim.debug_values));
 }

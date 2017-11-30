@@ -13,6 +13,7 @@ same code** in an emulated circuit, on your computer. In the simulation, you can
 * Advance time "step by step".
 * Add triggers on some pins and make the simulation stop when the pin state change.
 * Run multiple programs on multiple MCUs in the same simulation.
+* Wire simulated pins to FTDI devices (see `examples`).
 
 By testing the soundness of your software before sending it to the MCU, you can save significant
 setup time and do introspection that you couldn't do on your hardware. Of course, the simulation

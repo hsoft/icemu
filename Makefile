@@ -3,19 +3,36 @@ LIBRARY_NAME = icemu
 TARGET_LIB = lib$(LIBRARY_NAME).a
 TEST_TARGET = test_icemu
 
+ifeq ($(shell pkg-config libftdi1 && echo 1), 1)
+	USE_LIBFTDI ?= 1
+else
+	USE_LIBFTDI = 0
+endif
+
 PKGCONFIG_LIBS = ncurses
+ifeq ($(USE_LIBFTDI), 1)
+	PKGCONFIG_LIBS += libftdi1
+endif
+
 CFLAGS = -Wall `pkg-config --cflags $(PKGCONFIG_LIBS)`
 
 SRCS = pin.c pinlist.c chip.c shiftregister.c decoder.c counter.c \
 	gate.c led.c mcu.c util.c ui.c sim.c
+ifeq ($(USE_LIBFTDI), 1)
+	SRCS += ftdi.c
+endif
+
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
 TEST_SRCS = main.c pin.c shiftregister.c decoder.c counter.c \
 	gate.c circuit.c util.c
 TEST_OBJS = $(addprefix tests/, $(TEST_SRCS:%.c=%.o))
 CUNIT_LINKING ?= `pkg-config --libs cunit`
 
+
 .PHONY: all
 all: $(TARGET_LIB)
+	@echo "Done! was built with:"
+	@echo "USE_LIBFTDI: $(USE_LIBFTDI)"
 
 $(TARGET_LIB): $(OBJS)
 	ar rcs $@ $^

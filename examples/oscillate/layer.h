@@ -6,6 +6,6 @@
 #endif
 
 
-void setup_interrupt();
-bool set_timer0_target(unsigned long usecs);
-void set_timer0_mode_to_interrupt();
+void osc_setup_interrupt();
+bool osc_set_timer0_target(unsigned long usecs);
+void osc_set_timer0_mode_to_interrupt();

@@ -12,7 +12,7 @@ static volatile uint32_t counter;
 #ifndef SIMULATION
 ISR(PCINT0_vect)
 #else
-void int0_interrupt()
+void osc_int0_interrupt()
 #endif
 {
     counter++;
@@ -21,7 +21,7 @@ void int0_interrupt()
 #ifndef SIMULATION
 ISR(TIMER0_COMPA_vect)
 #else
-void timer0_interrupt()
+void osc_timer0_interrupt()
 #endif
 {
     freq = counter;
@@ -31,21 +31,21 @@ void timer0_interrupt()
 #endif
 }
 
-void setup()
+void osc_setup()
 {
 #ifndef SIMULATION
     sei();
 #endif
 
-    set_timer0_target(1000UL * 100); // every 100ms
-    set_timer0_mode_to_interrupt();
-    setup_interrupt();
+    osc_set_timer0_target(1000UL * 100); // every 100ms
+    osc_set_timer0_mode_to_interrupt();
+    osc_setup_interrupt();
 }
 
 #ifndef SIMULATION
 int main (void)
 {
-    setup();
+    osc_setup();
     while(1);
 }
 #endif

@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "layer.h"
 
 #ifndef cbi
@@ -10,7 +11,7 @@
 
 #define USECS_PER_SECOND 1000000UL
 
-void setup_interrupt()
+void osc_setup_interrupt()
 {
     // enable Pin Change Interrupts
     sbi(GIMSK, PCIE);
@@ -19,7 +20,7 @@ void setup_interrupt()
     sei();
 }
 
-bool set_timer0_target(unsigned long usecs)
+bool osc_set_timer0_target(unsigned long usecs)
 {
     unsigned long ticks;
     unsigned char prescaler_shifts[5] = {0, 3, 6, 8, 10};
@@ -57,7 +58,7 @@ bool set_timer0_target(unsigned long usecs)
     return true;
 }
 
-void set_timer0_mode_to_interrupt()
+void osc_set_timer0_mode_to_interrupt()
 {
     // Enable CTC mode
     sbi(TCCR0A, WGM01);

@@ -10,8 +10,9 @@ same code** in an emulated circuit, on your computer. In the simulation, you can
 * See the state of every pin in the circuit.
 * Pause the simulation.
 * Slow the simulation down.
-* Advance time "tick-by-tick", a "tick" being one pass of the main loop.
+* Advance time "step by step".
 * Add triggers on some pins and make the simulation stop when the pin state change.
+* Run multiple programs on multiple MCUs in the same simulation.
 
 By testing the soundness of your software before sending it to the MCU, you can save significant
 setup time and do introspection that you couldn't do on your hardware. Of course, the simulation
@@ -45,7 +46,7 @@ complex software and have **it** supply the inputs and react to the outputs of m
 There's a possibility that my newbie-ness made me create a tool that already exists, however, and
 if that happened, please tell me so I can stop working on useless tools.
 
-## Where's the Python implementation
+## Where's the Python implementation?
 
 `icemu` was initially written in Python. I underestimated how quickly speed would become an issue
 and, soon enough, it was. I rewrote the whole thing in C. The old python implementation is still
@@ -61,8 +62,9 @@ available in the `python` branch of the repo.
 ## How to use
 
 For now, the API is not stable so it's not a library meant to be installed. What you're going to
-do is to add `icemu` as a subrepo build is along with your project. You can look at the `examples`
-folder for example, or at my [seg7-multiplex][seg7-multiplex] for a real-world integration example.
+do is to add `icemu` as a subrepo and build it along with your project. You can look at the
+`examples` folder for example, or at my [seg7-multiplex][seg7-multiplex] for a real-world
+integration example.
 
 Then, you need to recreate your prototype's logic along with IO shims in a small C program that
 uses `icemu` and configure it with your program's runloop. Again, look at examples.

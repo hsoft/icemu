@@ -12,3 +12,7 @@ And the end of this all is our MCU which has an interrupt set on `PB0` and a tim
 100ms and records frequency. We use `icemu` debug capabilities to get that frequency which is
 displayed at the bottom right of the screen. We thus see that we get the proper amount of interrupt
 calls on oscillating pins!
+
+You'll notice that functions in this project are prefixed with `osc_` when other examples don't
+have such prefixes. That is because this project is reused in the `multimcu` example and we need
+namespaces for these functions.

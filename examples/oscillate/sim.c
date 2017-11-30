@@ -10,24 +10,24 @@ static ICeChip dec;
 static ICePin oscillator;
 
 /* main.c decl */
-void setup();
-void int0_interrupt();
-void timer0_interrupt();
+void osc_setup();
+void osc_int0_interrupt();
+void osc_timer0_interrupt();
 
 /* layer impl */
-void setup_interrupt()
+void osc_setup_interrupt()
 {
     icemu_mcu_add_interrupt(
-        &mcu, icemu_chip_getpin(&mcu, "PB0"), ICE_INTERRUPT_ON_RISING, int0_interrupt);
+        &mcu, icemu_chip_getpin(&mcu, "PB0"), ICE_INTERRUPT_ON_RISING, osc_int0_interrupt);
 }
 
-bool set_timer0_target(unsigned long usecs)
+bool osc_set_timer0_target(unsigned long usecs)
 {
-    icemu_mcu_add_timer(&mcu, usecs, timer0_interrupt);
+    icemu_mcu_add_timer(&mcu, usecs, osc_timer0_interrupt);
     return true;
 }
 
-void set_timer0_mode_to_interrupt()
+void osc_set_timer0_mode_to_interrupt()
 {
 }
 
@@ -60,7 +60,7 @@ int main()
 
     icemu_pin_set_oscillating_freq(&oscillator, 1000UL * 1000UL);
 
-    setup();
+    osc_setup();
 
     icemu_ui_add_element("Counter 1:", &cnt);
     icemu_ui_add_element("Decoder:", &dec);

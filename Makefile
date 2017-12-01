@@ -3,7 +3,8 @@ LIBRARY_NAME = icemu
 TARGET_LIB = lib$(LIBRARY_NAME).a
 TEST_TARGET = test_icemu
 
-ifeq ($(shell pkg-config libftdi1 && echo 1), 1)
+LIBFTDI_LIBNAME ?= libftdi1
+ifeq ($(shell pkg-config $(LIBFTDI_LIBNAME) && echo 1), 1)
 	USE_LIBFTDI ?= 1
 else
 	USE_LIBFTDI = 0
@@ -11,7 +12,7 @@ endif
 
 PKGCONFIG_LIBS = ncurses
 ifeq ($(USE_LIBFTDI), 1)
-	PKGCONFIG_LIBS += libftdi1
+	PKGCONFIG_LIBS += $(LIBFTDI_LIBNAME)
 endif
 
 CFLAGS = -Wall `pkg-config --cflags $(PKGCONFIG_LIBS)`

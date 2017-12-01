@@ -1,6 +1,6 @@
 language: c
 before_install: sudo apt-get install libncurses5 pkg-config libcunit1-dev libftdi-dev
-install: make
+install: LIBFTDI_LIBNAME="libftdi" make
 script:
   # In addition to running unit tests, we also want to make sure that all examples build fine.
   - make -C examples

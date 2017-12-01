@@ -3,7 +3,7 @@ before_install: sudo apt-get install libncurses5 pkg-config libcunit1-dev libftd
 install: LIBFTDI_LIBNAME="libftdi" make
 script:
   # In addition to running unit tests, we also want to make sure that all examples build fine.
-  - make -C examples
+  - LIBFTDI_LIBNAME="libftdi" make -C examples
   # cunit pkg is messed up in ubuntu trusty: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=782366
   # don't use pkg-config
   - CUNIT_LINKING="-lcunit" make test

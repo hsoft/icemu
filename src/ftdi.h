@@ -2,7 +2,6 @@
 #include "pinlist.h"
 
 typedef struct {
-    int handle;
     ICePinList inputs;
 } ICeFTDI;
 

@@ -26,6 +26,12 @@ static void ftdi_global_init()
 
 static void ftdi_pinchange(ICePin *pin)
 {
+    ICeFTDI *f;
+    uint8_t buf;
+
+    f = pin->chip->logical_unit;
+    buf = (uint8_t)icemu_util_get_binary_value(&f->inputs);
+    ftdi_write_data(g_ftdi, &buf, 1);
 }
 
 // "_" suffix is because "ftdi_new()" clashes with libftdi.
@@ -36,14 +42,15 @@ static ICeFTDI* ftdi_new_(
     const char **input_codes)
 {
     ICeFTDI *f;
+    int ret;
 
     ftdi_global_init();
     f = (ICeFTDI *)malloc(sizeof(ICeFTDI));
-    f->handle = ftdi_usb_open(g_ftdi, usb_vendor_id, usb_product_id);
-    if (f->handle < 0) {
+    ret = ftdi_usb_open(g_ftdi, usb_vendor_id, usb_product_id);
+    if (ret < 0) {
         fprintf(
             stderr, "unable to open ftdi device: %d (%s)\n",
-            f->handle, ftdi_get_error_string(g_ftdi));
+            ret, ftdi_get_error_string(g_ftdi));
         exit(1);
     }
     ftdi_set_bitmode(g_ftdi, 0xff, BITMODE_BITBANG);

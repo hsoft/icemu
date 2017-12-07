@@ -51,7 +51,8 @@ static ICeFTDI* ftdi_new_(
         fprintf(
             stderr, "unable to open ftdi device: %d (%s)\n",
             ret, ftdi_get_error_string(g_ftdi));
-        exit(1);
+        free(f);
+        return NULL;
     }
     ftdi_set_bitmode(g_ftdi, 0xff, BITMODE_BITBANG);
     icemu_chip_init(chip, (void *)f, ftdi_pinchange, icemu_util_chararray_count(input_codes));
@@ -60,11 +61,11 @@ static ICeFTDI* ftdi_new_(
 }
 
 /* Public */
-void icemu_FT232H_init(ICeChip *chip)
+bool icemu_FT232H_init(ICeChip *chip)
 {
     const char * input_codes[] = {"D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", NULL};
 
-    ftdi_new_(chip, 0x0403, 0x6014, input_codes);
+    return ftdi_new_(chip, 0x0403, 0x6014, input_codes) != NULL;
 }
 
 

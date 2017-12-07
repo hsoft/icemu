@@ -5,6 +5,7 @@ typedef struct {
     ICePinList inputs;
 } ICeFTDI;
 
-void icemu_FT232H_init(ICeChip *chip);
+// Returns whether we would connect to the device
+bool icemu_FT232H_init(ICeChip *chip);
 
 

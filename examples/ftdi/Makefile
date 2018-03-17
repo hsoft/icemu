@@ -1,6 +1,5 @@
 PROGNAME = ftdi
 
-LIBFTDI_LIBNAME ?= libftdi1
-PKGCONFIG_LIBS = ncurses $(LIBFTDI_LIBNAME)
+NEEDS_FTDI = yes
 
 include ../common.mk

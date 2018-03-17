@@ -1,16 +1,27 @@
+LIBRARY_NAME = @PACKAGE_NAME@
 MCU ?= attiny45
 F_CPU ?= 1000000UL
-CC = avr-gcc
-CFLAGS = -Os -Wall -DF_CPU=$(F_CPU) -mmcu=$(MCU) -c
-LDFLAGS = -mmcu=$(MCU)
+AVR_CC = avr-gcc
+AVR_CFLAGS = -Os -Wall -DF_CPU=$(F_CPU) -mmcu=$(MCU) -c
+AVR_LDFLAGS = -mmcu=$(MCU)
 OBJS ?= main.o layer.o
 
 AVRDUDEMCU = t45
 AVRDUDEARGS = -c usbtiny -P usb 
 
+SIM_CC = @CC@
+SIM_CFLAGS = @CFLAGS@ @NCURSES_CFLAGS@ -DSIMULATION -Wall -c
+SIM_LIBS = @LIBS@ @NCURSES_LIBS@
 SIM_OBJS ?= main.o sim.o
-PKGCONFIG_LIBS ?= ncurses
-LDFLAGS = `pkg-config --libs --static $(PKGCONFIG_LIBS)`
+
+ifdef NEEDS_FTDI
+FTDI_LIBS = @FTDI_LIBS@
+SIM_LIBS += $(FTDI_LIBS)
+endif
+
+
+CC = $(AVR_CC)
+CFLAGS = $(AVR_CFLAGS)
 
 # Patterns
 
@@ -31,7 +42,7 @@ clean:
 	rm -f $(OBJS) $(PROGNAME).hex $(PROGNAME).bin $(SIM_OBJS) $(PROGNAME)
 
 $(PROGNAME).bin: $(OBJS)
-	$(CC) $(LDFLAGS) $+ -o $@
+	$(AVR_CC) $(AVR_LDFLAGS) $+ -o $@
 
 $(PROGNAME).hex: $(PROGNAME).bin
 	avr-objcopy -O ihex -R .eeprom $< $@
@@ -42,11 +53,16 @@ $(PROGNAME).hex: $(PROGNAME).bin
 
 # we always want to run make on the ../.. to make sure we have a fresh lib.
 $(PROGNAME): $(SIM_OBJS)
+ifdef NEEDS_FTDI
+ifndef FTDI_LIBS
+	$(error icemu needs to be built with --enable-ftdi for this example)
+endif
+endif
 	$(MAKE) -C ../..
-	$(CC) -L../.. $(SIM_OBJS) -o $@ -licemu $(LDFLAGS)
+	$(CC) -L../.. $(SIM_OBJS) -o $@ -l$(LIBRARY_NAME) $(SIM_LIBS)
 
-sim: CC = cc
-sim: CFLAGS = -DSIMULATION -Wall `pkg-config --cflags ncurses` -c
+sim: CC = $(SIM_CC)
+sim: CFLAGS = $(SIM_CFLAGS)
 sim: $(PROGNAME)
 	@echo Done!
 

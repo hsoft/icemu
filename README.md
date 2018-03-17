@@ -56,9 +56,12 @@ available in the `python` branch of the repo.
 ## Requirements
 
 * C compiler
+* GNU autoconf
 * GNU make
+* pkg-config
 * ncurses
 * CUnit for tests
+* libftdi for an FTDI interface (optional)
 
 ## How to use
 
@@ -67,10 +70,17 @@ do is to add `icemu` as a subrepo and build it along with your project. You can 
 `examples` folder for example, or at my [seg7-multiplex][seg7-multiplex] for a real-world
 integration example.
 
+To build, run:
+
+    $ autoreconf
+    $ ./configure
+    $ make
+
 Then, you need to recreate your prototype's logic along with IO shims in a small C program that
 uses `icemu` and configure it with your program's runloop. Again, look at examples.
 
-Then, compile, run and enjoy!
+Once `./configure` has run, you can build all examples by `cd`ing into
+`examples` and run `make`.
 
 ## Examples
 
@@ -83,6 +93,6 @@ starting point after having looked at the examples.
 
 ## License
 
-LGPLv3, Copyright 2017 Virgil Dupras
+LGPLv3, Copyright 2018 Virgil Dupras
 
 [seg7-multiplex]: https://github.com/hsoft/seg7-multiplex

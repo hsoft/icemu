@@ -7,15 +7,15 @@ CFLAGS = @CFLAGS@ @FTDI_CFLAGS@ @NCURSES_CFLAGS@
 FTDI_LIBS = @FTDI_LIBS@
 CUNIT_LIBS = @CUNIT_LIBS@
 
-SRCS = pin.c pinlist.c chip.c shiftregister.c decoder.c counter.c \
-	gate.c led.c mcu.c util.c ui.c sim.c
+SRCS = pin.c pinlist.c chip.c shiftregister.c decoder.c display_decoder.c \
+	counter.c gate.c led.c mcu.c util.c ui.c sim.c
 ifdef FTDI_LIBS
 	SRCS += ftdi.c
 endif
 
 OBJS = $(addprefix src/, $(SRCS:%.c=%.o))
-TEST_SRCS = main.c pin.c shiftregister.c decoder.c counter.c \
-	gate.c circuit.c util.c
+TEST_SRCS = main.c pin.c shiftregister.c decoder.c display_decoder.c \
+	counter.c gate.c circuit.c util.c
 TEST_OBJS = $(addprefix tests/, $(TEST_SRCS:%.c=%.o))
 
 .PHONY: all

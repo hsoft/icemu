@@ -5,6 +5,7 @@
 void test_pin_init();
 void test_shiftregister_init();
 void test_decoder_init();
+void test_display_decoder_init();
 void test_counter_init();
 void test_gate_init();
 void test_circuit_init();
@@ -16,6 +17,7 @@ int main()
     test_pin_init();
     test_shiftregister_init();
     test_decoder_init();
+    test_display_decoder_init();
     test_counter_init();
     test_gate_init();
     test_circuit_init();

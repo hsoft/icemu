@@ -6,63 +6,33 @@
 #endif
 #include "layer.h"
 
-#define SRCLK PinB0
-#define SRSER PinB1
-#define RCLK PinB2
-
-// Least significant bit is on Q0
-//               XABCDEGF
-#define Seg7_0 0b01111101
-#define Seg7_1 0b00110000
-#define Seg7_2 0b01101110
-#define Seg7_3 0b01111010
-#define Seg7_4 0b00110011
-#define Seg7_5 0b01011011
-#define Seg7_6 0b01011111
-#define Seg7_7 0b01110000
-#define Seg7_8 0b01111111
-#define Seg7_9 0b01111011
+#define SER_A PinB0
+#define SER_B PinB1
+#define SER_C PinB2
+#define SER_D PinB3
 
 static uint8_t current_digit;
 
-static void toggleclk(PinID pin)
+static void decsend(uint8_t val)
 {
-    pinlow(pin);
-    _delay_us(1);
-    pinhigh(pin);
-}
-
-// LSB goes on q0
-static void shiftsend(uint8_t val)
-{
-    char i;
-
-    for (i=7; i>=0; i--) {
-        pinset(SRSER, val & (1 << i));
-        toggleclk(SRCLK);
-    }
-}
-
-static void senddigit(uint8_t val)
-{
-    uint8_t digits[10] = {Seg7_0, Seg7_1, Seg7_2, Seg7_3, Seg7_4, Seg7_5, Seg7_6, Seg7_7, Seg7_8, Seg7_9};
-
-    pinlow(RCLK);
-    shiftsend(~digits[val]);
-    pinhigh(RCLK);
+    pinset(SER_A, val & (1 << 0));
+    pinset(SER_B, val & (1 << 1));
+    pinset(SER_C, val & (1 << 2));
+    pinset(SER_D, val & (1 << 3));
 }
 
 void setup()
 {
     current_digit = 0;
-    pinoutputmode(SRSER);
-    pinoutputmode(SRCLK);
-    pinoutputmode(RCLK);
+    pinoutputmode(SER_A);
+    pinoutputmode(SER_B);
+    pinoutputmode(SER_C);
+    pinoutputmode(SER_D);
 }
 
 void loop()
 {
-    senddigit(current_digit);
+    decsend(current_digit);
     current_digit++;
     if (current_digit == 10) {
         current_digit = 0;

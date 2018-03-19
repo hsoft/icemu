@@ -3,11 +3,12 @@
 #include "layer.h"
 
 static ICeChip mcu;
-static ICeChip sr;
+static ICeChip dec;
 static ICeChip seg;
 static ICePin *pb0;
 static ICePin *pb1;
 static ICePin *pb2;
+static ICePin *pb3;
 
 /* main.c decl */
 void setup();
@@ -19,6 +20,7 @@ static ICePin* pinid(PinID pin)
         case PinB0: return pb0;
         case PinB1: return pb1;
         case PinB2: return pb2;
+        case PinB3: return pb3;
         default: return pb0;
     }
 }
@@ -57,31 +59,33 @@ void _delay_ms(unsigned int ms)
 
 int main()
 {
-    char * segorder[] = {"F", "G", "E", "D", "C", "B", "A", "DP"};
-    int i;
-    ShiftRegister *srl;
-
     icemu_sim_init();
     icemu_ATtiny_init(&mcu);
     icemu_mcu_set_runloop(&mcu, loop, 1000UL * 1000UL);
-    icemu_SN74HC595_init(&sr);
+    icemu_SN7447A_init(&dec);
     icemu_seg7_init(&seg);
-    srl = (ShiftRegister *)sr.logical_unit;
 
     pb0 = icemu_chip_getpin(&mcu, "PB0");
     pb1 = icemu_chip_getpin(&mcu, "PB1");
     pb2 = icemu_chip_getpin(&mcu, "PB2");
+    pb3 = icemu_chip_getpin(&mcu, "PB3");
 
-    icemu_pin_wireto(pb0, icemu_chip_getpin(&sr, "SRCLK"));
-    icemu_pin_wireto(pb1, icemu_chip_getpin(&sr, "SER"));
-    icemu_pin_wireto(pb2, icemu_chip_getpin(&sr, "RCLK"));
+    icemu_pin_wireto(pb0, icemu_chip_getpin(&dec, "A"));
+    icemu_pin_wireto(pb1, icemu_chip_getpin(&dec, "B"));
+    icemu_pin_wireto(pb2, icemu_chip_getpin(&dec, "C"));
+    icemu_pin_wireto(pb3, icemu_chip_getpin(&dec, "D"));
 
-    for (i = 0; i < 8; i++) {
-        icemu_pin_wireto(srl->outputs.pins[i], icemu_chip_getpin(&seg, segorder[i]));
-    }
+    icemu_pin_wireto(icemu_chip_getpin(&dec, "a"), icemu_chip_getpin(&seg, "A"));
+    icemu_pin_wireto(icemu_chip_getpin(&dec, "b"), icemu_chip_getpin(&seg, "B"));
+    icemu_pin_wireto(icemu_chip_getpin(&dec, "c"), icemu_chip_getpin(&seg, "C"));
+    icemu_pin_wireto(icemu_chip_getpin(&dec, "d"), icemu_chip_getpin(&seg, "D"));
+    icemu_pin_wireto(icemu_chip_getpin(&dec, "e"), icemu_chip_getpin(&seg, "E"));
+    icemu_pin_wireto(icemu_chip_getpin(&dec, "f"), icemu_chip_getpin(&seg, "F"));
+    icemu_pin_wireto(icemu_chip_getpin(&dec, "g"), icemu_chip_getpin(&seg, "G"));
+
     setup();
     icemu_ui_add_element("MCU:", &mcu);
-    icemu_ui_add_element("SR:", &sr);
+    icemu_ui_add_element("DEC:", &dec);
     icemu_ui_add_element("Seg7:", &seg);
     icemu_sim_run();
     return 0;

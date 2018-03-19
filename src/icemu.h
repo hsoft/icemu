@@ -3,6 +3,7 @@
 #include "pinlist.h"
 #include "chip.h"
 #include "decoder.h"
+#include "display_decoder.h"
 #include "shiftregister.h"
 #include "counter.h"
 #include "gate.h"

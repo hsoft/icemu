@@ -3,12 +3,14 @@ AC_INIT([icemu], [0.1])
 AC_CONFIG_SRCDIR([src/pinlist.c])
 AC_USE_SYSTEM_EXTENSIONS
 
-AC_ARG_ENABLE(
+AC_ARG_WITH(
     [ftdi],
-    AS_HELP_STRING(
-        [--enable-ftdi],
+    [AS_HELP_STRING(
+        [--with-ftdi],
         [Build with libftdi]
-    )
+    )],
+    [],
+    [with_ftdi=no]
 )
 
 # Checks for programs.
@@ -17,8 +19,11 @@ AC_PROG_CC
 # Checks for libraries.
 PKG_CHECK_MODULES([NCURSES], [ncurses])
 
-if test "x$enable_ftdi" = "xyes"; then
-    PKG_CHECK_MODULES([FTDI], [libftdi1])
+if test "x$with_ftdi" != "xno"; then
+    if test "x$with_ftdi" = "xyes"; then
+        with_ftdi=libftdi
+    fi
+    PKG_CHECK_MODULES([FTDI], [$with_ftdi])
 fi
 
 PKG_CHECK_MODULES(

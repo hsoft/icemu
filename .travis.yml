@@ -1,9 +1,11 @@
 language: c
-before_install: sudo apt-get install libncurses5 pkg-config libcunit1-dev libftdi-dev
-install: LIBFTDI_LIBNAME="libftdi" make
+before_install: sudo apt-get install autoconf libncurses5 pkg-config libcunit1-dev libftdi-dev
+install: autoreconf -vif
 script:
-  # In addition to running unit tests, we also want to make sure that all examples build fine.
-  - LIBFTDI_LIBNAME="libftdi" make -C examples
   # cunit pkg is messed up in ubuntu trusty: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=782366
-  # don't use pkg-config
-  - CUNIT_LINKING="-lcunit" make test
+  # don't use pkg-config and set CUNIT_LIBS directly
+  - ./configure CUNIT_LIBS="-lcunit" --with-ftdi
+  - make
+  # In addition to running unit tests, we also want to make sure that all examples build fine.
+  - make -C examples
+  - make test

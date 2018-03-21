@@ -171,6 +171,10 @@ void icemu_ledmatrix_init(ICeChip *chip, uint8_t width, uint8_t height)
     lm->leds = malloc(sizeof(LED) * width * height);
     for (i = 0; i < width * height; i++) {
         p = icemu_chip_addpin(chip, "", false);
+        /* We initially set our LED GND pin to high so that it doesn't start
+         * off as "powered" until we actually wire GND to something low.
+         */
+        p->high = true;
         led_init(&lm->leds[i], &lm->vcc, p);
     }
     icemu_pin_init(&lm->vcc, chip, "VCC", false);

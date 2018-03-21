@@ -50,6 +50,7 @@ static ICeDisplayDecoder* decoder_new(
     icemu_pinlist_subset_of_existing(
         &dec->serial_pins, &dec->inputs, serial_codes);
     dec->value_table = value_table;
+    decoder_update_output(dec);
     return dec;
 }
 

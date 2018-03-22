@@ -75,13 +75,7 @@ int main()
     icemu_pin_wireto(pb2, icemu_chip_getpin(&dec, "C"));
     icemu_pin_wireto(pb3, icemu_chip_getpin(&dec, "D"));
 
-    icemu_pin_wireto(icemu_chip_getpin(&dec, "a"), icemu_chip_getpin(&seg, "A"));
-    icemu_pin_wireto(icemu_chip_getpin(&dec, "b"), icemu_chip_getpin(&seg, "B"));
-    icemu_pin_wireto(icemu_chip_getpin(&dec, "c"), icemu_chip_getpin(&seg, "C"));
-    icemu_pin_wireto(icemu_chip_getpin(&dec, "d"), icemu_chip_getpin(&seg, "D"));
-    icemu_pin_wireto(icemu_chip_getpin(&dec, "e"), icemu_chip_getpin(&seg, "E"));
-    icemu_pin_wireto(icemu_chip_getpin(&dec, "f"), icemu_chip_getpin(&seg, "F"));
-    icemu_pin_wireto(icemu_chip_getpin(&dec, "g"), icemu_chip_getpin(&seg, "G"));
+    icemu_displaydecoder_wireto_seg7(&dec, &seg);
 
     setup();
     icemu_ui_add_element("MCU:", &mcu);

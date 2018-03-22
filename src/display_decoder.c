@@ -56,6 +56,17 @@ static ICeDisplayDecoder* decoder_new(
 
 /* Public */
 
+void icemu_displaydecoder_wireto_seg7(ICeChip *chip, ICeChip *seg7)
+{
+    icemu_pin_wireto(icemu_chip_getpin(chip, "a"), icemu_chip_getpin(seg7, "A"));
+    icemu_pin_wireto(icemu_chip_getpin(chip, "b"), icemu_chip_getpin(seg7, "B"));
+    icemu_pin_wireto(icemu_chip_getpin(chip, "c"), icemu_chip_getpin(seg7, "C"));
+    icemu_pin_wireto(icemu_chip_getpin(chip, "d"), icemu_chip_getpin(seg7, "D"));
+    icemu_pin_wireto(icemu_chip_getpin(chip, "e"), icemu_chip_getpin(seg7, "E"));
+    icemu_pin_wireto(icemu_chip_getpin(chip, "f"), icemu_chip_getpin(seg7, "F"));
+    icemu_pin_wireto(icemu_chip_getpin(chip, "g"), icemu_chip_getpin(seg7, "G"));
+}
+
 /* SN7447A is a 7-segment decoder with a table of 16 hardcoded values selected
  * from a 4-bit binary input.
  *

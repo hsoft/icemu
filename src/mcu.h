@@ -37,7 +37,8 @@ typedef struct {
     ICeRunloopFunc *runloop;
     bool in_runloop;
     unsigned int runloop_duration; // usecs per runloop
-    unsigned int usecs_since_last_run;
+    // elapsed usecs since the last runloop execution
+    unsigned int elapsed_usecs;
     // index of the interrupt func must be the same as the index of the pin the interrupt
     // is bound to.
     ICeMCUInterrupt interrupts[ICE_MAX_INTERRUPTS];

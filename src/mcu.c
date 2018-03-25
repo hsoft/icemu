@@ -79,7 +79,7 @@ static unsigned int mcu_elapse(ICeChip *chip, time_t usecs)
     ICeMCU *mcu;
 
     mcu = (ICeMCU *)chip->logical_unit;
-    mcu->usecs_since_last_run += usecs;
+    mcu->elapsed_usecs += usecs;
     for (i = 0; i < chip->pins.count; i++) {
         // interrupt array is sparse. We don't break loop on NULL.
         if (mcu->interrupts[i].func != NULL) {
@@ -98,12 +98,14 @@ static unsigned int mcu_elapse(ICeChip *chip, time_t usecs)
             result = MIN(elapse, result);
         }
     }
-    if (!mcu->in_runloop && (mcu->runloop != NULL) && (mcu->usecs_since_last_run >= mcu->runloop_duration)) {
-        mcu->usecs_since_last_run = 0;
-        mcu->in_runloop = true;
-        mcu->runloop();
-        mcu->in_runloop = false;
-        result = MIN(result, mcu->runloop_duration);
+    if (!mcu->in_runloop && (mcu->runloop != NULL)) {
+        if (mcu->elapsed_usecs >= mcu->runloop_duration) {
+            mcu->elapsed_usecs -= mcu->runloop_duration;
+            mcu->in_runloop = true;
+            mcu->runloop();
+            mcu->in_runloop = false;
+        }
+        result = MIN(result, mcu->runloop_duration - mcu->elapsed_usecs);
     }
     if (result == ICE_MAX_CHIP_ELAPSE) {
         result = 0;
@@ -122,7 +124,7 @@ static ICeMCU* mcu_new(ICeChip *chip, const char **codes)
     mcu->in_runloop = false;
     mcu->runloop = NULL;
     mcu->runloop_duration = 0;
-    mcu->usecs_since_last_run = 0;
+    mcu->elapsed_usecs = 0;
     memset(mcu->interrupts, 0, sizeof(mcu->interrupts));
     memset(mcu->timers, 0, sizeof(mcu-> timers));
     icemu_chip_init(chip, (void *)mcu, mcu_pinchange, count);

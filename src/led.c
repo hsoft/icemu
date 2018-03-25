@@ -10,7 +10,6 @@
 /* Private */
 typedef struct {
     uint32_t fade_timeout;
-    bool powered;
     ICePin *vcc;
     ICePin *gnd;
 } LED;
@@ -25,27 +24,21 @@ typedef struct {
 void led_init(LED *led, ICePin *vcc, ICePin *gnd)
 {
     led->fade_timeout = 0;
-    led->powered = false;
     led->vcc = vcc;
     led->gnd = gnd;
 }
 
-void led_update(LED *led)
+bool led_powered(LED *led)
 {
-    bool powered;
-
-    powered = led->vcc->high && !led->gnd->high;
-    if (powered != led->powered) {
-        led->powered = powered;
-        if (!led->powered) {
-            // enable fade timeout
-            led->fade_timeout = LED_FADE_DELAY;
-        }
-    }
+    return led->vcc->high && !led->gnd->high;
 }
 
 unsigned int led_elapse(LED *led, time_t usecs)
 {
+    if (led_powered(led)) {
+        led->fade_timeout = LED_FADE_DELAY;
+        return 0;
+    }
     if (led->fade_timeout > 0) {
         led->fade_timeout -= MIN(usecs, led->fade_timeout);
     }
@@ -54,23 +47,7 @@ unsigned int led_elapse(LED *led, time_t usecs)
 
 bool led_lit(LED *led)
 {
-    return led->powered || led->fade_timeout > 0;
-}
-
-static void ledmatrix_pinchange(ICePin *pin)
-{
-    LEDMatrix *lm = (LEDMatrix *)pin->chip->logical_unit;
-    int i;
-
-    if (pin == &lm->vcc) {
-        // update all leds
-        for (i = 0; i < lm->width * lm->height; i++) {
-            led_update(&lm->leds[i]);
-        }
-    } else {
-        i = icemu_pinlist_find(&pin->chip->pins, pin);
-        led_update(&lm->leds[i]);
-    }
+    return led_powered(led) || led->fade_timeout > 0;
 }
 
 /*  _.  A.
@@ -165,7 +142,7 @@ void icemu_ledmatrix_init(ICeChip *chip, uint8_t width, uint8_t height)
     ICePin *p;
 
     lm = (LEDMatrix *)malloc(sizeof(LEDMatrix));
-    icemu_chip_init(chip, (void *)lm, ledmatrix_pinchange, width * height);
+    icemu_chip_init(chip, (void *)lm, NULL, width * height);
     lm->width = width;
     lm->height = height;
     lm->leds = malloc(sizeof(LED) * width * height);

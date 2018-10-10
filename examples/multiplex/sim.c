@@ -55,7 +55,7 @@ int main()
     icemu_sim_init();
     icemu_ATtiny_init(&mcu);
     icemu_SN74HC138_init(&dec);
-    icemu_ledmatrix_init(&lm, 4, 2);
+    icemu_ledmatrix_init(&lm, 4, 2, true);
     dec_lu = (ICeDecoder *)dec.logical_unit;
 
     pb0 = icemu_chip_getpin(&mcu, "PB0");

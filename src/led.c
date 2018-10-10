@@ -17,7 +17,7 @@ typedef struct {
 typedef struct {
     uint8_t width;
     uint8_t height;
-    ICePin vcc;
+    ICePin common;
     LED *leds;
 } LEDMatrix;
 
@@ -128,14 +128,15 @@ void icemu_seg7_init(ICeChip *chip)
     uint8_t i;
     const char * codes[] = {"A", "B", "C", "D", "E", "F", "G", "DP", NULL};
 
-    icemu_ledmatrix_init(chip, 8, 1);
+    icemu_ledmatrix_init(chip, 8, 1, true);
     for (i = 0; i < 8; i++) {
         chip->pins.pins[i]->code = codes[i];
     }
     chip->asciiart_func = seg7_asciiart;
 }
 
-void icemu_ledmatrix_init(ICeChip *chip, uint8_t width, uint8_t height)
+void icemu_ledmatrix_init(
+    ICeChip *chip, uint8_t width, uint8_t height, bool common_anode)
 {
     LEDMatrix *lm;
     uint8_t i;
@@ -148,19 +149,24 @@ void icemu_ledmatrix_init(ICeChip *chip, uint8_t width, uint8_t height)
     lm->leds = malloc(sizeof(LED) * width * height);
     for (i = 0; i < width * height; i++) {
         p = icemu_chip_addpin(chip, "", false);
-        /* We initially set our LED GND pin to high so that it doesn't start
-         * off as "powered" until we actually wire GND to something low.
+        /* We initially set our LED GND pin to the same value as the common pin
+         * so that it doesn't start off as "powered" until we actually wire GND
+         * to something low.
          */
-        p->high = true;
-        led_init(&lm->leds[i], &lm->vcc, p);
+        p->high = common_anode;
+        if (common_anode) {
+            led_init(&lm->leds[i], &lm->common, p);
+        } else {
+            led_init(&lm->leds[i], p, &lm->common);
+        }
     }
-    icemu_pin_init(&lm->vcc, chip, "VCC", false);
+    icemu_pin_init(&lm->common, chip, common_anode ? "CA" : "CC", false);
     chip->asciiart_func = ledmatrix_asciiart;
     chip->elapse_func = ledmatrix_elapse;
-    icemu_pin_set(&lm->vcc, true);
+    icemu_pin_set(&lm->common, common_anode);
 }
 
-ICePin* icemu_ledmatrix_vcc(ICeChip *chip)
+ICePin* icemu_ledmatrix_common_pin(ICeChip *chip)
 {
-    return &((LEDMatrix *)chip->logical_unit)->vcc;
+    return &((LEDMatrix *)chip->logical_unit)->common;
 }

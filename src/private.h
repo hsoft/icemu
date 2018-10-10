@@ -13,6 +13,11 @@ struct DebugValue {
     int val;
 };
 
+struct ChipStack {
+    ICeChip *chip;
+    struct ChipStack *prev;
+};
+
 typedef struct {
     bool initialized;
     ICeSimRunMode runmode;
@@ -23,7 +28,7 @@ typedef struct {
     ICeUIAction actions[MAX_SIM_ACTIONS];
     ICePin * triggers[MAX_SIM_TRIGGERS];
     struct DebugValue debug_values[MAX_DEBUG_VALUES];
-    ICeChip *elapsing_chip;
+    struct ChipStack *elapsing_chip_stack;
 } Simulation;
 
 void icemu_pin_set_global_pinchange_trigger(ICePinChangeFunc *func);

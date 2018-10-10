@@ -42,6 +42,7 @@ static void sim_tick()
     unsigned int elapse;
     unsigned int elapse_min = ICE_MAX_CHIP_ELAPSE;
     ICeChip **chip_registry = icemu_chip_get_registry();
+    struct ChipStack elapsing_chip_stack;
 
     // We've *already* elapsed our `elapsing_for` usecs. While we're calling our elapse() funcs,
     // the clock is still ticking! this is why we take our timestamp now.
@@ -52,9 +53,11 @@ static void sim_tick()
         if (chip_registry[i] == NULL) {
             break;
         }
-        sim.elapsing_chip = chip_registry[i];
+        elapsing_chip_stack.chip = chip_registry[i];
+        elapsing_chip_stack.prev = sim.elapsing_chip_stack;
+        sim.elapsing_chip_stack = &elapsing_chip_stack;
         elapse = icemu_chip_elapse(chip_registry[i], sim.elapsing_for);
-        sim.elapsing_chip = NULL;
+        sim.elapsing_chip_stack = elapsing_chip_stack.prev;
         if (elapse > 0) {
             elapse_min = MIN(elapse_min, elapse);
         }
@@ -137,7 +140,7 @@ void icemu_sim_init()
     sim.last_tick_ts = icemu_util_timestamp();
     sim.elapsed = 0;
     sim.elapsing_for = 1;
-    sim.elapsing_chip = NULL;
+    sim.elapsing_chip_stack = NULL;
     memset(sim.actions, 0, sizeof(sim.actions));
     memset(sim.triggers, 0, sizeof(sim.triggers));
     memset(sim.debug_values, 0, sizeof(sim.debug_values));
@@ -195,7 +198,11 @@ void icemu_sim_delay(time_t usecs)
 
 ICeChip* icemu_sim_get_elapsing_chip()
 {
-    return sim.elapsing_chip;
+    if (sim.elapsing_chip_stack == NULL) {
+        return NULL;
+    } else {
+        return sim.elapsing_chip_stack->chip;
+    }
 }
 
 ICeSimRunMode icemu_sim_runmode()

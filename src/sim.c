@@ -52,7 +52,9 @@ static void sim_tick()
         if (chip_registry[i] == NULL) {
             break;
         }
+        sim.elapsing_chip = chip_registry[i];
         elapse = icemu_chip_elapse(chip_registry[i], sim.elapsing_for);
+        sim.elapsing_chip = NULL;
         if (elapse > 0) {
             elapse_min = MIN(elapse_min, elapse);
         }
@@ -135,6 +137,7 @@ void icemu_sim_init()
     sim.last_tick_ts = icemu_util_timestamp();
     sim.elapsed = 0;
     sim.elapsing_for = 1;
+    sim.elapsing_chip = NULL;
     memset(sim.actions, 0, sizeof(sim.actions));
     memset(sim.triggers, 0, sizeof(sim.triggers));
     memset(sim.debug_values, 0, sizeof(sim.debug_values));
@@ -188,6 +191,11 @@ void icemu_sim_delay(time_t usecs)
         }
     }
     usleep(usecs);
+}
+
+ICeChip* icemu_sim_get_elapsing_chip()
+{
+    return sim.elapsing_chip;
 }
 
 ICeSimRunMode icemu_sim_runmode()

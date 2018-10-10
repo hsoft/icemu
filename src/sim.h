@@ -74,6 +74,12 @@ void icemu_sim_delay(time_t usecs);
  */
 void icemu_sim_set_debug_value(const char *name, int val);
 
+/* Returns the currently elapsing chip
+ *
+ * Useful to determine which MCU is in a runloop when inside a sim layer shim.
+ */
+ICeChip* icemu_sim_get_elapsing_chip();
+
 /* Simulation Properties */
 time_t icemu_sim_elapsed_usecs();
 ICeSimRunMode icemu_sim_runmode();

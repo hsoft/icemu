@@ -23,6 +23,7 @@ typedef struct {
     ICeUIAction actions[MAX_SIM_ACTIONS];
     ICePin * triggers[MAX_SIM_TRIGGERS];
     struct DebugValue debug_values[MAX_DEBUG_VALUES];
+    ICeChip *elapsing_chip;
 } Simulation;
 
 void icemu_pin_set_global_pinchange_trigger(ICePinChangeFunc *func);
